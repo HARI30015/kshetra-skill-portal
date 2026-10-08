@@ -1,0 +1,20 @@
+# Render deploy config for stdskillupps backend (FastAPI).
+# In the Render dashboard: New → Blueprint → connect the repo, or create a
+# Web Service manually with the same build/start commands below.
+services:
+  - type: web
+    name: stdskillupps-api
+    runtime: python
+    plan: free
+    buildCommand: pip install -r backend/requirements.txt
+    startCommand: uvicorn backend.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: SUPABASE_URL
+        sync: false # set in Render dashboard — never commit
+      - key: SUPABASE_ANON_KEY
+        sync: false
+      - key: SUPABASE_SERVICE_KEY
+        sync: false
+      - key: FRONTEND_URL
+        sync: false # e.g. https://stdskillupps.vercel.app (used for CORS in prod)
