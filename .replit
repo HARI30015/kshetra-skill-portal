@@ -1,0 +1,3 @@
+# Replit runs the stdskillupps app (lives in stdskillupps/ subdir).
+run = "bash stdskillupps/start.sh"
+entrypoint = "stdskillupps/start.sh"
