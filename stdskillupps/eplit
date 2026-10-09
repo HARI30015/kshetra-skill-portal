@@ -1,8 +1,0 @@
-run = "bash start.sh"
-entrypoint = "start.sh"
-
-[nix]
-channel = "stable-24_05"
-
-[deployment]
-run = ["bash", "start.sh"]
