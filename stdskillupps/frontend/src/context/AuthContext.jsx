@@ -1,1 +1,132 @@
-aW1wb3J0IFJlYWN0LCB7IGNyZWF0ZUNvbnRleHQsIHVzZUNvbnRleHQsIHVzZUVmZmVjdCwgdXNlTWVtbywgdXNlU3RhdGUsIHVzZUNhbGxiYWNrIH0gZnJvbSAncmVhY3QnOwppbXBvcnQgeyBzdXBhYmFzZSB9IGZyb20gJy4uL3N1cGFiYXNlQ2xpZW50JzsKaW1wb3J0IHsgZ2V0TXlQcm9maWxlLCBjcmVhdGVQcm9maWxlIH0gZnJvbSAnLi4vYXBpJzsKCmNvbnN0IEF1dGhDb250ZXh0ID0gY3JlYXRlQ29udGV4dChudWxsKTsKCmV4cG9ydCBmdW5jdGlvbiBBdXRoUHJvdmlkZXIoeyBjaGlsZHJlbiB9KSB7CiAgY29uc3QgW3Nlc3Npb24sIHNldFNlc3Npb25dID0gdXNlU3RhdGUobnVsbCk7CiAgY29uc3QgW3Byb2ZpbGUsIHNldFByb2ZpbGVdID0gdXNlU3RhdGUobnVsbCk7CiAgY29uc3QgW2xvYWRpbmcsIHNldExvYWRpbmddID0gdXNlU3RhdGUodHJ1ZSk7CiAgY29uc3QgW3Byb2ZpbGVMb2FkaW5nLCBzZXRQcm9maWxlTG9hZGluZ10gPSB1c2VTdGF0ZShmYWxzZSk7CgogIGNvbnN0IGZldGNoUHJvZmlsZSA9IHVzZUNhbGxiYWNrKGFzeW5jICgpID0+IHsKICAgIHNldFByb2ZpbGVMb2FkaW5nKHRydWUpOwogICAgdHJ5IHsKICAgICAgY29uc3QgcCA9IGF3YWl0IGdldE15UHJvZmlsZSgpOwogICAgICBzZXRQcm9maWxlKHApOwogICAgICByZXR1cm4gcDsKICAgIH0gY2F0Y2ggKGVycikgewogICAgICBpZiAoZXJyPy5yZXNwb25zZT8uc3RhdHVzID09PSA0MDQpIHsKICAgICAgICAvLyBOZXcgdXNlciB3aXRoIG5vIHByb2ZpbGUgcm93IHlldCDigJQgY3JlYXRlIG9uZSBmcm9tIHRoZWlyIHNpZ251cAogICAgICAgIC8vIG1ldGFkYXRhIHNvIHByb3RlY3RlZCByb3V0ZXMgZG9uJ3QgaGFuZyBvbiAiTG9hZGluZyB5b3VyIHByb2ZpbGXigKYiLgogICAgICAgIHRyeSB7CiAgICAgICAgICBjb25zdCB7CiAgICAgICAgICAgIGRhdGE6IHsgdXNlciB9LAogICAgICAgICAgfSA9IGF3YWl0IHN1cGFiYXNlLmF1dGguZ2V0VXNlcigpOwogICAgICAgICAgY29uc3QgbWV0YSA9IHVzZXI/LnVzZXJfbWV0YWRhdGEgfHwge307CiAgICAgICAgICBjb25zdCBwID0gYXdhaXQgY3JlYXRlUHJvZmlsZSh7CiAgICAgICAgICAgIGZ1bGxfbmFtZTogbWV0YS5mdWxsX25hbWUgfHwgdXNlcj8uZW1haWw/LnNwbGl0KCdAJylbMF0gfHwgJ1N0dWRlbnQnLAogICAgICAgICAgICByb2xlOiBtZXRhLnJvbGUgPT09ICdsZWN0dXJlcicgPyAnbGVjdHVyZXInIDogJ3N0dWRlbnQnLAogICAgICAgICAgfSk7CiAgICAgICAgICBzZXRQcm9maWxlKHApOwogICAgICAgICAgcmV0dXJuIHA7CiAgICAgICAgfSBjYXRjaCAoY3JlYXRlRXJyKSB7CiAgICAgICAgICAvLyBlc2xpbnQtZGlzYWJsZS1uZXh0LWxpbmUgbm8tY29uc29sZQogICAgICAgICAgY29uc29sZS5lcnJvcignRmFpbGVkIHRvIGNyZWF0ZSBwcm9maWxlOicsIGNyZWF0ZUVycj8ubWVzc2FnZSk7CiAgICAgICAgfQogICAgICB9IGVsc2UgewogICAgICAgIC8vIGVzbGludC1kaXNhYmxlLW5leHQtbGluZSBuby1jb25zb2xlCiAgICAgICAgY29uc29sZS5lcnJvcignRmFpbGVkIHRvIGZldGNoIHByb2ZpbGU6JywgZXJyPy5tZXNzYWdlKTsKICAgICAgfQogICAgICBzZXRQcm9maWxlKG51bGwpOwogICAgICByZXR1cm4gbnVsbDsKICAgIH0gZmluYWxseSB7CiAgICAgIHNldFByb2ZpbGVMb2FkaW5nKGZhbHNlKTsKICAgIH0KICB9LCBbXSk7CgogIC8vIEVuc3VyZSBhIHByb2ZpbGUgcm93IGV4aXN0cyBmb3IgYSBmcmVzaGx5LXNpZ25lZC11cCB1c2VyLCB0aGVuIGxvYWQgaXQuCiAgY29uc3QgZW5zdXJlUHJvZmlsZSA9IHVzZUNhbGxiYWNrKAogICAgYXN5bmMgKGZhbGxiYWNrTmFtZSwgZmFsbGJhY2tSb2xlKSA9PiB7CiAgICAgIGNvbnN0IGV4aXN0aW5nID0gYXdhaXQgZmV0Y2hQcm9maWxlKCk7CiAgICAgIGlmIChleGlzdGluZykgcmV0dXJuIGV4aXN0aW5nOwogICAgICB0cnkgewogICAgICAgIGNvbnN0IHAgPSBhd2FpdCBjcmVhdGVQcm9maWxlKHsgZnVsbF9uYW1lOiBmYWxsYmFja05hbWUsIHJvbGU6IGZhbGxiYWNrUm9sZSB9KTsKICAgICAgICBzZXRQcm9maWxlKHApOwogICAgICAgIHJldHVybiBwOwogICAgICB9IGNhdGNoIChlcnIpIHsKICAgICAgICAvLyBlc2xpbnQtZGlzYWJsZS1uZXh0LWxpbmUgbm8tY29uc29sZQogICAgICAgIGNvbnNvbGUuZXJyb3IoJ0ZhaWxlZCB0byBjcmVhdGUgcHJvZmlsZTonLCBlcnI/Lm1lc3NhZ2UpOwogICAgICAgIHJldHVybiBudWxsOwogICAgICB9CiAgICB9LAogICAgW2ZldGNoUHJvZmlsZV0KICApOwoKICBjb25zdCByZWZyZXNoUHJvZmlsZSA9IHVzZUNhbGxiYWNrKGFzeW5jICgpID0+IHsKICAgIGF3YWl0IGZldGNoUHJvZmlsZSgpOwogIH0sIFtmZXRjaFByb2ZpbGVdKTsKCiAgY29uc3QgbG9nb3V0ID0gdXNlQ2FsbGJhY2soYXN5bmMgKCkgPT4gewogICAgYXdhaXQgc3VwYWJhc2UuYXV0aC5zaWduT3V0KCk7CiAgICBzZXRQcm9maWxlKG51bGwpOwogICAgc2V0U2Vzc2lvbihudWxsKTsKICB9LCBbXSk7CgogIHVzZUVmZmVjdCgoKSA9PiB7CiAgICBsZXQgbW91bnRlZCA9IHRydWU7CiAgICBzdXBhYmFzZS5hdXRoLmdldFNlc3Npb24oKS50aGVuKCh7IGRhdGE6IHsgc2Vzc2lvbjogcyB9IH0pID0+IHsKICAgICAgaWYgKCFtb3VudGVkKSByZXR1cm47CiAgICAgIHNldFNlc3Npb24ocyk7CiAgICAgIGlmIChzKSB7CiAgICAgICAgZmV0Y2hQcm9maWxlKCkuZmluYWxseSgoKSA9PiBtb3VudGVkICYmIHNldExvYWRpbmcoZmFsc2UpKTsKICAgICAgfSBlbHNlIHsKICAgICAgICBzZXRMb2FkaW5nKGZhbHNlKTsKICAgICAgfQogICAgfSk7CgogICAgY29uc3QgewogICAgICBkYXRhOiB7IHN1YnNjcmlwdGlvbiB9LAogICAgfSA9IHN1cGFiYXNlLmF1dGgub25BdXRoU3RhdGVDaGFuZ2UoYXN5bmMgKF9ldmVudCwgcykgPT4gewogICAgICBpZiAoIW1vdW50ZWQpIHJldHVybjsKICAgICAgc2V0U2Vzc2lvbihzKTsKICAgICAgaWYgKHMpIHsKICAgICAgICBhd2FpdCBmZXRjaFByb2ZpbGUoKTsKICAgICAgfSBlbHNlIHsKICAgICAgICBzZXRQcm9maWxlKG51bGwpOwogICAgICB9CiAgICB9KTsKCiAgICByZXR1cm4gKCkgPT4gewogICAgICBtb3VudGVkID0gZmFsc2U7CiAgICAgIHN1YnNjcmlwdGlvbi51bnN1YnNjcmliZSgpOwogICAgfTsKICB9LCBbZmV0Y2hQcm9maWxlXSk7CgogIGNvbnN0IHZhbHVlID0gdXNlTWVtbygKICAgICgpID0+ICh7CiAgICAgIHNlc3Npb24sCiAgICAgIHByb2ZpbGUsCiAgICAgIHJvbGU6IHByb2ZpbGU/LnJvbGUgfHwgbnVsbCwKICAgICAgbG9hZGluZywKICAgICAgcHJvZmlsZUxvYWRpbmcsCiAgICAgIGlzQXV0aGVudGljYXRlZDogISFzZXNzaW9uLAogICAgICBuZWVkc09uYm9hcmRpbmc6CiAgICAgICAgISFzZXNzaW9uICYmICEhcHJvZmlsZSAmJiBwcm9maWxlLnJvbGUgPT09ICdzdHVkZW50JyAmJiAhcHJvZmlsZS5vbmJvYXJkZWQsCiAgICAgIGZldGNoUHJvZmlsZSwKICAgICAgZW5zdXJlUHJvZmlsZSwKICAgICAgcmVmcmVzaFByb2ZpbGUsCiAgICAgIGxvZ291dCwKICAgIH0pLAogICAgW3Nlc3Npb24sIHByb2ZpbGUsIGxvYWRpbmcsIHByb2ZpbGVMb2FkaW5nLCBmZXRjaFByb2ZpbGUsIGVuc3VyZVByb2ZpbGUsIHJlZnJlc2hQcm9maWxlLCBsb2dvdXRdCiAgKTsKCiAgcmV0dXJuIDxBdXRoQ29udGV4dC5Qcm92aWRlciB2YWx1ZT17dmFsdWV9PntjaGlsZHJlbn08L0F1dGhDb250ZXh0LlByb3ZpZGVyPjsKfQoKZXhwb3J0IGZ1bmN0aW9uIHVzZUF1dGgoKSB7CiAgY29uc3QgY3R4ID0gdXNlQ29udGV4dChBdXRoQ29udGV4dCk7CiAgaWYgKCFjdHgpIHRocm93IG5ldyBFcnJvcigndXNlQXV0aCBtdXN0IGJlIHVzZWQgd2l0aGluIEF1dGhQcm92aWRlcicpOwogIHJldHVybiBjdHg7Cn0K
+import React, { createContext, useContext, useEffect, useMemo, useState, useCallback } from 'react';
+import { supabase } from '../supabaseClient';
+import { getMyProfile, createProfile } from '../api';
+
+const AuthContext = createContext(null);
+
+export function AuthProvider({ children }) {
+  const [session, setSession] = useState(null);
+  const [profile, setProfile] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [profileLoading, setProfileLoading] = useState(false);
+
+  const fetchProfile = useCallback(async () => {
+    setProfileLoading(true);
+    try {
+      const p = await getMyProfile();
+      setProfile(p);
+      return p;
+    } catch (err) {
+      if (err?.response?.status === 404) {
+        // New user with no profile row yet — create one from their signup
+        // metadata so protected routes don't hang on "Loading your profile…".
+        try {
+          const {
+            data: { user },
+          } = await supabase.auth.getUser();
+          const meta = user?.user_metadata || {};
+          const p = await createProfile({
+            full_name: meta.full_name || user?.email?.split('@')[0] || 'Student',
+            role: meta.role === 'lecturer' ? 'lecturer' : 'student',
+          });
+          setProfile(p);
+          return p;
+        } catch (createErr) {
+          // eslint-disable-next-line no-console
+          console.error('Failed to create profile:', createErr?.message);
+        }
+      } else {
+        // eslint-disable-next-line no-console
+        console.error('Failed to fetch profile:', err?.message);
+      }
+      setProfile(null);
+      return null;
+    } finally {
+      setProfileLoading(false);
+    }
+  }, []);
+
+  // Ensure a profile row exists for a freshly-signed-up user, then load it.
+  const ensureProfile = useCallback(
+    async (fallbackName, fallbackRole) => {
+      const existing = await fetchProfile();
+      if (existing) return existing;
+      try {
+        const p = await createProfile({ full_name: fallbackName, role: fallbackRole });
+        setProfile(p);
+        return p;
+      } catch (err) {
+        // eslint-disable-next-line no-console
+        console.error('Failed to create profile:', err?.message);
+        return null;
+      }
+    },
+    [fetchProfile]
+  );
+
+  const refreshProfile = useCallback(async () => {
+    await fetchProfile();
+  }, [fetchProfile]);
+
+  const logout = useCallback(async () => {
+    await supabase.auth.signOut();
+    setProfile(null);
+    setSession(null);
+  }, []);
+
+  useEffect(() => {
+    let mounted = true;
+    supabase.auth.getSession().then(({ data: { session: s } }) => {
+      if (!mounted) return;
+      setSession(s);
+      if (s) {
+        fetchProfile().finally(() => mounted && setLoading(false));
+      } else {
+        setLoading(false);
+      }
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (_event, s) => {
+      if (!mounted) return;
+      setSession(s);
+      if (s) {
+        await fetchProfile();
+      } else {
+        setProfile(null);
+      }
+    });
+
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
+  }, [fetchProfile]);
+
+  const value = useMemo(
+    () => ({
+      session,
+      profile,
+      role: profile?.role || null,
+      loading,
+      profileLoading,
+      isAuthenticated: !!session,
+      needsOnboarding:
+        !!session && !!profile && profile.role === 'student' && !profile.onboarded,
+      fetchProfile,
+      ensureProfile,
+      refreshProfile,
+      logout,
+    }),
+    [session, profile, loading, profileLoading, fetchProfile, ensureProfile, refreshProfile, logout]
+  );
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+}
+
+export function useAuth() {
+  const ctx = useContext(AuthContext);
+  if (!ctx) throw new Error('useAuth must be used within AuthProvider');
+  return ctx;
+}
