@@ -14,6 +14,8 @@ export default function Login() {
   const { refreshProfile } = useAuth();
   const [email, setEmail] = useState('');
   const [code, setCode] = useState('');
+  const [password, setPassword] = useState('');
+  const [mode, setMode] = useState('otp');
   const [step, setStep] = useState('email');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -57,6 +59,32 @@ export default function Login() {
     }
   };
 
+  const handlePasswordLogin = async (e) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
+    try {
+      const { error: authError } = await supabase.auth.signInWithPassword({ email, password });
+      if (authError) throw authError;
+      await refreshProfile();
+      const from = location.state?.from;
+      navigate(from && from !== '/login' ? from : '/dashboard', { replace: true });
+    } catch (err) {
+      setError(err?.message || 'Sign in failed.');
+      setShakeKey((k) => k + 1);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const switchMode = (m) => {
+    setMode(m);
+    setStep('email');
+    setCode('');
+    setPassword('');
+    setError('');
+  };
+
   return (
     <PageWrapper>
       <main className="flex min-h-screen items-center justify-center px-4 pt-24">
@@ -85,7 +113,15 @@ export default function Login() {
               </p>
             </motion.div>
 
-            {step === 'email' ? (
+            {mode === 'password' ? (
+              <form onSubmit={handlePasswordLogin} className="mt-6 space-y-5">
+                <AnimatedInput label="Email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@college.edu" autoComplete="email" required />
+                <AnimatedInput label="Password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" autoComplete="current-password" required />
+                {error && <div className="rounded-xl border border-rose-400/40 bg-rose-500/15 px-4 py-3 text-sm text-rose-200">{error}</div>}
+                <AnimatedButton type="submit" loading={loading} className="w-full">{loading ? 'Signing in…' : 'Sign In'}</AnimatedButton>
+                <button type="button" onClick={() => switchMode('otp')} className="w-full text-center text-sm text-slate-400 hover:text-slate-300">Use login code instead</button>
+              </form>
+            ) : step === 'email' ? (
               <form onSubmit={handleSendCode} className="mt-6 space-y-5">
                 <motion.div
                   initial={{ opacity: 0, x: -16 }}
@@ -123,10 +159,18 @@ export default function Login() {
                   initial={{ opacity: 0, y: 12 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.35 }}
+                  className="space-y-3"
                 >
                   <AnimatedButton type="submit" loading={loading} className="w-full">
                     {loading ? 'Sending code…' : 'Send Login Code'}
                   </AnimatedButton>
+                  <button
+                    type="button"
+                    onClick={() => switchMode('password')}
+                    className="w-full text-center text-sm text-slate-400 hover:text-slate-300"
+                  >
+                    Use password instead
+                  </button>
                 </motion.div>
               </form>
             ) : (
