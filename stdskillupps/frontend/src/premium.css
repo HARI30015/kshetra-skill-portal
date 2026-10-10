@@ -1,0 +1,28 @@
+@keyframes std-float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-16px); }
+}
+@keyframes std-ripple {
+  to { transform: scale(2.5); opacity: 0; }
+}
+@keyframes std-glow-pulse {
+  0%, 100% { box-shadow: 0 0 20px rgba(139, 92, 246, 0.3); }
+  50% { box-shadow: 0 0 32px rgba(139, 92, 246, 0.55); }
+}
+.animate-float { animation: std-float 6s ease-in-out infinite; }
+.animate-glow-pulse { animation: std-glow-pulse 2.5s ease-in-out infinite; }
+.gradient-border {
+  border: 1.5px solid transparent;
+  background: linear-gradient(rgba(15,20,40,0.85), rgba(15,20,40,0.85)) padding-box,
+    linear-gradient(135deg, rgba(139,92,246,0.6), rgba(34,211,238,0.6)) border-box;
+}
+.card-hover { transition: transform 0.35s ease, box-shadow 0.35s ease; }
+.card-hover:hover { transform: translateY(-8px); box-shadow: 0 20px 60px rgba(139,92,246,0.25); }
+.text-shine {
+  background: linear-gradient(110deg, #fff 20%, #a78bfa 40%, #22d3ee 60%, #fff 80%);
+  background-size: 200% auto;
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  animation: std-shimmer 4s linear infinite;
+}
+.glass-interactive { transition: background-color 0.3s ease; }
+.glass-interactive:hover { background-color: rgba(255, 255, 255, 0.16); }
