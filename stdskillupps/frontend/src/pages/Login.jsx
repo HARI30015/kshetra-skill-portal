@@ -43,25 +43,29 @@ export default function Login() {
 
   return (
     <PageWrapper>
-      <main className="flex min-h-screen items-center justify-center px-4 pt-24">
+      <main className="flex min-h-screen items-center justify-center px-4 pt-24 perspective-2000">
         <motion.div
           key={shakeKey}
           animate={shakeKey ? { x: [0, -10, 10, -8, 8, -4, 4, 0] } : {}}
           transition={{ duration: 0.5 }}
-          className="w-full max-w-md"
+          className="w-full max-w-md preserve-3d"
+          style={{ transformStyle: 'preserve-3d' }}
         >
           <motion.div
-            initial={{ opacity: 0, y: 40, scale: 0.96 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-            className="glass-strong p-8"
+            initial={{ opacity: 0, y: 60, rotateX: -20, scale: 0.94, z: -100 }}
+            animate={{ opacity: 1, y: 0, rotateX: 0, scale: 1, z: 0 }}
+            transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+            whileHover={{ rotateX: 2, rotateY: -2, scale: 1.01 }}
+            className="glass-3d p-8 preserve-3d"
+            style={{ transformStyle: 'preserve-3d', boxShadow: '0 30px 80px rgba(0,0,0,0.5), 0 0 60px rgba(139,92,246,0.15)' }}
           >
+            <div style={{ transform: 'translateZ(40px)' }}>
             <motion.div
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.15 }}
             >
-              <h1 className="text-2xl font-extrabold text-white">Welcome back 👋</h1>
+              <h1 className="text-2xl font-extrabold text-white" style={{ textShadow: '0 4px 20px rgba(139,92,246,0.4)' }}>Welcome back 👋</h1>
               <p className="mt-1 text-sm text-slate-300">
                 Sign in with your email and password.
               </p>
@@ -146,6 +150,7 @@ export default function Login() {
                 Create an account
               </Link>
             </p>
+            </div>
           </motion.div>
         </motion.div>
       </main>
