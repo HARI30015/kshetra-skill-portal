@@ -67,3 +67,31 @@ def update_profile(
     if not resp.data:
         raise HTTPException(status_code=404, detail="Profile not found")
     return profile_out(resp.data[0])
+
+@router.post("/log-login")
+def log_login(request: Request, user=Depends(get_current_user), db: Client = Depends(get_supabase)):
+    """Record a login event. Called once by the frontend after successful sign-in."""
+    try:
+        profile_resp = db.table("profiles").select("id,email,role").eq("id", user.id).single().execute()
+        profile = profile_resp.data if profile_resp else None
+    except Exception:
+        profile = None
+    
+    # Update last_login_at
+    try:
+        db.table("profiles").update({"last_login_at": "now()"}).eq("id", user.id).execute()
+    except Exception:
+        pass
+    
+    # Insert into login_history
+    try:
+        db.table("login_history").insert({
+            "user_id": user.id,
+            "email": (profile or {}).get("email") or user.email,
+            "role": (profile or {}).get("role") or "student",
+            "ip_address": request.client.host if request.client else None,
+        }).execute()
+    except Exception:
+        pass
+    
+    return {"ok": True}
