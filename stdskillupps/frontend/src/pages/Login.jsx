@@ -1,4 +1,3 @@
-// redeploy trigger
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -13,50 +12,16 @@ export default function Login() {
   const location = useLocation();
   const { refreshProfile } = useAuth();
   const [email, setEmail] = useState('');
-  const [code, setCode] = useState('');
   const [password, setPassword] = useState('');
-  const [mode, setMode] = useState('otp');
-  const [step, setStep] = useState('email');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [shakeKey, setShakeKey] = useState(0);
 
-  const handleSendCode = async (e) => {
-    e.preventDefault();
-    setError('');
-    setLoading(true);
-    try {
-      const { error: otpError } = await supabase.auth.signInWithOtp({ email });
-      if (otpError) throw otpError;
-      setStep('code');
-    } catch (err) {
-      setError(err?.message || 'Could not send code. Check the email and try again.');
-      setShakeKey((k) => k + 1);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const notice = location.state?.notice;
 
-  const handleVerifyCode = async (e) => {
-    e.preventDefault();
-    setError('');
-    setLoading(true);
-    try {
-      const { error: verifyError } = await supabase.auth.verifyOtp({
-        email,
-        token: code.trim(),
-        type: 'email',
-      });
-      if (verifyError) throw verifyError;
-      await refreshProfile();
-      const from = location.state?.from;
-      navigate(from && from !== '/login' ? from : '/dashboard', { replace: true });
-    } catch (err) {
-      setError(err?.message || 'Invalid code. Please try again.');
-      setShakeKey((k) => k + 1);
-    } finally {
-      setLoading(false);
-    }
+  const goToDashboard = () => {
+    const from = location.state?.from;
+    navigate(from && from !== '/login' ? from : '/dashboard', { replace: true });
   };
 
   const handlePasswordLogin = async (e) => {
@@ -67,22 +32,13 @@ export default function Login() {
       const { error: authError } = await supabase.auth.signInWithPassword({ email, password });
       if (authError) throw authError;
       await refreshProfile();
-      const from = location.state?.from;
-      navigate(from && from !== '/login' ? from : '/dashboard', { replace: true });
+      goToDashboard();
     } catch (err) {
-      setError(err?.message || 'Sign in failed.');
+      setError(err?.message || 'Sign in failed. Check your email and password.');
       setShakeKey((k) => k + 1);
     } finally {
       setLoading(false);
     }
-  };
-
-  const switchMode = (m) => {
-    setMode(m);
-    setStep('email');
-    setCode('');
-    setPassword('');
-    setError('');
   };
 
   return (
@@ -107,126 +63,82 @@ export default function Login() {
             >
               <h1 className="text-2xl font-extrabold text-white">Welcome back 👋</h1>
               <p className="mt-1 text-sm text-slate-300">
-                {step === 'email'
-                  ? 'Enter your email — we\'ll send you a login code.'
-                  : `We sent a 6-digit code to ${email}.`}
+                Sign in with your email and password.
               </p>
             </motion.div>
 
-            {mode === 'password' ? (
-              <form onSubmit={handlePasswordLogin} className="mt-6 space-y-5">
-                <AnimatedInput label="Email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@college.edu" autoComplete="email" required />
-                <AnimatedInput label="Password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" autoComplete="current-password" required />
-                {error && <div className="rounded-xl border border-rose-400/40 bg-rose-500/15 px-4 py-3 text-sm text-rose-200">{error}</div>}
-                <AnimatedButton type="submit" loading={loading} className="w-full">{loading ? 'Signing in…' : 'Sign In'}</AnimatedButton>
-                <button type="button" onClick={() => switchMode('otp')} className="w-full text-center text-sm text-slate-400 hover:text-slate-300">Use login code instead</button>
-              </form>
-            ) : step === 'email' ? (
-              <form onSubmit={handleSendCode} className="mt-6 space-y-5">
+            <AnimatePresence>
+              {notice && !error && (
                 <motion.div
-                  initial={{ opacity: 0, x: -16 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.25 }}
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="overflow-hidden"
                 >
-                  <AnimatedInput
-                    label="Email"
-                    type="email"
-                    name="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="you@college.edu"
-                    autoComplete="email"
-                    required
-                  />
+                  <div className="mt-4 rounded-xl border border-cyan-400/40 bg-cyan-500/15 px-4 py-3 text-sm text-cyan-200">
+                    {notice}
+                  </div>
                 </motion.div>
+              )}
+            </AnimatePresence>
 
-                <AnimatePresence>
-                  {error && (
-                    <motion.div
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: 'auto' }}
-                      exit={{ opacity: 0, height: 0 }}
-                      className="overflow-hidden"
-                    >
-                      <div className="rounded-xl border border-rose-400/40 bg-rose-500/15 px-4 py-3 text-sm text-rose-200">
-                        {error}
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-
-                <motion.div
-                  initial={{ opacity: 0, y: 12 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.35 }}
-                  className="space-y-3"
-                >
-                  <AnimatedButton type="submit" loading={loading} className="w-full">
-                    {loading ? 'Sending code…' : 'Send Login Code'}
-                  </AnimatedButton>
-                  <button
-                    type="button"
-                    onClick={() => switchMode('password')}
-                    className="w-full text-center text-sm text-slate-400 hover:text-slate-300"
+            <form onSubmit={handlePasswordLogin} className="mt-6 space-y-5">
+              <motion.div
+                initial={{ opacity: 0, x: -16 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.25 }}
+              >
+                <AnimatedInput
+                  label="Email"
+                  type="email"
+                  name="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="you@college.edu"
+                  autoComplete="email"
+                  required
+                />
+              </motion.div>
+              <motion.div
+                initial={{ opacity: 0, x: -16 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.35 }}
+              >
+                <AnimatedInput
+                  label="Password"
+                  type="password"
+                  name="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  autoComplete="current-password"
+                  required
+                />
+              </motion.div>
+              <AnimatePresence>
+                {error && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="overflow-hidden"
                   >
-                    Use password instead
-                  </button>
-                </motion.div>
-              </form>
-            ) : (
-              <form onSubmit={handleVerifyCode} className="mt-6 space-y-5">
-                <motion.div
-                  initial={{ opacity: 0, x: -16 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.25 }}
-                >
-                  <AnimatedInput
-                    label="6-digit code"
-                    type="text"
-                    name="code"
-                    value={code}
-                    onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                    placeholder="123456"
-                    autoComplete="one-time-code"
-                    inputMode="numeric"
-                    required
-                  />
-                </motion.div>
-
-                <AnimatePresence>
-                  {error && (
-                    <motion.div
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: 'auto' }}
-                      exit={{ opacity: 0, height: 0 }}
-                      className="overflow-hidden"
-                    >
-                      <div className="rounded-xl border border-rose-400/40 bg-rose-500/15 px-4 py-3 text-sm text-rose-200">
-                        {error}
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-
-                <motion.div
-                  initial={{ opacity: 0, y: 12 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.35 }}
-                  className="space-y-3"
-                >
-                  <AnimatedButton type="submit" loading={loading} className="w-full">
-                    {loading ? 'Verifying…' : 'Verify & Sign In'}
-                  </AnimatedButton>
-                  <button
-                    type="button"
-                    onClick={() => { setStep('email'); setCode(''); setError(''); }}
-                    className="w-full text-center text-sm text-slate-400 hover:text-slate-300"
-                  >
-                    Use a different email
-                  </button>
-                </motion.div>
-              </form>
-            )}
+                    <div className="rounded-xl border border-rose-400/40 bg-rose-500/15 px-4 py-3 text-sm text-rose-200">
+                      {error}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+              <motion.div
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.45 }}
+              >
+                <AnimatedButton type="submit" loading={loading} className="w-full">
+                  {loading ? 'Signing in…' : 'Sign In'}
+                </AnimatedButton>
+              </motion.div>
+            </form>
 
             <p className="mt-6 text-center text-sm text-slate-400">
               New here?{' '}
