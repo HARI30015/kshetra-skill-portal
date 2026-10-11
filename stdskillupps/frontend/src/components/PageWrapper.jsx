@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 
 // Generate random floating 3D shapes
 function useShapes(count) {
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
   return useMemo(() => {
     return Array.from({ length: count }, (_, i) => ({
       id: i,
@@ -13,10 +14,10 @@ function useShapes(count) {
       delay: -Math.random() * 20,
       hue: [265, 190, 320, 220, 280][i % 5],
       shape: ['circle', 'square', 'diamond'][i % 3],
-      blur: 40 + Math.random() * 60,
+      blur: isMobile ? 20 + Math.random() * 20 : 40 + Math.random() * 60,
       opacity: 0.08 + Math.random() * 0.12,
     }));
-  }, [count]);
+  }, [count, isMobile]);
 }
 
 function FloatingShape({ shape }) {
@@ -69,7 +70,12 @@ function ShineStreaks() {
 }
 
 function Scene3D() {
-  const shapes = useShapes(12);
+  // Reduce effects on mobile to prevent GPU overload / black screens
+  const isMobile = typeof window !== 'undefined' && (
+    /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+    window.innerWidth < 768
+  );
+  const shapes = useShapes(isMobile ? 4 : 12);
 
   return (
     <div className="pointer-events-none fixed inset-0 overflow-hidden" aria-hidden style={{ zIndex: 0 }}>
