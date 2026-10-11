@@ -89,14 +89,14 @@ export default function Landing() {
             <Link to="/signup" className="perspective-1000">
               <motion.div whileHover={{ scale: 1.05, rotateX: 5 }} whileTap={{ scale: 0.95 }} className="preserve-3d">
                 <AnimatedButton className="px-8 py-4 text-base !rounded-2xl shadow-[0_20px_60px_rgba(139,92,246,0.4)]">
-                  Get Started →
+                  Sign Up →
                 </AnimatedButton>
               </motion.div>
             </Link>
             <Link to="/login" className="perspective-1000">
               <motion.div whileHover={{ scale: 1.05, rotateX: -5 }} whileTap={{ scale: 0.95 }} className="preserve-3d">
                 <AnimatedButton variant="secondary" className="px-8 py-4 text-base !rounded-2xl">
-                  Sign In
+                  Login
                 </AnimatedButton>
               </motion.div>
             </Link>
