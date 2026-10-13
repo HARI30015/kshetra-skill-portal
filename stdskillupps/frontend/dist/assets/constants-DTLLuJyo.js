@@ -1,1 +1,1 @@
-const t="https://leetcode.com/",s="https://www.campustrack.in/";export{s as C,t as L};
+Y29uc3QgdD0iaHR0cHM6Ly9sZWV0Y29kZS5jb20vIixzPSJodHRwczovL3d3dy5jYW1wdXN0cmFjay5pbi8iO2V4cG9ydHtzIGFzIEMsdCBhcyBMfTsK
