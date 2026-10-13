@@ -90,7 +90,11 @@ export default function Landing() {
                   style={{ transformStyle: 'preserve-3d' }}
                   className="flex w-full max-w-md flex-col items-center gap-4 rounded-3xl border border-white/15 bg-gradient-to-br from-white/10 via-white/[0.06] to-white/[0.02] p-8 shadow-2xl backdrop-blur-xl"
                 >
-                  <h2 className="text-2xl font-bold text-white">Welcome to stdskillupps</h2>
+                  {/* Project title + Welcome — shown at the top of the auth view */}
+                  <h1 className="bg-gradient-to-r from-pink-500 via-amber-400 via-lime-300 to-cyan-400 to-violet-500 bg-clip-text text-center text-4xl font-extrabold tracking-tight text-transparent sm:text-5xl">
+                    stdskillupps
+                  </h1>
+                  <h2 className="text-2xl font-bold text-white">Welcome</h2>
                   <p className="text-sm text-slate-300">Choose an option to continue</p>
                   <motion.button
                     initial={{ scale: 0.5, rotateX: -30, opacity: 0 }}
