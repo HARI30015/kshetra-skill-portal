@@ -115,7 +115,7 @@ export default function Landing() {
             <span className="bg-gradient-to-r from-pink-500 via-amber-400 via-lime-300 to-cyan-400 to-violet-500 bg-clip-text text-transparent">
               coding grind
             </span>{' '}
-            into a<br className="hidden sm:block" /> a placement{' '}
+            into a<br className="hidden sm:block" /> placement{' '}
             <span className="bg-gradient-to-r from-pink-500 via-amber-400 via-lime-300 to-cyan-400 to-violet-500 bg-clip-text text-transparent">
               offer
             </span>
@@ -128,7 +128,7 @@ export default function Landing() {
             Master DSA, track progress, and land your dream placement with guided prep, real-time analytics, and 2000+ company questions.
           </motion.p>
 
-          {/* 3D zoom stage: Get Started <-> Login / Sign In */}
+          {/* 3D zoom stage: Get Started <-> Login / Sign Up */}
           <div
             className="relative mt-9 flex flex-col items-center justify-center"
             style={{ perspective: 1000, transformStyle: 'preserve-3d', minHeight: 120 }}
@@ -185,7 +185,7 @@ export default function Landing() {
                     style={{ transformStyle: 'preserve-3d' }}
                     className="w-full rounded-2xl bg-gradient-to-r from-violet-600 via-purple-500 to-cyan-400 px-6 py-3.5 text-base font-bold text-white shadow-[0_0_30px_rgba(139,92,246,0.4)] transition hover:shadow-[0_0_45px_rgba(139,92,246,0.6)]"
                   >
-                    Sign In
+                    Sign Up
                   </motion.button>
                   <motion.button
                     initial={{ scale: 0.5, opacity: 0 }}
