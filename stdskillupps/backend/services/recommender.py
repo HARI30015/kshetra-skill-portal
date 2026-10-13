@@ -48,6 +48,20 @@ def _language_frequency(placements: list[dict]) -> list[tuple[str, int]]:
     return sorted(freq.items(), key=lambda kv: (-kv[1], kv[0]))
 
 
+def _coerce_year(value) -> int:
+    """Coerce a year value to int. Strings ("2"), floats (2.0) and None are
+    all accepted; anything unparseable falls back to year 1 so a malformed
+    row can never crash plan generation with a TypeError."""
+    if isinstance(value, bool):
+        return 1
+    if isinstance(value, int):
+        return value
+    try:
+        return int(float(str(value).strip()))
+    except (TypeError, ValueError):
+        return 1
+
+
 def generate_plan(profile: dict, stats: dict | None, placements: list[dict]) -> dict:
     """Build a year-based study plan.
 
@@ -61,7 +75,12 @@ def generate_plan(profile: dict, stats: dict | None, placements: list[dict]) -> 
     # Accept both frontend aliases (year_of_study, target_job_field) and
     # canonical DB columns (year, target_field).
     field = profile.get("target_job_field") or profile.get("target_field") or "SWE"
-    year = profile.get("year_of_study") or profile.get("year") or 1
+    raw_year = profile.get("year_of_study")
+    if raw_year is None:
+        raw_year = profile.get("year")
+    # Clamp the lower bound: year 0 / negative / garbage all mean "year 1"
+    # (matches the previous `or 1` fallback for falsy values).
+    year = max(1, _coerce_year(raw_year)) if raw_year is not None else 1
     campustrack_score = profile.get("campustrack_score")
 
     freq = _language_frequency(placements)

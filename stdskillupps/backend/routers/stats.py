@@ -10,7 +10,12 @@ router = APIRouter(prefix="/stats", tags=["stats"])
 
 
 def _get_stats(db: Client, profile_id: str):
-    resp = db.table("student_stats").select("*").eq("profile_id", profile_id).single().execute()
+    # .single() raises (PGRST116) when no row matches — a profile with no
+    # synced stats yet must return None (→ 404 in get_stats), not a 500.
+    try:
+        resp = db.table("student_stats").select("*").eq("profile_id", profile_id).single().execute()
+    except Exception:
+        return None
     return resp.data
 
 
@@ -22,7 +27,10 @@ def sync_stats(
 ):
     self_or_lecturer(profile_id, profile)
 
-    prof_resp = db.table("profiles").select("leetcode_username").eq("id", profile_id).single().execute()
+    try:
+        prof_resp = db.table("profiles").select("leetcode_username").eq("id", profile_id).single().execute()
+    except Exception:
+        raise HTTPException(status_code=404, detail="Profile not found") from None
     target = prof_resp.data
     if target is None:
         raise HTTPException(status_code=404, detail="Profile not found")

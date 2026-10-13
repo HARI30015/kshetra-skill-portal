@@ -17,13 +17,21 @@ def generate_recommendation(
 ):
     self_or_lecturer(profile_id, profile)
 
-    prof_resp = db.table("profiles").select("*").eq("id", profile_id).single().execute()
+    # .single() raises (PGRST116) when no row matches — convert to 404
+    # instead of letting it surface as a 500. Same for student_stats below.
+    try:
+        prof_resp = db.table("profiles").select("*").eq("id", profile_id).single().execute()
+    except Exception:
+        raise HTTPException(status_code=404, detail="Profile not found") from None
     target = prof_resp.data
     if target is None:
         raise HTTPException(status_code=404, detail="Profile not found")
 
-    stats_resp = db.table("student_stats").select("*").eq("profile_id", profile_id).single().execute()
-    stats = stats_resp.data  # may be None
+    try:
+        stats_resp = db.table("student_stats").select("*").eq("profile_id", profile_id).single().execute()
+        stats = stats_resp.data  # may be None
+    except Exception:
+        stats = None
 
     placements_resp = (
         db.table("placements")

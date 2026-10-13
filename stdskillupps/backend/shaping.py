@@ -34,12 +34,26 @@ PROFILE_FIELDS = {
 
 
 def normalize_profile_update(data: dict) -> dict:
-    """Map frontend field names to DB columns; drop unknown keys."""
+    """Map frontend field names to DB columns; drop unknown keys.
+
+    ``year`` is coerced to int here (write path) so a string year ("2")
+    can never reach the integer DB column or downstream plan generation.
+    Unparseable years are dropped, letting the caller 400 on "nothing
+    to update" instead of sending garbage to the DB.
+    """
     out: dict[str, str | int | float | bool | None] = {}
     for key, value in data.items():
         column = PROFILE_IN_ALIASES.get(key, key)
-        if column in PROFILE_FIELDS and value is not None:
-            out[column] = value
+        if column not in PROFILE_FIELDS or value is None:
+            continue
+        if column == "year":
+            if isinstance(value, bool):
+                continue
+            try:
+                value = int(float(str(value).strip()))
+            except (TypeError, ValueError):
+                continue
+        out[column] = value
     return out
 
 

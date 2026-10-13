@@ -1,4 +1,6 @@
 """Profile endpoints."""
+from datetime import datetime, timezone
+
 from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel
 from supabase import Client
@@ -77,9 +79,13 @@ def log_login(request: Request, user=Depends(get_current_user), db: Client = Dep
     except Exception:
         profile = None
     
-    # Update last_login_at
+    # Update last_login_at. NOTE: the value must be a real ISO timestamp —
+    # the literal string "now()" is not valid timestamptz input, so
+    # PostgREST rejected the update and last_login_at was never set.
     try:
-        db.table("profiles").update({"last_login_at": "now()"}).eq("id", user.id).execute()
+        db.table("profiles").update(
+            {"last_login_at": datetime.now(timezone.utc).isoformat()}
+        ).eq("id", user.id).execute()
     except Exception:
         pass
     
