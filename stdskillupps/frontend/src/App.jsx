@@ -3,7 +3,7 @@ import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import Navbar from './components/Navbar';
 import ProtectedRoute from './components/ProtectedRoute';
-import Orbs from './components/Orbs';
+import Background3D from './components/Background3D';
 import Loader from './components/Loader';
 
 // Code-split: each page becomes its own lazy chunk so the initial
@@ -21,7 +21,7 @@ export default function App() {
 
   return (
     <div className="noise-overlay relative min-h-screen">
-      <Orbs />
+      <Background3D />
       <Navbar />
       <Suspense fallback={<Loader label="Loading…" />}>
         <AnimatePresence mode="wait">
