@@ -28,7 +28,7 @@ def generate_recommendation(
     placements_resp = (
         db.table("placements")
         .select("*")
-        .eq("job_field", target.get("target_field") or "")
+        .eq("job_field", target.get("target_job_field") or target.get("target_field") or "")
         .execute()
     )
     placements = placements_resp.data or []

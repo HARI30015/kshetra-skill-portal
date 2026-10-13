@@ -51,13 +51,17 @@ def _language_frequency(placements: list[dict]) -> list[tuple[str, int]]:
 def generate_plan(profile: dict, stats: dict | None, placements: list[dict]) -> dict:
     """Build a year-based study plan.
 
-    profile: row from profiles (year, target_field, campustrack_score, ...)
+    profile: row from profiles (year_of_study/year, target_job_field/target_field,
+    campustrack_score, ...). Both the frontend alias names and the canonical
+    DB column names are accepted.
     stats: row from student_stats or None
-    placements: placement rows for profile['target_field']
+    placements: placement rows for the profile's target field
     """
     stats = stats or {}
-    field = profile.get("target_field") or "SWE"
-    year = profile.get("year") or 1
+    # Accept both frontend aliases (year_of_study, target_job_field) and
+    # canonical DB columns (year, target_field).
+    field = profile.get("target_job_field") or profile.get("target_field") or "SWE"
+    year = profile.get("year_of_study") or profile.get("year") or 1
     campustrack_score = profile.get("campustrack_score")
 
     freq = _language_frequency(placements)
