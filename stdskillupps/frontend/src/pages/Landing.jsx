@@ -1,6 +1,6 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import PageWrapper from '../components/PageWrapper';
 
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.12 } } };
@@ -18,7 +18,7 @@ const features = [
       </svg>
     ),
     title: 'LeetCode tracking',
-    text: 'Track daily problems \u2022 Streaks \u2022 Difficulty analytics',
+    text: 'Track daily problems • Streaks • Difficulty analytics',
   },
   {
     icon: (
@@ -28,7 +28,7 @@ const features = [
       </svg>
     ),
     title: 'Year-wise guidance',
-    text: 'Curated roadmap \u2022 1st to 4th year \u2022 Milestones',
+    text: 'Curated roadmap • 1st to 4th year • Milestones',
   },
   {
     icon: (
@@ -38,7 +38,7 @@ const features = [
       </svg>
     ),
     title: 'Placements database',
-    text: '200+ companies \u2022 Roles \u2022 Package insights',
+    text: '200+ companies • Roles • Package insights',
   },
 ];
 
@@ -50,6 +50,19 @@ const stats = [
 ];
 
 export default function Landing() {
+  const [showAuth, setShowAuth] = useState(false);
+  const navigate = useNavigate();
+
+  const handleLogin = () => {
+    setShowAuth(false);
+    navigate('/login');
+  };
+
+  const handleSignUp = () => {
+    setShowAuth(false);
+    navigate('/signup');
+  };
+
   return (
     <PageWrapper>
       <div className="relative mx-auto max-w-7xl px-4 pb-16">
@@ -80,12 +93,12 @@ export default function Landing() {
             <a href="#resources" className="transition hover:text-white">Resources</a>
             <a href="#about" className="transition hover:text-white">About</a>
           </nav>
-          <Link
-            to="/login"
+          <button
+            onClick={() => setShowAuth(true)}
             className="rounded-xl border border-white/30 bg-white/5 px-6 py-2 text-[15px] font-semibold text-white backdrop-blur transition hover:bg-white/15"
           >
-            Sign In
-          </Link>
+            Get Started
+          </button>
         </motion.header>
 
         {/* Hero */}
@@ -116,9 +129,9 @@ export default function Landing() {
             Master DSA, track progress, and land your dream placement with guided prep, real-time analytics, and 2000+ company questions.
           </motion.p>
 
-          <motion.div variants={fadeUp} className="mt-9 flex flex-col items-center justify-center gap-4 sm:flex-row">
-            <Link
-              to="/signup"
+          <motion.div variants={fadeUp} className="mt-9 flex flex-col items-center justify-center gap-4">
+            <button
+              onClick={() => setShowAuth(true)}
               className="relative w-64 rounded-full bg-gradient-to-r from-violet-600 via-purple-500 to-cyan-400 px-8 py-4 text-lg font-bold text-white shadow-[0_0_40px_rgba(139,92,246,0.5)] transition hover:shadow-[0_0_60px_rgba(139,92,246,0.7)] sm:w-72"
             >
               <span className="relative z-10">Get Started</span>
@@ -127,13 +140,7 @@ export default function Landing() {
                 <span className="absolute top-2 right-1/3 h-1.5 w-1.5 rounded-full bg-white/60 blur-[1px]" />
                 <span className="absolute bottom-2 left-1/2 h-1 w-1 rounded-full bg-white/70" />
               </span>
-            </Link>
-            <Link
-              to="/login"
-              className="w-64 rounded-2xl border border-white/25 bg-white/5 px-8 py-4 text-lg font-bold text-white backdrop-blur transition hover:bg-white/10 sm:w-72"
-            >
-              Sign In
-            </Link>
+            </button>
           </motion.div>
         </motion.main>
 
@@ -180,6 +187,52 @@ export default function Landing() {
           ))}
         </motion.section>
       </div>
+
+      {/* Auth Modal */}
+      <AnimatePresence>
+        {showAuth && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm"
+            onClick={() => setShowAuth(false)}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              transition={{ duration: 0.25 }}
+              className="relative w-full max-w-sm rounded-3xl border border-white/15 bg-gradient-to-br from-white/10 via-white/[0.06] to-white/[0.02] p-8 text-center shadow-2xl backdrop-blur-xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button
+                onClick={() => setShowAuth(false)}
+                className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-white transition hover:bg-white/20"
+                aria-label="Close"
+              >
+                ✕
+              </button>
+              <h2 className="text-2xl font-bold text-white">Welcome to stdskillupps</h2>
+              <p className="mt-2 text-sm text-slate-300">Choose an option to continue</p>
+              <div className="mt-6 flex flex-col gap-3">
+                <button
+                  onClick={handleLogin}
+                  className="w-full rounded-2xl border border-white/25 bg-white/5 px-6 py-3.5 text-base font-bold text-white backdrop-blur transition hover:bg-white/10"
+                >
+                  Login
+                </button>
+                <button
+                  onClick={handleSignUp}
+                  className="w-full rounded-2xl bg-gradient-to-r from-violet-600 via-purple-500 to-cyan-400 px-6 py-3.5 text-base font-bold text-white shadow-[0_0_30px_rgba(139,92,246,0.4)] transition hover:shadow-[0_0_45px_rgba(139,92,246,0.6)]"
+                >
+                  Sign Up
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </PageWrapper>
   );
 }
