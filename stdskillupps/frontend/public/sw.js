@@ -1,1 +1,51 @@
-Lyogc3Rkc2tpbGx1cHBzIHNlcnZpY2Ugd29ya2VyIOKAlCBjYWNoZS1maXJzdCBhcHAgc2hlbGwsIG5ldHdvcmstZmlyc3QgcGFnZXMuICovCmNvbnN0IENBQ0hFID0gJ3N0ZHNraWxsdXBwcy12MSc7CgpzZWxmLmFkZEV2ZW50TGlzdGVuZXIoJ2luc3RhbGwnLCAoZXZlbnQpID0+IHsKICBldmVudC53YWl0VW50aWwoCiAgICBjYWNoZXMub3BlbihDQUNIRSkudGhlbigoY2FjaGUpID0+IGNhY2hlLmFkZEFsbChbJy8nLCAnL2luZGV4Lmh0bWwnLCAnL21hbmlmZXN0LndlYm1hbmlmZXN0J10pKS50aGVuKCgpID0+IHNlbGYuc2tpcFdhaXRpbmcoKSkKICApOwp9KTsKCnNlbGYuYWRkRXZlbnRMaXN0ZW5lcignYWN0aXZhdGUnLCAoZXZlbnQpID0+IHsKICBldmVudC53YWl0VW50aWwoCiAgICBjYWNoZXMua2V5cygpLnRoZW4oKGtleXMpID0+CiAgICAgIFByb21pc2UuYWxsKGtleXMuZmlsdGVyKChrKSA9PiBrICE9PSBDQUNIRSkubWFwKChrKSA9PiBjYWNoZXMuZGVsZXRlKGspKSkKICAgICkudGhlbigoKSA9PiBzZWxmLmNsaWVudHMuY2xhaW0oKSkKICApOwp9KTsKCnNlbGYuYWRkRXZlbnRMaXN0ZW5lcignZmV0Y2gnLCAoZXZlbnQpID0+IHsKICBjb25zdCB7IHJlcXVlc3QgfSA9IGV2ZW50OwogIGlmIChyZXF1ZXN0Lm1ldGhvZCAhPT0gJ0dFVCcpIHJldHVybjsKICBjb25zdCB1cmwgPSBuZXcgVVJMKHJlcXVlc3QudXJsKTsKCiAgLy8gSGFzaGVkIGJ1aWxkIGFzc2V0czogY2FjaGUtZmlyc3QsIHRoZXkgYXJlIGltbXV0YWJsZS4KICBpZiAodXJsLnBhdGhuYW1lLnN0YXJ0c1dpdGgoJy9hc3NldHMvJykpIHsKICAgIGV2ZW50LnJlc3BvbmRXaXRoKAogICAgICBjYWNoZXMubWF0Y2gocmVxdWVzdCkudGhlbigKICAgICAgICAoaGl0KSA9PgogICAgICAgICAgaGl0IHx8CiAgICAgICAgICBmZXRjaChyZXF1ZXN0KS50aGVuKChyZXMpID0+IHsKICAgICAgICAgICAgY29uc3QgY29weSA9IHJlcy5jbG9uZSgpOwogICAgICAgICAgICBjYWNoZXMub3BlbihDQUNIRSkudGhlbigoY2FjaGUpID0+IGNhY2hlLnB1dChyZXF1ZXN0LCBjb3B5KSk7CiAgICAgICAgICAgIHJldHVybiByZXM7CiAgICAgICAgICB9KQogICAgICApCiAgICApOwogICAgcmV0dXJuOwogIH0KCiAgLy8gUGFnZXMgLyBuYXZpZ2F0aW9uOiBuZXR3b3JrLWZpcnN0IHNvIHRoZSBTUEEgc2hlbGwgc3RheXMgZnJlc2guCiAgaWYgKHJlcXVlc3QubW9kZSA9PT0gJ25hdmlnYXRlJykgewogICAgZXZlbnQucmVzcG9uZFdpdGgoCiAgICAgIGZldGNoKHJlcXVlc3QpCiAgICAgICAgLnRoZW4oKHJlcykgPT4gewogICAgICAgICAgY29uc3QgY29weSA9IHJlcy5jbG9uZSgpOwogICAgICAgICAgY2FjaGVzLm9wZW4oQ0FDSEUpLnRoZW4oKGNhY2hlKSA9PiBjYWNoZS5wdXQoJy9pbmRleC5odG1sJywgY29weSkpOwogICAgICAgICAgcmV0dXJuIHJlczsKICAgICAgICB9KQogICAgICAgIC5jYXRjaCgoKSA9PiBjYWNoZXMubWF0Y2goJy9pbmRleC5odG1sJykpCiAgICApOwogIH0KfSk7Cg==
+/* stdskillupps service worker — cache-first app shell, network-first pages. */
+const CACHE = 'stdskillupps-v1';
+
+self.addEventListener('install', (event) => {
+  event.waitUntil(
+    caches.open(CACHE).then((cache) => cache.addAll(['/', '/index.html', '/manifest.webmanifest'])).then(() => self.skipWaiting())
+  );
+});
+
+self.addEventListener('activate', (event) => {
+  event.waitUntil(
+    caches.keys().then((keys) =>
+      Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k)))
+    ).then(() => self.clients.claim())
+  );
+});
+
+self.addEventListener('fetch', (event) => {
+  const { request } = event;
+  if (request.method !== 'GET') return;
+  const url = new URL(request.url);
+
+  // Hashed build assets: cache-first, they are immutable.
+  if (url.pathname.startsWith('/assets/')) {
+    event.respondWith(
+      caches.match(request).then(
+        (hit) =>
+          hit ||
+          fetch(request).then((res) => {
+            const copy = res.clone();
+            caches.open(CACHE).then((cache) => cache.put(request, copy));
+            return res;
+          })
+      )
+    );
+    return;
+  }
+
+  // Pages / navigation: network-first so the SPA shell stays fresh.
+  if (request.mode === 'navigate') {
+    event.respondWith(
+      fetch(request)
+        .then((res) => {
+          const copy = res.clone();
+          caches.open(CACHE).then((cache) => cache.put('/index.html', copy));
+          return res;
+        })
+        .catch(() => caches.match('/index.html'))
+    );
+  }
+});
