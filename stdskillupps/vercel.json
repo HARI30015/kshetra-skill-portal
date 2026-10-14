@@ -3,5 +3,8 @@
   "framework": null,
   "installCommand": null,
   "outputDirectory": "frontend/dist",
-  "rewrites": [{"destination": "/index.html", "source": "/(.*)"}]
+  "rewrites": [
+    {"source": "/assets/(.*)", "destination": "/assets/$1"},
+    {"source": "/(.*)", "destination": "/index.html"}
+  ]
 }
