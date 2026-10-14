@@ -1,10 +1,1 @@
-{
-  "buildCommand": null,
-  "framework": null,
-  "installCommand": null,
-  "outputDirectory": "frontend/dist",
-  "rewrites": [
-    {"source": "/assets/(.*)", "destination": "/assets/$1"},
-    {"source": "/(.*)", "destination": "/index.html"}
-  ]
-}
+eyJidWlsZENvbW1hbmQiOiJucG0gcnVuIGJ1aWxkIC0tcHJlZml4IGZyb250ZW5kIiwiZnJhbWV3b3JrIjoidml0ZSIsImluc3RhbGxDb21tYW5kIjoibnBtIGluc3RhbGwgLS1wcmVmaXggZnJvbnRlbmQiLCJvdXRwdXREaXJlY3RvcnkiOiJmcm9udGVuZC9kaXN0IiwicmV3cml0ZXMiOlt7ImRlc3RpbmF0aW9uIjoiL2Fzc2V0cy8kMSIsInNvdXJjZSI6Ii9hc3NldHMvKC4qKSJ9LHsiZGVzdGluYXRpb24iOiIvc3cuanMiLCJzb3VyY2UiOiIvc3cuanMifSx7ImRlc3RpbmF0aW9uIjoiL21hbmlmZXN0LndlYm1hbmlmZXN0Iiwic291cmNlIjoiL21hbmlmZXN0LndlYm1hbmlmZXN0In0seyJkZXN0aW5hdGlvbiI6Ii92aXRlLnN2ZyIsInNvdXJjZSI6Ii92aXRlLnN2ZyJ9LHsiZGVzdGluYXRpb24iOiIvaW5kZXguaHRtbCIsInNvdXJjZSI6Ii8oLiopIn1dfQ==
