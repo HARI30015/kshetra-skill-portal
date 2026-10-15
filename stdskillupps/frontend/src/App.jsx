@@ -22,7 +22,7 @@ export default function App() {
   return (
     <div className="noise-overlay relative min-h-screen">
       <Background3D />
-      <Navbar />
+      {location.pathname !== '/' && <Navbar />}
       <Suspense fallback={<Loader label="Loading…" />}>
         <AnimatePresence mode="wait">
           <Routes location={location} key={location.pathname}>
