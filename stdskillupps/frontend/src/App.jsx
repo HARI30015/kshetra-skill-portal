@@ -5,6 +5,7 @@ import Navbar from './components/Navbar';
 import ProtectedRoute from './components/ProtectedRoute';
 import Background3D from './components/Background3D';
 import Loader from './components/Loader';
+import ErrorBoundary from './components/ErrorBoundary';
 
 // Code-split: each page becomes its own lazy chunk so the initial
 // bundle stays small and the site loads fast.
@@ -23,6 +24,7 @@ export default function App() {
     <div className="noise-overlay relative min-h-screen">
       <Background3D />
       {location.pathname !== '/' && <Navbar />}
+      <ErrorBoundary>
       <Suspense fallback={<Loader label="Loading…" />}>
         <AnimatePresence mode="wait">
           <Routes location={location} key={location.pathname}>
@@ -65,6 +67,7 @@ export default function App() {
           </Routes>
         </AnimatePresence>
       </Suspense>
+      </ErrorBoundary>
     </div>
   );
 }
