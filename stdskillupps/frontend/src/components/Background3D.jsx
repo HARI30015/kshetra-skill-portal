@@ -71,12 +71,12 @@ export default function Background3D() {
   }, []);
 
   const spheres = [
-    { size: 180, left: '6%', top: '15%', c1: 'rgba(139,92,246,0.25)', c2: 'rgba(99,102,241,0.10)', dur: 16, delay: 0, blur: 20 },
-    { size: 140, left: '85%', top: '10%', c1: 'rgba(34,211,238,0.22)', c2: 'rgba(14,165,233,0.08)', dur: 19, delay: 1, blur: 18 },
-    { size: 220, left: '78%', top: '65%', c1: 'rgba(217,70,239,0.20)', c2: 'rgba(162,28,175,0.08)', dur: 22, delay: 0.5, blur: 24 },
-    { size: 160, left: '10%', top: '75%', c1: 'rgba(99,102,241,0.22)', c2: 'rgba(79,70,229,0.08)', dur: 18, delay: 1.5, blur: 20 },
-    { size: 110, left: '45%', top: '5%', c1: 'rgba(236,72,153,0.18)', c2: 'rgba(219,39,119,0.06)', dur: 15, delay: 0.8, blur: 16 },
-    { size: 90, left: '60%', top: '85%', c1: 'rgba(251,191,36,0.15)', c2: 'rgba(245,158,11,0.05)', dur: 20, delay: 2, blur: 14 },
+    { size: 180, left: '6%', top: '15%', c1: 'rgba(139,92,246,0.55)', c2: 'rgba(99,102,241,0.22)', dur: 16, delay: 0, blur: 20 },
+    { size: 140, left: '85%', top: '10%', c1: 'rgba(34,211,238,0.50)', c2: 'rgba(14,165,233,0.20)', dur: 19, delay: 1, blur: 18 },
+    { size: 220, left: '78%', top: '65%', c1: 'rgba(217,70,239,0.48)', c2: 'rgba(162,28,175,0.20)', dur: 22, delay: 0.5, blur: 24 },
+    { size: 160, left: '10%', top: '75%', c1: 'rgba(99,102,241,0.50)', c2: 'rgba(79,70,229,0.20)', dur: 18, delay: 1.5, blur: 20 },
+    { size: 110, left: '45%', top: '5%', c1: 'rgba(236,72,153,0.45)', c2: 'rgba(219,39,119,0.18)', dur: 15, delay: 0.8, blur: 16 },
+    { size: 90, left: '60%', top: '85%', c1: 'rgba(251,191,36,0.42)', c2: 'rgba(245,158,11,0.16)', dur: 20, delay: 2, blur: 14 },
   ];
 
   const cubes = [
@@ -136,8 +136,8 @@ export default function Background3D() {
               background: `radial-gradient(circle at 30% 30%, ${sp.c1}, ${sp.c2} 60%, transparent 75%)`,
               backdropFilter: `blur(${sp.blur}px)`,
               WebkitBackdropFilter: `blur(${sp.blur}px)`,
-              border: '1px solid rgba(255,255,255,0.12)',
-              boxShadow: 'inset 0 0 30px rgba(255,255,255,0.08), 0 20px 60px rgba(0,0,0,0.25)',
+              border: '2px solid rgba(255,255,255,0.35)',
+              boxShadow: 'inset 0 0 40px rgba(255,255,255,0.15), inset -10px -15px 40px rgba(0,0,0,0.15), 0 20px 60px rgba(0,0,0,0.35), 0 0 60px rgba(255,255,255,0.08)',
               transformStyle: 'preserve-3d',
             }}
             animate={{
@@ -148,15 +148,28 @@ export default function Background3D() {
             }}
             transition={{ duration: sp.dur, delay: sp.delay, repeat: Infinity, ease: 'easeInOut' }}
           >
-            {/* Glass highlight */}
+            {/* Glass highlight — bright shine spot */}
             <div
               className="absolute rounded-full"
               style={{
-                width: '35%',
-                height: '25%',
-                left: '18%',
-                top: '12%',
-                background: 'radial-gradient(ellipse, rgba(255,255,255,0.35), transparent 70%)',
+                width: '45%',
+                height: '32%',
+                left: '12%',
+                top: '8%',
+                background: 'radial-gradient(ellipse, rgba(255,255,255,0.75), rgba(255,255,255,0.15) 60%, transparent 75%)',
+                filter: 'blur(2px)',
+              }}
+            />
+            {/* Bottom rim light for glass depth */}
+            <div
+              className="absolute rounded-full"
+              style={{
+                width: '70%',
+                height: '18%',
+                left: '15%',
+                bottom: '6%',
+                background: 'radial-gradient(ellipse, rgba(255,255,255,0.25), transparent 70%)',
+                filter: 'blur(4px)',
               }}
             />
           </motion.div>
@@ -186,22 +199,23 @@ export default function Background3D() {
             }}
             transition={{ duration: c.dur, delay: c.delay, repeat: Infinity, ease: 'linear' }}
           >
-            {/* Cube faces */}
+            {/* Cube faces — glassy with shine */}
             {[
-              { transform: `translateZ(${c.size / 2}px)`, bg: 'rgba(139,92,246,0.18)' },
-              { transform: `rotateY(90deg) translateZ(${c.size / 2}px)`, bg: 'rgba(34,211,238,0.15)' },
-              { transform: `rotateY(180deg) translateZ(${c.size / 2}px)`, bg: 'rgba(217,70,239,0.15)' },
-              { transform: `rotateY(-90deg) translateZ(${c.size / 2}px)`, bg: 'rgba(99,102,241,0.15)' },
-              { transform: `rotateX(90deg) translateZ(${c.size / 2}px)`, bg: 'rgba(236,72,153,0.12)' },
-              { transform: `rotateX(-90deg) translateZ(${c.size / 2}px)`, bg: 'rgba(251,191,36,0.10)' },
+              { transform: `translateZ(${c.size / 2}px)`, bg: 'rgba(139,92,246,0.35)' },
+              { transform: `rotateY(90deg) translateZ(${c.size / 2}px)`, bg: 'rgba(34,211,238,0.30)' },
+              { transform: `rotateY(180deg) translateZ(${c.size / 2}px)`, bg: 'rgba(217,70,239,0.30)' },
+              { transform: `rotateY(-90deg) translateZ(${c.size / 2}px)`, bg: 'rgba(99,102,241,0.32)' },
+              { transform: `rotateX(90deg) translateZ(${c.size / 2}px)`, bg: 'rgba(236,72,153,0.28)' },
+              { transform: `rotateX(-90deg) translateZ(${c.size / 2}px)`, bg: 'rgba(251,191,36,0.25)' },
             ].map((face, fi) => (
               <div
                 key={fi}
                 className="absolute inset-0"
                 style={{
                   transform: face.transform,
-                  background: face.bg,
-                  border: '1px solid rgba(255,255,255,0.18)',
+                  background: `linear-gradient(135deg, rgba(255,255,255,0.25) 0%, ${face.bg} 40%, ${face.bg} 100%)`,
+                  border: '1.5px solid rgba(255,255,255,0.40)',
+                  boxShadow: 'inset 0 0 20px rgba(255,255,255,0.12)',
                   backdropFilter: 'blur(8px)',
                   WebkitBackdropFilter: 'blur(8px)',
                 }}
