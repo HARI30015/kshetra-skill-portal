@@ -71,12 +71,12 @@ export default function Background3D() {
   }, []);
 
   const spheres = [
-    { size: 180, left: '6%', top: '15%', c1: 'rgba(139,92,246,0.55)', c2: 'rgba(99,102,241,0.22)', dur: 16, delay: 0, blur: 20 },
-    { size: 140, left: '85%', top: '10%', c1: 'rgba(34,211,238,0.50)', c2: 'rgba(14,165,233,0.20)', dur: 19, delay: 1, blur: 18 },
-    { size: 220, left: '78%', top: '65%', c1: 'rgba(217,70,239,0.48)', c2: 'rgba(162,28,175,0.20)', dur: 22, delay: 0.5, blur: 24 },
-    { size: 160, left: '10%', top: '75%', c1: 'rgba(99,102,241,0.50)', c2: 'rgba(79,70,229,0.20)', dur: 18, delay: 1.5, blur: 20 },
-    { size: 110, left: '45%', top: '5%', c1: 'rgba(236,72,153,0.45)', c2: 'rgba(219,39,119,0.18)', dur: 15, delay: 0.8, blur: 16 },
-    { size: 90, left: '60%', top: '85%', c1: 'rgba(251,191,36,0.42)', c2: 'rgba(245,158,11,0.16)', dur: 20, delay: 2, blur: 14 },
+    { size: 180, left: '6%', top: '15%', c1: 'rgba(167,139,250,0.95)', c2: 'rgba(124,58,237,0.85)', dur: 16, delay: 0, blur: 20 },
+    { size: 140, left: '85%', top: '10%', c1: 'rgba(103,232,249,0.95)', c2: 'rgba(6,182,214,0.85)', dur: 19, delay: 1, blur: 18 },
+    { size: 220, left: '78%', top: '65%', c1: 'rgba(240,171,252,0.92)', c2: 'rgba(192,38,211,0.85)', dur: 22, delay: 0.5, blur: 24 },
+    { size: 160, left: '10%', top: '75%', c1: 'rgba(129,140,248,0.95)', c2: 'rgba(79,70,229,0.85)', dur: 18, delay: 1.5, blur: 20 },
+    { size: 110, left: '45%', top: '5%', c1: 'rgba(249,168,212,0.92)', c2: 'rgba(219,39,119,0.85)', dur: 15, delay: 0.8, blur: 16 },
+    { size: 90, left: '60%', top: '85%', c1: 'rgba(253,224,71,0.90)', c2: 'rgba(202,138,4,0.85)', dur: 20, delay: 2, blur: 14 },
   ];
 
   const cubes = [
@@ -133,11 +133,9 @@ export default function Background3D() {
               height: sp.size,
               left: sp.left,
               top: sp.top,
-              background: `radial-gradient(circle at 30% 30%, ${sp.c1}, ${sp.c2} 60%, transparent 75%)`,
-              backdropFilter: `blur(${sp.blur}px)`,
-              WebkitBackdropFilter: `blur(${sp.blur}px)`,
-              border: '2px solid rgba(255,255,255,0.35)',
-              boxShadow: 'inset 0 0 40px rgba(255,255,255,0.15), inset -10px -15px 40px rgba(0,0,0,0.15), 0 20px 60px rgba(0,0,0,0.35), 0 0 60px rgba(255,255,255,0.08)',
+              background: `radial-gradient(circle at 32% 28%, rgba(255,255,255,0.95) 0%, ${sp.c1} 18%, ${sp.c2} 55%, rgba(0,0,0,0.25) 100%)`,
+              border: '2px solid rgba(255,255,255,0.55)',
+              boxShadow: `inset -12px -18px 45px rgba(0,0,0,0.35), inset 8px 10px 30px rgba(255,255,255,0.25), 0 25px 70px rgba(0,0,0,0.45), 0 0 80px ${sp.c1}`,
               transformStyle: 'preserve-3d',
             }}
             animate={{
@@ -199,25 +197,23 @@ export default function Background3D() {
             }}
             transition={{ duration: c.dur, delay: c.delay, repeat: Infinity, ease: 'linear' }}
           >
-            {/* Cube faces — glassy with shine */}
+            {/* Cube faces — solid glassy with shine */}
             {[
-              { transform: `translateZ(${c.size / 2}px)`, bg: 'rgba(139,92,246,0.35)' },
-              { transform: `rotateY(90deg) translateZ(${c.size / 2}px)`, bg: 'rgba(34,211,238,0.30)' },
-              { transform: `rotateY(180deg) translateZ(${c.size / 2}px)`, bg: 'rgba(217,70,239,0.30)' },
-              { transform: `rotateY(-90deg) translateZ(${c.size / 2}px)`, bg: 'rgba(99,102,241,0.32)' },
-              { transform: `rotateX(90deg) translateZ(${c.size / 2}px)`, bg: 'rgba(236,72,153,0.28)' },
-              { transform: `rotateX(-90deg) translateZ(${c.size / 2}px)`, bg: 'rgba(251,191,36,0.25)' },
+              { transform: `translateZ(${c.size / 2}px)`, bg: 'rgba(139,92,246,0.75)' },
+              { transform: `rotateY(90deg) translateZ(${c.size / 2}px)`, bg: 'rgba(34,211,238,0.70)' },
+              { transform: `rotateY(180deg) translateZ(${c.size / 2}px)`, bg: 'rgba(217,70,239,0.70)' },
+              { transform: `rotateY(-90deg) translateZ(${c.size / 2}px)`, bg: 'rgba(99,102,241,0.72)' },
+              { transform: `rotateX(90deg) translateZ(${c.size / 2}px)`, bg: 'rgba(236,72,153,0.68)' },
+              { transform: `rotateX(-90deg) translateZ(${c.size / 2}px)`, bg: 'rgba(251,191,36,0.65)' },
             ].map((face, fi) => (
               <div
                 key={fi}
                 className="absolute inset-0"
                 style={{
                   transform: face.transform,
-                  background: `linear-gradient(135deg, rgba(255,255,255,0.25) 0%, ${face.bg} 40%, ${face.bg} 100%)`,
-                  border: '1.5px solid rgba(255,255,255,0.40)',
-                  boxShadow: 'inset 0 0 20px rgba(255,255,255,0.12)',
-                  backdropFilter: 'blur(8px)',
-                  WebkitBackdropFilter: 'blur(8px)',
+                  background: `linear-gradient(135deg, rgba(255,255,255,0.55) 0%, ${face.bg} 45%, ${face.bg} 100%)`,
+                  border: '2px solid rgba(255,255,255,0.65)',
+                  boxShadow: 'inset 0 0 25px rgba(255,255,255,0.25)',
                 }}
               />
             ))}
