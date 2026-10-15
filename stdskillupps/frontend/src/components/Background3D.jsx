@@ -119,6 +119,20 @@ export default function Background3D() {
         ))}
       </motion.div>
 
+      {/* TEST: plain div sphere, no motion */}
+      <div
+        className="absolute rounded-full"
+        style={{
+          width: 180,
+          height: 180,
+          left: '6%',
+          top: '15%',
+          background: 'radial-gradient(circle at 32% 28%, rgba(255,255,255,0.95) 0%, rgba(167,139,250,0.95) 18%, rgba(124,58,237,0.85) 55%, rgba(0,0,0,0.25) 100%)',
+          border: '2px solid rgba(255,255,255,0.55)',
+          zIndex: 10,
+        }}
+      />
+
       {/* Glassy floating spheres / circles — parallax layer (medium depth) + tilt */}
       <motion.div
         className="absolute inset-0"
