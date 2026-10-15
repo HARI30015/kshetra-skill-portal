@@ -159,7 +159,41 @@ export default function Dashboard() {
     }
   };
 
+  const [profileWaited, setProfileWaited] = useState(false);
+  useEffect(() => {
+    if (profile) {
+      setProfileWaited(false);
+      return;
+    }
+    const t = setTimeout(() => setProfileWaited(true), 12000);
+    return () => clearTimeout(t);
+  }, [profile]);
+
   if (!profile) {
+    if (profileWaited) {
+      return (
+        <PageWrapper>
+          <div className="min-h-screen flex items-center justify-center px-4">
+            <div className="text-center max-w-sm">
+              <div className="text-5xl mb-4">😕</div>
+              <h2 className="text-xl font-bold text-white mb-2">Couldn't load your dashboard</h2>
+              <p className="text-white/60 text-sm mb-6">
+                Your profile didn't load. Check your connection and try again.
+              </p>
+              <button
+                onClick={() => {
+                  setProfileWaited(false);
+                  refreshProfile();
+                }}
+                className="px-6 py-3 rounded-full bg-gradient-to-r from-violet-500 to-cyan-400 text-white font-semibold"
+              >
+                Try Again
+              </button>
+            </div>
+          </div>
+        </PageWrapper>
+      );
+    }
     return (
       <PageWrapper>
         <Loader label="Loading your dashboard…" />
