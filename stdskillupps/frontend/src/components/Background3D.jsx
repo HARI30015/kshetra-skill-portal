@@ -119,20 +119,6 @@ export default function Background3D() {
         ))}
       </motion.div>
 
-      {/* TEST: plain div sphere, no motion */}
-      <div
-        className="absolute rounded-full"
-        style={{
-          width: 180,
-          height: 180,
-          left: '6%',
-          top: '15%',
-          background: 'radial-gradient(circle at 32% 28%, rgba(255,255,255,0.95) 0%, rgba(167,139,250,0.95) 18%, rgba(124,58,237,0.85) 55%, rgba(0,0,0,0.25) 100%)',
-          border: '2px solid rgba(255,255,255,0.55)',
-          zIndex: 10,
-        }}
-      />
-
       {/* Glassy floating spheres / circles — parallax layer (medium depth) + tilt */}
       <motion.div
         className="absolute inset-0"
@@ -147,9 +133,9 @@ export default function Background3D() {
               height: sp.size,
               left: sp.left,
               top: sp.top,
-              background: `radial-gradient(circle at 32% 28%, rgba(255,255,255,0.95) 0%, ${sp.c1} 18%, ${sp.c2} 55%, rgba(0,0,0,0.25) 100%)`,
-              border: '2px solid rgba(255,255,255,0.55)',
-              boxShadow: `inset -12px -18px 45px rgba(0,0,0,0.35), inset 8px 10px 30px rgba(255,255,255,0.25), 0 25px 70px rgba(0,0,0,0.45), 0 0 80px ${sp.c1}`,
+              background: `radial-gradient(circle at 35% 30%, rgba(255,255,255,1) 0%, ${sp.c1} 22%, ${sp.c2} 58%, rgba(0,0,0,0.35) 100%)`,
+              border: '3px solid rgba(255,255,255,0.75)',
+              boxShadow: `inset -15px -20px 50px rgba(0,0,0,0.45), inset 10px 12px 35px rgba(255,255,255,0.35), 0 30px 80px rgba(0,0,0,0.55), 0 0 100px ${sp.c1}`,
             }}
             animate={{
               x: [0, 40, -30, 0],
@@ -158,28 +144,39 @@ export default function Background3D() {
             }}
             transition={{ duration: sp.dur, delay: sp.delay, repeat: Infinity, ease: 'easeInOut' }}
           >
-            {/* Glass highlight — bright shine spot */}
+            {/* Crisp specular highlight — intense white shine */}
             <div
               className="absolute rounded-full"
               style={{
-                width: '45%',
-                height: '32%',
-                left: '12%',
-                top: '8%',
-                background: 'radial-gradient(ellipse, rgba(255,255,255,0.75), rgba(255,255,255,0.15) 60%, transparent 75%)',
-                filter: 'blur(2px)',
+                width: '28%',
+                height: '20%',
+                left: '18%',
+                top: '12%',
+                background: 'radial-gradient(ellipse, rgba(255,255,255,1) 0%, rgba(255,255,255,0.6) 40%, transparent 70%)',
               }}
             />
-            {/* Bottom rim light for glass depth */}
+            {/* Secondary soft glow */}
             <div
               className="absolute rounded-full"
               style={{
-                width: '70%',
-                height: '18%',
-                left: '15%',
-                bottom: '6%',
-                background: 'radial-gradient(ellipse, rgba(255,255,255,0.25), transparent 70%)',
-                filter: 'blur(4px)',
+                width: '55%',
+                height: '40%',
+                left: '10%',
+                top: '6%',
+                background: 'radial-gradient(ellipse, rgba(255,255,255,0.35), transparent 70%)',
+                filter: 'blur(3px)',
+              }}
+            />
+            {/* Bottom glass reflection */}
+            <div
+              className="absolute rounded-full"
+              style={{
+                width: '60%',
+                height: '15%',
+                left: '20%',
+                bottom: '8%',
+                background: 'radial-gradient(ellipse, rgba(255,255,255,0.4), transparent 70%)',
+                filter: 'blur(2px)',
               }}
             />
           </motion.div>
