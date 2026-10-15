@@ -96,7 +96,7 @@ export default function Background3D() {
     <div
       className="pointer-events-none fixed inset-0 z-0 overflow-hidden"
       aria-hidden="true"
-      style={{ perspective: '1200px' }}
+      style={{  }}
       onMouseMove={handleMouseMove}
     >
       {/* Twinkling stars — parallax layer (least depth) */}
@@ -122,7 +122,7 @@ export default function Background3D() {
       {/* Glassy floating spheres / circles — parallax layer (medium depth) + tilt */}
       <motion.div
         className="absolute inset-0"
-        style={{ x: spheresX, y: spheresY, rotateX: tiltX, rotateY: tiltY, transformStyle: 'preserve-3d' }}
+        style={{ x: spheresX, y: spheresY }}
       >
         {spheres.map((sp, i) => (
           <motion.div
@@ -136,13 +136,11 @@ export default function Background3D() {
               background: `radial-gradient(circle at 32% 28%, rgba(255,255,255,0.95) 0%, ${sp.c1} 18%, ${sp.c2} 55%, rgba(0,0,0,0.25) 100%)`,
               border: '2px solid rgba(255,255,255,0.55)',
               boxShadow: `inset -12px -18px 45px rgba(0,0,0,0.35), inset 8px 10px 30px rgba(255,255,255,0.25), 0 25px 70px rgba(0,0,0,0.45), 0 0 80px ${sp.c1}`,
-              transformStyle: 'preserve-3d',
             }}
             animate={{
               x: [0, 40, -30, 0],
               y: [0, -35, 25, 0],
-              rotateX: [0, 12, -8, 0],
-              rotateY: [0, -10, 8, 0],
+              scale: [1, 1.08, 0.96, 1],
             }}
             transition={{ duration: sp.dur, delay: sp.delay, repeat: Infinity, ease: 'easeInOut' }}
           >
@@ -174,10 +172,10 @@ export default function Background3D() {
         ))}
       </motion.div>
 
-      {/* Glassy rotating cubes (3D) — parallax layer (most depth) + tilt */}
+      {/* Glassy rotating cubes — parallax layer (most depth) */}
       <motion.div
         className="absolute inset-0"
-        style={{ x: cubesX, y: cubesY, rotateX: tiltX, rotateY: tiltY, transformStyle: 'preserve-3d' }}
+        style={{ x: cubesX, y: cubesY }}
       >
         {cubes.map((c, i) => (
           <motion.div
@@ -188,35 +186,29 @@ export default function Background3D() {
               height: c.size,
               left: c.left,
               top: c.top,
-              transformStyle: 'preserve-3d',
+              background: `linear-gradient(135deg, rgba(255,255,255,0.45) 0%, rgba(139,92,246,0.65) 30%, rgba(34,211,238,0.55) 70%, rgba(139,92,246,0.45) 100%)`,
+              border: '2px solid rgba(255,255,255,0.60)',
+              borderRadius: '12px',
+              boxShadow: 'inset 0 0 30px rgba(255,255,255,0.25), inset -8px -10px 25px rgba(0,0,0,0.25), 0 15px 45px rgba(0,0,0,0.40), 0 0 50px rgba(139,92,246,0.30)',
             }}
             animate={{
-              rotateX: [c.rot, c.rot + 360],
-              rotateY: [c.rot, c.rot + 360],
+              rotate: [c.rot, c.rot + 360],
               y: [0, -18, 0],
+              scale: [1, 1.06, 1],
             }}
             transition={{ duration: c.dur, delay: c.delay, repeat: Infinity, ease: 'linear' }}
           >
-            {/* Cube faces — solid glassy with shine */}
-            {[
-              { transform: `translateZ(${c.size / 2}px)`, bg: 'rgba(139,92,246,0.75)' },
-              { transform: `rotateY(90deg) translateZ(${c.size / 2}px)`, bg: 'rgba(34,211,238,0.70)' },
-              { transform: `rotateY(180deg) translateZ(${c.size / 2}px)`, bg: 'rgba(217,70,239,0.70)' },
-              { transform: `rotateY(-90deg) translateZ(${c.size / 2}px)`, bg: 'rgba(99,102,241,0.72)' },
-              { transform: `rotateX(90deg) translateZ(${c.size / 2}px)`, bg: 'rgba(236,72,153,0.68)' },
-              { transform: `rotateX(-90deg) translateZ(${c.size / 2}px)`, bg: 'rgba(251,191,36,0.65)' },
-            ].map((face, fi) => (
-              <div
-                key={fi}
-                className="absolute inset-0"
-                style={{
-                  transform: face.transform,
-                  background: `linear-gradient(135deg, rgba(255,255,255,0.55) 0%, ${face.bg} 45%, ${face.bg} 100%)`,
-                  border: '2px solid rgba(255,255,255,0.65)',
-                  boxShadow: 'inset 0 0 25px rgba(255,255,255,0.25)',
-                }}
-              />
-            ))}
+            {/* Glass shine on cube */}
+            <div
+              className="absolute rounded-lg"
+              style={{
+                width: '50%',
+                height: '35%',
+                left: '10%',
+                top: '8%',
+                background: 'radial-gradient(ellipse, rgba(255,255,255,0.65), transparent 70%)',
+              }}
+            />
           </motion.div>
         ))}
       </motion.div>
@@ -232,13 +224,11 @@ export default function Background3D() {
               height: r.size,
               left: r.left,
               top: r.top,
-              border: '2px solid rgba(255,255,255,0.10)',
-              boxShadow: '0 0 40px rgba(139,92,246,0.12), inset 0 0 30px rgba(255,255,255,0.06)',
-              transformStyle: 'preserve-3d',
+              border: '3px solid rgba(255,255,255,0.30)',
+              boxShadow: '0 0 50px rgba(139,92,246,0.35), inset 0 0 30px rgba(255,255,255,0.12)',
             }}
             animate={{
-              rotateX: [60, 75, 60],
-              rotateY: [0, 30, 0],
+              rotate: [0, 360],
               scale: [1, 1.08, 1],
             }}
             transition={{ duration: r.dur, delay: r.delay, repeat: Infinity, ease: 'easeInOut' }}
