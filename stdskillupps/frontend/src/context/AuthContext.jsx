@@ -13,10 +13,32 @@ export function AuthProvider({ children }) {
   const fetchProfile = useCallback(async () => {
     setProfileLoading(true);
     try {
-      const p = await getMyProfile();
-      setProfile(p);
-      return p;
-    } catch (err) {
+      // The backend (free tier) sleeps when idle and can take 30-60s to
+      // wake. Retry network / 5xx failures a few times so a cold start
+      // doesn't surface as "Couldn't load your profile" — the first
+      // attempt wakes the server, a later one succeeds.
+      const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+      let fetched = null;
+      let err = null;
+      for (let attempt = 0; attempt < 4; attempt++) {
+        try {
+          fetched = await getMyProfile();
+          err = null;
+          break;
+        } catch (e) {
+          err = e;
+          const status = e?.response?.status;
+          // 404 = no profile row yet (handled below). 401/403 = an auth
+          // problem retrying can't fix. Anything else (network error,
+          // 502/503/504 while the server wakes) is worth another try.
+          if (status === 404 || status === 401 || status === 403) break;
+          if (attempt < 3) await sleep(5000);
+        }
+      }
+      if (fetched) {
+        setProfile(fetched);
+        return fetched;
+      }
       if (err?.response?.status === 404) {
         // New user with no profile row yet — create one from their signup
         // metadata so protected routes don't hang on "Loading your profile…".

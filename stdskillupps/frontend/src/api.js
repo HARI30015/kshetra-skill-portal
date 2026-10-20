@@ -6,6 +6,10 @@ const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 export const api = axios.create({
   baseURL,
   headers: { 'Content-Type': 'application/json' },
+  // The backend runs on a free tier that sleeps when idle and can take
+  // 30-60s to wake. A generous timeout keeps the first request alive
+  // instead of failing it while the server is still starting.
+  timeout: 70000,
 });
 
 // Attach the Supabase session JWT as a Bearer token on every request.

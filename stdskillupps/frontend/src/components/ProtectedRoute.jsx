@@ -7,17 +7,25 @@ export default function ProtectedRoute({ children, roles }) {
   const { isAuthenticated, role, needsOnboarding, loading, profileLoading, profile, fetchProfile } = useAuth();
   const location = useLocation();
   const [waitedLong, setWaitedLong] = useState(false);
+  const [slowLoad, setSlowLoad] = useState(false);
   const [retrying, setRetrying] = useState(false);
 
-  // If profile takes more than 12s, assume it's stuck and offer a retry
-  // instead of hanging on the loader forever.
+  // The backend sleeps when idle and can take 30-60s to wake; the profile
+  // fetch retries automatically during that window. Only treat the load
+  // as stuck (and offer a manual retry) after 90s. After 10s, show a
+  // "server is waking up" hint so the wait doesn't look like a hang.
   useEffect(() => {
     if (!profileLoading) {
       setWaitedLong(false);
+      setSlowLoad(false);
       return;
     }
-    const t = setTimeout(() => setWaitedLong(true), 12000);
-    return () => clearTimeout(t);
+    const t = setTimeout(() => setWaitedLong(true), 90000);
+    const t2 = setTimeout(() => setSlowLoad(true), 10000);
+    return () => {
+      clearTimeout(t);
+      clearTimeout(t2);
+    };
   }, [profileLoading, location.pathname]);
 
   const handleRetry = async () => {
@@ -70,8 +78,13 @@ export default function ProtectedRoute({ children, roles }) {
   // Wait for the profile to resolve before deciding about roles/onboarding.
   if (profileLoading || (isAuthenticated && !role && location.pathname !== '/onboarding')) {
     return (
-      <div className="min-h-screen">
+      <div className="min-h-screen flex flex-col items-center justify-center">
         <Loader label="Loading your profile…" />
+        {slowLoad && (
+          <p className="mt-3 max-w-sm px-6 text-center text-sm text-white/50">
+            The server is waking up — this can take up to a minute. Hang tight…
+          </p>
+        )}
       </div>
     );
   }
