@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useMemo, useState, useCallback } from 'react';
 import { supabase } from '../supabaseClient';
-import { getMyProfile, createProfile } from '../api';
+import { getMyProfile, createProfile, deleteMyIncompleteProfile } from '../api';
 
 const AuthContext = createContext(null);
 
@@ -9,6 +9,18 @@ export function AuthProvider({ children }) {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [profileLoading, setProfileLoading] = useState(false);
+
+  // Remove half-done profile data after a broken sign-in. The backend
+  // only deletes a profile that was never onboarded and has no
+  // user-entered fields, so completed profiles are always safe.
+  // Best-effort: if the backend is unreachable there is nothing to clean.
+  const cleanupIncomplete = useCallback(async () => {
+    try {
+      await deleteMyIncompleteProfile();
+    } catch {
+      // ignore — cleanup is best-effort
+    }
+  }, []);
 
   const fetchProfile = useCallback(async () => {
     setProfileLoading(true);
@@ -61,12 +73,23 @@ export function AuthProvider({ children }) {
         // eslint-disable-next-line no-console
         console.error('Failed to fetch profile:', err?.message);
       }
+      // The sign-in broke midway (profile could not be loaded or
+      // created after all retries): delete any half-done data and end
+      // the broken session, so signing in again starts completely
+      // fresh. Completed profiles are never deleted (backend guard).
+      await cleanupIncomplete();
+      try {
+        await supabase.auth.signOut();
+      } catch {
+        // ignore
+      }
+      setSession(null);
       setProfile(null);
       return null;
     } finally {
       setProfileLoading(false);
     }
-  }, []);
+  }, [cleanupIncomplete]);
 
   // Ensure a profile row exists for a freshly-signed-up user, then load it.
   const ensureProfile = useCallback(
@@ -91,10 +114,14 @@ export function AuthProvider({ children }) {
   }, [fetchProfile]);
 
   const logout = useCallback(async () => {
+    // Signing out mid-setup abandons a half-done profile — delete it so
+    // the next sign-in starts new. Completed profiles are kept (the
+    // backend guard decides), so this is safe for finished accounts.
+    await cleanupIncomplete();
     await supabase.auth.signOut();
     setProfile(null);
     setSession(null);
-  }, []);
+  }, [cleanupIncomplete]);
 
   useEffect(() => {
     let mounted = true;

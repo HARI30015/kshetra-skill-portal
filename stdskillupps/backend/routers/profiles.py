@@ -40,6 +40,28 @@ def get_me(profile: dict = Depends(get_current_profile)):
     return profile_out(profile)
 
 
+@router.delete("/me/incomplete")
+def delete_my_incomplete_profile(
+    user=Depends(get_current_user),
+    db: Client = Depends(get_supabase),
+):
+    """Delete the caller's profile row ONLY when it is half-done: never
+    onboarded and no user-entered fields filled in. This runs when a
+    sign-in breaks midway (or the user signs out mid-setup) so the next
+    sign-in starts with fresh info. Completed profiles are never touched
+    — the guard below is checked server-side on every call."""
+    resp = db.table("profiles").select("*").eq("id", user.id).execute()
+    rows = resp.data or []
+    if not rows:
+        return {"deleted": False, "reason": "no profile"}
+    row = rows[0]
+    user_fields = ("year", "target_field", "leetcode_username", "campustrack_username")
+    if row.get("onboarded") or any(row.get(k) for k in user_fields):
+        return {"deleted": False, "reason": "profile has user data"}
+    db.table("profiles").delete().eq("id", user.id).execute()
+    return {"deleted": True}
+
+
 @router.get("")
 def list_profiles(
     _lecturer: dict = Depends(require_lecturer),
