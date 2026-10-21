@@ -1,6 +1,20 @@
 import React, { useEffect, useMemo } from 'react';
 import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
 
+// Performance notes (visuals unchanged):
+// - blur-3xl on the huge glow orbs was the single biggest source of
+//   jank: the browser re-blurred hundreds of thousands of pixels every
+//   frame while they drifted. The orbs already use radial gradients
+//   that fade to transparent, so the blur filter is removed — same
+//   soft glow, composited for free.
+// - Same for the small blur() highlights inside each sphere: replaced
+//   by their radial gradients alone (the gradient edge is already soft).
+// - All continuous animation is transform/opacity only, and every
+//   animated layer is promoted with will-change so the compositor —
+//   not the main thread — does the per-frame work.
+// - Animations pause while the tab is hidden, and on touch devices
+//   (no mouse to parallax with) the mousemove listener is skipped.
+
 // Global 3D background: twinkling stars, glassy floating spheres/circles,
 // glassy cubes, and soft gradient orbs — fixed behind all content.
 // Mouse parallax: every layer shifts opposite the cursor (move right ->
@@ -8,6 +22,8 @@ import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
 // cubes most — layered ON TOP of the existing twinkle/rotate/float
 // animations via wrapper layers, so no existing animation is replaced.
 export default function Background3D() {
+  // (Continuous animations idle on their own in hidden tabs — the
+  // browser stops requestAnimationFrame there.)
   // Normalised mouse position, centred: -0.5 (left/top) .. +0.5 (right/bottom)
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
@@ -42,7 +58,12 @@ export default function Background3D() {
   // practice; the onMouseMove on the container below is kept as well so the
   // container itself also reports cursor movement whenever it receives it.
   useEffect(() => {
-    window.addEventListener('mousemove', handleMouseMove);
+    // Touch devices have no mouse — skip the listener entirely so
+    // scrolling never competes with parallax bookkeeping.
+    if (typeof window !== 'undefined' && window.matchMedia?.('(pointer: coarse)').matches) {
+      return undefined;
+    }
+    window.addEventListener('mousemove', handleMouseMove, { passive: true });
     return () => window.removeEventListener('mousemove', handleMouseMove);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -100,7 +121,7 @@ export default function Background3D() {
       onMouseMove={handleMouseMove}
     >
       {/* Twinkling stars — parallax layer (least depth) */}
-      <motion.div className="absolute inset-0" style={{ x: starsX, y: starsY }}>
+      <motion.div className="absolute inset-0" style={{ x: starsX, y: starsY, willChange: 'transform' }}>
         {stars.map((s) => (
           <motion.span
             key={s.id}
@@ -112,6 +133,7 @@ export default function Background3D() {
               height: s.size,
               background: s.color,
               boxShadow: `0 0 ${s.size * 3}px ${s.color}`,
+              willChange: 'transform, opacity',
             }}
             animate={{ opacity: [s.opacity * 0.3, s.opacity, s.opacity * 0.3], scale: [0.8, 1.2, 0.8] }}
             transition={{ duration: s.duration, delay: s.delay, repeat: Infinity, ease: 'easeInOut' }}
@@ -122,7 +144,7 @@ export default function Background3D() {
       {/* Glassy floating spheres / circles — parallax layer (medium depth) + tilt */}
       <motion.div
         className="absolute inset-0"
-        style={{ x: spheresX, y: spheresY }}
+        style={{ x: spheresX, y: spheresY, willChange: 'transform' }}
       >
         {spheres.map((sp, i) => (
           <motion.div
@@ -136,6 +158,7 @@ export default function Background3D() {
               background: `radial-gradient(circle at 35% 30%, rgba(255,255,255,1) 0%, ${sp.c1} 22%, ${sp.c2} 58%, rgba(0,0,0,0.35) 100%)`,
               border: '3px solid rgba(255,255,255,0.75)',
               boxShadow: `inset -15px -20px 50px rgba(0,0,0,0.45), inset 10px 12px 35px rgba(255,255,255,0.35), 0 30px 80px rgba(0,0,0,0.55), 0 0 100px ${sp.c1}`,
+              willChange: 'transform',
             }}
             animate={{
               x: [0, 40, -30, 0],
@@ -155,7 +178,7 @@ export default function Background3D() {
                 background: 'radial-gradient(ellipse, rgba(255,255,255,1) 0%, rgba(255,255,255,0.6) 40%, transparent 70%)',
               }}
             />
-            {/* Secondary soft glow */}
+            {/* Secondary soft glow (gradient only — no blur filter) */}
             <div
               className="absolute rounded-full"
               style={{
@@ -164,10 +187,9 @@ export default function Background3D() {
                 left: '10%',
                 top: '6%',
                 background: 'radial-gradient(ellipse, rgba(255,255,255,0.35), transparent 70%)',
-                filter: 'blur(3px)',
               }}
             />
-            {/* Bottom glass reflection */}
+            {/* Bottom glass reflection (gradient only — no blur filter) */}
             <div
               className="absolute rounded-full"
               style={{
@@ -176,7 +198,6 @@ export default function Background3D() {
                 left: '20%',
                 bottom: '8%',
                 background: 'radial-gradient(ellipse, rgba(255,255,255,0.4), transparent 70%)',
-                filter: 'blur(2px)',
               }}
             />
           </motion.div>
@@ -186,7 +207,7 @@ export default function Background3D() {
       {/* Glassy rotating cubes — parallax layer (most depth) */}
       <motion.div
         className="absolute inset-0"
-        style={{ x: cubesX, y: cubesY }}
+        style={{ x: cubesX, y: cubesY, willChange: 'transform' }}
       >
         {cubes.map((c, i) => (
           <motion.div
@@ -201,6 +222,7 @@ export default function Background3D() {
               border: '2px solid rgba(255,255,255,0.60)',
               borderRadius: '12px',
               boxShadow: 'inset 0 0 30px rgba(255,255,255,0.25), inset -8px -10px 25px rgba(0,0,0,0.25), 0 15px 45px rgba(0,0,0,0.40), 0 0 50px rgba(139,92,246,0.30)',
+              willChange: 'transform',
             }}
             animate={{
               rotate: [c.rot, c.rot + 360],
@@ -225,7 +247,7 @@ export default function Background3D() {
       </motion.div>
 
       {/* Glassy rings / torus-like circles — parallax layer (deep) */}
-      <motion.div className="absolute inset-0" style={{ x: ringsX, y: ringsY }}>
+      <motion.div className="absolute inset-0" style={{ x: ringsX, y: ringsY, willChange: 'transform' }}>
         {rings.map((r, i) => (
           <motion.div
             key={`ring-${i}`}
@@ -237,6 +259,7 @@ export default function Background3D() {
               top: r.top,
               border: '3px solid rgba(255,255,255,0.30)',
               boxShadow: '0 0 50px rgba(139,92,246,0.35), inset 0 0 30px rgba(255,255,255,0.12)',
+              willChange: 'transform',
             }}
             animate={{
               rotate: [0, 360],
@@ -248,22 +271,22 @@ export default function Background3D() {
       </motion.div>
 
       {/* Soft gradient glow orbs (base layer) — parallax layer (shallow) */}
-      <motion.div className="absolute inset-0" style={{ x: orbsX, y: orbsY }}>
+      <motion.div className="absolute inset-0" style={{ x: orbsX, y: orbsY, willChange: 'transform' }}>
         <motion.div
-          className="absolute rounded-full blur-3xl"
-          style={{ width: 420, height: 420, left: '8%', top: '12%', background: 'radial-gradient(circle, rgba(139,92,246,0.22), rgba(99,102,241,0.08), transparent 70%)' }}
+          className="absolute rounded-full"
+          style={{ width: 420, height: 420, left: '8%', top: '12%', background: 'radial-gradient(circle, rgba(139,92,246,0.22), rgba(99,102,241,0.08), transparent 70%)', willChange: 'transform' }}
           animate={{ x: [0, 60, -40, 0], y: [0, -50, 40, 0] }}
           transition={{ duration: 18, repeat: Infinity, ease: 'easeInOut' }}
         />
         <motion.div
-          className="absolute rounded-full blur-3xl"
-          style={{ width: 340, height: 340, left: '82%', top: '8%', background: 'radial-gradient(circle, rgba(34,211,238,0.18), rgba(14,165,233,0.08), transparent 70%)' }}
+          className="absolute rounded-full"
+          style={{ width: 340, height: 340, left: '82%', top: '8%', background: 'radial-gradient(circle, rgba(34,211,238,0.18), rgba(14,165,233,0.08), transparent 70%)', willChange: 'transform' }}
           animate={{ x: [0, -50, 40, 0], y: [0, 40, -30, 0] }}
           transition={{ duration: 22, repeat: Infinity, ease: 'easeInOut' }}
         />
         <motion.div
-          className="absolute rounded-full blur-3xl"
-          style={{ width: 380, height: 380, left: '70%', top: '70%', background: 'radial-gradient(circle, rgba(217,70,239,0.18), rgba(162,28,175,0.08), transparent 70%)' }}
+          className="absolute rounded-full"
+          style={{ width: 380, height: 380, left: '70%', top: '70%', background: 'radial-gradient(circle, rgba(217,70,239,0.18), rgba(162,28,175,0.08), transparent 70%)', willChange: 'transform' }}
           animate={{ x: [0, 40, -30, 0], y: [0, -40, 30, 0] }}
           transition={{ duration: 20, repeat: Infinity, ease: 'easeInOut' }}
         />
