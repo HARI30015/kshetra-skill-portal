@@ -73,17 +73,12 @@ export function AuthProvider({ children }) {
         // eslint-disable-next-line no-console
         console.error('Failed to fetch profile:', err?.message);
       }
-      // The sign-in broke midway (profile could not be loaded or
-      // created after all retries): delete any half-done data and end
-      // the broken session, so signing in again starts completely
-      // fresh. Completed profiles are never deleted (backend guard).
-      await cleanupIncomplete();
-      try {
-        await supabase.auth.signOut();
-      } catch {
-        // ignore
-      }
-      setSession(null);
+      // Load failed (e.g. the server is still waking up): leave the
+      // session untouched — ProtectedRoute keeps waiting/retrying.
+      // Never sign the user out or delete data from here: a slow or
+      // briefly unreachable server must not destroy a valid sign-in.
+      // (Signing out here is what surfaced "Auth session missing"
+      // during sign-in.) Half-done data cleanup happens on logout.
       setProfile(null);
       return null;
     } finally {
