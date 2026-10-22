@@ -62,6 +62,88 @@ def _coerce_year(value) -> int:
         return 1
 
 
+# ---------------------------------------------------------------------------
+# Exact schedule: the week-by-week "what to do" the student follows.
+# Topics run in a fixed proven order; the student starts part-way through
+# the sequence when their solved count shows the early topics are done.
+# ---------------------------------------------------------------------------
+_TOPIC_SEQUENCE = [
+    "Arrays & Hashing",
+    "Strings & Pattern Matching",
+    "Two Pointers & Sliding Window",
+    "Stack & Queues",
+    "Linked List",
+    "Binary Search & Sorting",
+    "Trees & BST",
+    "Heaps & Priority Queues",
+    "Graphs - BFS/DFS & Shortest Path",
+    "Backtracking & Recursion",
+    "Dynamic Programming I (1D)",
+    "Dynamic Programming II (2D) + Mixed Revision",
+]
+
+# Rotating weekly skill track per field, alongside the DSA topic.
+_FIELD_WEEKLY_SKILLS: dict[str, list[str]] = {
+    "SWE": ["OOP concepts", "DBMS + SQL queries", "OS fundamentals", "Computer Networks", "Git + GitHub portfolio", "Resume project sprint"],
+    "Data Science": ["SQL practice", "Statistics & Probability", "Pandas + NumPy", "Data Visualisation", "ML basics", "Case-study project"],
+    "Frontend": ["HTML/CSS layout drills", "JavaScript DOM projects", "React components", "API integration", "Responsive design", "Portfolio website"],
+    "Backend": ["REST API building", "SQL + schema design", "Authentication & JWT", "Caching basics", "Linux + deployment", "System design basics"],
+    "DevOps": ["Linux commands", "Git workflows", "Docker basics", "CI/CD pipelines", "Cloud fundamentals", "Monitoring basics"],
+    "Mobile": ["Platform UI basics", "REST API integration", "Local storage", "App architecture", "Publishing basics", "Portfolio app sprint"],
+}
+
+_YEAR_PACE = {
+    1: {"per_day": "3", "days": "Mon-Fri", "daily": ["1 hr: learn the week's topic (video/notes)", "1 hr: solve 3 easy problems in your main language", "30 min: revise yesterday's problems from memory"]},
+    2: {"per_day": "4-5", "days": "Mon-Sat", "daily": ["1 hr: topic study + notes", "2 hrs: solve 4-5 problems (easy + medium mix)", "30 min: skill-track work for the week"]},
+    3: {"per_day": "6-8", "days": "Mon-Sat", "daily": ["1 hr: weak-topic repair", "2.5 hrs: solve 6-8 problems, medium-first", "1 hr: skill-track / project work", "Sat: one timed contest; Sun: mock interview + revision"]},
+    4: {"per_day": "5-6", "days": "Every day", "daily": ["Morning (90 min): 3 problems - 1 easy warm-up + 2 medium, timed", "Afternoon (90 min): 1 hard problem + pattern revision", "Evening (1 hr): mock interview on alternate days, company-specific prep otherwise"]},
+}
+
+
+def _exact_schedule(year: int, field: str, primary_lang: str, total: int) -> list[str]:
+    """Week-by-week exact schedule for the next 12 weeks."""
+    pace = _YEAR_PACE.get(min(max(year, 1), 4), _YEAR_PACE[2])
+    skills = _FIELD_WEEKLY_SKILLS.get(field, _FIELD_WEEKLY_SKILLS["SWE"])
+
+    # Where to start in the topic sequence, from what is already solved.
+    if total >= 200:
+        start = 8  # revision-level: jump to the hard end + mocks
+    elif total >= 60:
+        start = 4
+    else:
+        start = 0
+    weeks = []
+    for w in range(12):
+        topic = _TOPIC_SEQUENCE[(start + w) % len(_TOPIC_SEQUENCE)]
+        skill = skills[w % len(skills)]
+        weeks.append(
+            f"- **Week {w + 1}: {topic}** - {pace['per_day']} problems/day ({pace['days']}) in {primary_lang}; skill track: {skill}."
+        )
+    if year >= 4:
+        weeks[10] = "- **Week 11: Company-tagged sprint** - only problems from your target companies' past papers, timed."
+        weeks[11] = "- **Week 12: Mock week** - one full mock interview daily + HR/behavioural stories ready."
+
+    lines = [
+        "",
+        "## Your exact schedule - start this week",
+        f"Main language: **{primary_lang}**. Pace: **{pace['per_day']} problems/day** ({pace['days']}).",
+        "",
+        "### Daily timetable",
+    ]
+    lines += [f"- {block}" for block in pace["daily"]]
+    lines += ["", "### Week by week (12 weeks)"]
+    lines += weeks
+    lines += [
+        "",
+        "### Rules that make it work",
+        "- Never break the chain two days in a row - a light day still counts (1 problem + revision).",
+        "- Every Sunday: re-solve the week's 5 hardest problems from scratch, no notes.",
+        "- Finish a week only when you can explain each pattern out loud; otherwise repeat the week.",
+    ]
+    return lines
+
+
+
 def generate_plan(profile: dict, stats: dict | None, placements: list[dict]) -> dict:
     """Build a year-based study plan.
 
@@ -245,6 +327,10 @@ def generate_plan(profile: dict, stats: dict | None, placements: list[dict]) -> 
             "## Focus areas",
             "\n".join(f"- {a}" for a in focus_areas),
         ]
+
+    # Every plan ends with the exact week-by-week schedule.
+    primary_lang = known_langs[0] if known_langs else (recommended_languages[0] if recommended_languages else "your main language")
+    plan_lines += _exact_schedule(year, field, primary_lang, total)
 
     return {
         "year": year,

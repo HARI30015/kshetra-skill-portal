@@ -5,7 +5,7 @@ import PageWrapper from '../components/PageWrapper';
 import AnimatedInput from '../components/AnimatedInput';
 import AnimatedButton from '../components/AnimatedButton';
 import { LEETCODE_URL, CAMPUSTRACK_URL } from '../constants';
-import { updateProfile, syncStats } from '../api';
+import { updateProfile, syncStats, generateRecommendation } from '../api';
 import { useAuth } from '../context/AuthContext';
 
 const YEARS = [1, 2, 3, 4];
@@ -66,6 +66,12 @@ export default function Onboarding() {
         } catch {
           // dashboard retries automatically
         }
+      }
+      // Have the exact schedule ready and waiting on the dashboard.
+      try {
+        await generateRecommendation(profile.id);
+      } catch {
+        // dashboard auto-generates on load if this misses
       }
       navigate('/dashboard', { replace: true });
     } catch (err) {

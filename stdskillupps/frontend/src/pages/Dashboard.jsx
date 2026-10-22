@@ -98,7 +98,15 @@ export default function Dashboard() {
       const r = await getRecommendation(profile.id);
       setRecommendation(r);
     } catch {
-      setRecommendation(null);
+      // No plan yet - generate it automatically (owner's rule: the
+      // student must see their exact schedule without hunting for a
+      // Generate button).
+      try {
+        const r = await generateRecommendation(profile.id);
+        setRecommendation(r);
+      } catch {
+        setRecommendation(null);
+      }
     } finally {
       setRecLoading(false);
     }
