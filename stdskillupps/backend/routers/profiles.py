@@ -7,6 +7,7 @@ from supabase import Client
 
 from deps import get_current_profile, get_current_user, get_supabase, require_lecturer, self_or_lecturer
 from shaping import normalize_profile_update, profile_out
+from services.leetcode import leetcode_user_exists
 
 router = APIRouter(prefix="/profiles", tags=["profiles"])
 
@@ -101,6 +102,26 @@ def update_profile(
     updates = normalize_profile_update(body)
     if not updates:
         raise HTTPException(status_code=400, detail="Nothing to update")
+    # Real-or-fake check (owner's rule, 2026-10-22): a LeetCode
+    # username is accepted only when LeetCode confirms the account
+    # really exists. CampusTrack has no public API to check against,
+    # so its username gets a format check here and stays
+    # lecturer-verified, as before.
+    lc_name = updates.get("leetcode_username")
+    if isinstance(lc_name, str) and lc_name.strip():
+        if leetcode_user_exists(lc_name.strip()) is False:
+            raise HTTPException(
+                status_code=400,
+                detail=f"LeetCode user '{lc_name.strip()}' not found. Enter a real LeetCode username.",
+            )
+    ct_name = updates.get("campustrack_username")
+    if isinstance(ct_name, str) and ct_name.strip():
+        cleaned = ct_name.strip()
+        if len(cleaned) > 60 or any(ch.isspace() for ch in cleaned):
+            raise HTTPException(
+                status_code=400,
+                detail="Enter a valid CampusTrack username (no spaces).",
+            )
     if "year" in updates and not (1 <= updates["year"] <= 4):
         raise HTTPException(status_code=400, detail="year must be between 1 and 4")
     resp = db.table("profiles").update(updates).eq("id", profile_id).execute()
@@ -139,48 +160,3 @@ def log_login(request: Request, user=Depends(get_current_user), db: Client = Dep
         pass
     
     return {"ok": True}
-
-
-@router.post("/admin/fix-leetcode")
-def admin_fix_leetcode(body: dict, request: Request, db: Client = Depends(get_supabase)):
-    """ONE-TIME admin fix (added 2026-10-22 at the owner's request):
-    correct one account's LeetCode username and immediately re-sync
-    its stats. Guarded by the ADMIN_TOKEN env var: while unset,
-    answers 404 to everyone. Remove after use."""
-    import os
-    import secrets
-
-    from services.leetcode import fetch_leetcode_stats
-
-    expected = os.getenv("ADMIN_TOKEN", "")
-    provided = request.headers.get("x-admin-token", "")
-    if not expected or not secrets.compare_digest(provided, expected):
-        raise HTTPException(status_code=404, detail="Not found")
-    email = (body.get("email") or "").strip()
-    new_username = (body.get("leetcode_username") or "").strip()
-    if not email or not new_username:
-        raise HTTPException(status_code=400, detail="email and leetcode_username required")
-    resp = db.table("profiles").select("id, leetcode_username").ilike("email", email).limit(1).execute()
-    if not resp.data:
-        raise HTTPException(status_code=404, detail="No account for that email")
-    uid = resp.data[0]["id"]
-    old_username = resp.data[0].get("leetcode_username")
-    db.table("profiles").update({"leetcode_username": new_username}).eq("id", uid).execute()
-    fetched = fetch_leetcode_stats(new_username)
-    error = fetched.pop("error", None)
-    row = {
-        "profile_id": uid,
-        "leetcode_total_solved": fetched["total"],
-        "leetcode_easy": fetched["easy"],
-        "leetcode_medium": fetched["medium"],
-        "leetcode_hard": fetched["hard"],
-        "language_stats": fetched["language_stats"],
-    }
-    db.table("student_stats").upsert(row, on_conflict="profile_id").execute()
-    return {
-        "email": email,
-        "old_leetcode_username": old_username,
-        "new_leetcode_username": new_username,
-        "total_solved": fetched["total"],
-        "warning": error,
-    }

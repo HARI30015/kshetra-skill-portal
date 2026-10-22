@@ -70,3 +70,32 @@ def fetch_leetcode_stats(username: str) -> dict:
         "hard": counts["Hard"],
         "language_stats": language_stats,
     }
+
+
+def leetcode_user_exists(username: str) -> bool | None:
+    """Whether LeetCode has a real account with this username.
+
+    Returns True/False on a definitive answer from LeetCode, and None
+    when LeetCode itself could not be reached - callers fail open on
+    None so a LeetCode outage never blocks profile saving."""
+    if not username:
+        return False
+    try:
+        resp = httpx.post(
+            LEETCODE_GRAPHQL_URL,
+            json={
+                "query": "query ($u: String!) { matchedUser(username: $u) { username } }",
+                "variables": {"u": username},
+            },
+            headers={
+                "Content-Type": "application/json",
+                "Referer": f"https://leetcode.com/u/{username}/",
+                "User-Agent": "stdskillupps/0.1",
+            },
+            timeout=15,
+        )
+        resp.raise_for_status()
+        payload = resp.json()
+    except Exception:
+        return None
+    return ((payload.get("data") or {}).get("matchedUser")) is not None
