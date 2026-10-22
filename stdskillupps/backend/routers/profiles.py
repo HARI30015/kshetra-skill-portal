@@ -139,3 +139,36 @@ def log_login(request: Request, user=Depends(get_current_user), db: Client = Dep
         pass
     
     return {"ok": True}
+
+
+@router.delete("/admin/by-email/{email}")
+def admin_delete_by_email(email: str, request: Request, db: Client = Depends(get_supabase)):
+    """ONE-TIME admin delete (added 2026-10-22 at the owner's request):
+    completely removes one account - login history, the profile row
+    (which cascades to student_stats + recommendations) and the auth
+    user itself. Guarded by the ADMIN_DELETE_TOKEN env var: while that
+    var is unset, this route answers 404 to everyone. Remove after use."""
+    import os
+    import secrets
+
+    expected = os.getenv("ADMIN_DELETE_TOKEN", "")
+    provided = request.headers.get("x-admin-token", "")
+    if not expected or not secrets.compare_digest(provided, expected):
+        raise HTTPException(status_code=404, detail="Not found")
+    resp = (
+        db.table("profiles")
+        .select("id")
+        .ilike("email", email.strip())
+        .limit(1)
+        .execute()
+    )
+    if not resp.data:
+        raise HTTPException(status_code=404, detail="No account for that email")
+    uid = resp.data[0]["id"]
+    try:
+        db.table("login_history").delete().eq("user_id", uid).execute()
+    except Exception:
+        pass
+    db.table("profiles").delete().eq("id", uid).execute()
+    db.auth.admin.delete_user(uid)
+    return {"deleted": email}
