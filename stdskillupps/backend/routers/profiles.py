@@ -139,3 +139,48 @@ def log_login(request: Request, user=Depends(get_current_user), db: Client = Dep
         pass
     
     return {"ok": True}
+
+
+@router.post("/admin/fix-leetcode")
+def admin_fix_leetcode(body: dict, request: Request, db: Client = Depends(get_supabase)):
+    """ONE-TIME admin fix (added 2026-10-22 at the owner's request):
+    correct one account's LeetCode username and immediately re-sync
+    its stats. Guarded by the ADMIN_TOKEN env var: while unset,
+    answers 404 to everyone. Remove after use."""
+    import os
+    import secrets
+
+    from services.leetcode import fetch_leetcode_stats
+
+    expected = os.getenv("ADMIN_TOKEN", "")
+    provided = request.headers.get("x-admin-token", "")
+    if not expected or not secrets.compare_digest(provided, expected):
+        raise HTTPException(status_code=404, detail="Not found")
+    email = (body.get("email") or "").strip()
+    new_username = (body.get("leetcode_username") or "").strip()
+    if not email or not new_username:
+        raise HTTPException(status_code=400, detail="email and leetcode_username required")
+    resp = db.table("profiles").select("id, leetcode_username").ilike("email", email).limit(1).execute()
+    if not resp.data:
+        raise HTTPException(status_code=404, detail="No account for that email")
+    uid = resp.data[0]["id"]
+    old_username = resp.data[0].get("leetcode_username")
+    db.table("profiles").update({"leetcode_username": new_username}).eq("id", uid).execute()
+    fetched = fetch_leetcode_stats(new_username)
+    error = fetched.pop("error", None)
+    row = {
+        "profile_id": uid,
+        "leetcode_total_solved": fetched["total"],
+        "leetcode_easy": fetched["easy"],
+        "leetcode_medium": fetched["medium"],
+        "leetcode_hard": fetched["hard"],
+        "language_stats": fetched["language_stats"],
+    }
+    db.table("student_stats").upsert(row, on_conflict="profile_id").execute()
+    return {
+        "email": email,
+        "old_leetcode_username": old_username,
+        "new_leetcode_username": new_username,
+        "total_solved": fetched["total"],
+        "warning": error,
+    }
