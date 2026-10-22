@@ -6,7 +6,6 @@ import AnimatedInput from '../components/AnimatedInput';
 import AnimatedButton from '../components/AnimatedButton';
 import { supabase } from '../supabaseClient';
 import { useAuth } from '../context/AuthContext';
-import { checkEmailExists } from '../api';
 
 const ROLES = [
   { value: 'student', label: 'Student', icon: '🎓' },
@@ -38,28 +37,18 @@ export default function Signup() {
     }
   };
 
-  // Step 1: send OTP to the new email
+  // Step 1: send OTP to the new email.
+  // Deliberately NO backend call here — the code must go out instantly.
+  // (An earlier version checked "account exists" against the backend
+  // first; when the server was asleep that made sending the code take
+  // up to a minute. Existing accounts are caught after verification
+  // instead — see handleVerifyCode.)
   const handleSendCode = async (e) => {
     e.preventDefault();
     setError('');
     setAccountExists(false);
     setLoading(true);
     try {
-      // Existing account? Send them to sign-in instead of creating a
-      // duplicate account. Fail-open: if the check itself errors (e.g.
-      // the server is still waking up), carry on with sign-up.
-      let exists = false;
-      try {
-        exists = await checkEmailExists(email.trim());
-      } catch {
-        exists = false;
-      }
-      if (exists) {
-        setAccountExists(true);
-        setError('An account with this email already exists. Please sign in instead.');
-        setShakeKey((k) => k + 1);
-        return;
-      }
       const { error: otpError } = await supabase.auth.signInWithOtp({
         email,
         options: { shouldCreateUser: true, data: { full_name: fullName, role } },
@@ -86,6 +75,24 @@ export default function Signup() {
         type: 'email',
       });
       if (verifyError) throw verifyError;
+      // Existing account? A brand-new account was created just now,
+      // when the code was sent; an existing one was created long
+      // before. This check runs entirely on Supabase (always on), so
+      // it's instant — no waiting on the backend. Existing users are
+      // routed to sign-in instead of overwriting their password here.
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      const createdAt = user?.created_at ? new Date(user.created_at).getTime() : Date.now();
+      if (Date.now() - createdAt > 60 * 60 * 1000) {
+        await supabase.auth.signOut();
+        setAccountExists(true);
+        setError('An account with this email already exists. Please sign in instead.');
+        setStep('details');
+        setCode('');
+        setShakeKey((k) => k + 1);
+        return;
+      }
       setStep('password');
     } catch (err) {
       setError(err?.message || 'Invalid code. Please try again.');

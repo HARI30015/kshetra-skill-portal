@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useMemo, useState, useCallback } from 'react';
 import { supabase } from '../supabaseClient';
-import { getMyProfile, createProfile, deleteMyIncompleteProfile } from '../api';
+import { getMyProfile, createProfile, deleteMyIncompleteProfile, getHealth } from '../api';
 
 const AuthContext = createContext(null);
 
@@ -123,6 +123,12 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     let mounted = true;
+    // Wake the backend the moment the app opens. It sleeps when idle
+    // and needs 30-60s to start; firing this now means it's awake by
+    // the time the user sends a sign-up code, sets a password, and the
+    // app creates/loads their profile — instead of every one of those
+    // steps waiting on a cold server. Fire-and-forget.
+    getHealth().catch(() => {});
     supabase.auth.getSession().then(({ data: { session: s } }) => {
       if (!mounted) return;
       setSession(s);

@@ -25,8 +25,21 @@ api.interceptors.request.use(async (config) => {
 
 // ---- Profiles ----
 export const getMyProfile = () => api.get('/profiles/me').then((r) => r.data);
-export const checkEmailExists = (email) =>
-  api.get('/profiles/email-exists', { params: { email } }).then((r) => !!r.data?.exists);
+export const checkEmailExists = async (email) => {
+  // The backend sleeps when idle: the first attempt may fail or time
+  // out WHILE waking it. Retry once — the second attempt reaches the
+  // awake server. Only a double failure propagates (callers fail open).
+  let lastErr;
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      const r = await api.get('/profiles/email-exists', { params: { email } });
+      return !!r.data?.exists;
+    } catch (e) {
+      lastErr = e;
+    }
+  }
+  throw lastErr;
+};
 export const deleteMyIncompleteProfile = () =>
   api.delete('/profiles/me/incomplete').then((r) => r.data);
 export const createProfile = (payload) => api.post('/profiles', payload).then((r) => r.data);
