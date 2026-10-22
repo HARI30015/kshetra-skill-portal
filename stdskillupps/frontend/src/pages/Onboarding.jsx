@@ -5,7 +5,7 @@ import PageWrapper from '../components/PageWrapper';
 import AnimatedInput from '../components/AnimatedInput';
 import AnimatedButton from '../components/AnimatedButton';
 import { LEETCODE_URL, CAMPUSTRACK_URL } from '../constants';
-import { updateProfile } from '../api';
+import { updateProfile, syncStats } from '../api';
 import { useAuth } from '../context/AuthContext';
 
 const YEARS = [1, 2, 3, 4];
@@ -56,6 +56,17 @@ export default function Onboarding() {
         onboarded: true,
       });
       await refreshProfile();
+      // Instant score (owner's rule): fetch the LeetCode score the
+      // moment the username is saved, so it is already showing on the
+      // dashboard when the student lands there. Best-effort - if this
+      // misses, the dashboard auto-syncs on load.
+      if (leetcode.trim()) {
+        try {
+          await syncStats(profile.id);
+        } catch {
+          // dashboard retries automatically
+        }
+      }
       navigate('/dashboard', { replace: true });
     } catch (err) {
       setError(err?.response?.data?.detail || err?.message || 'Failed to save. Please try again.');

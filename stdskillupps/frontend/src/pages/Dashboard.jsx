@@ -71,12 +71,26 @@ export default function Dashboard() {
       const s = await getStats(profile.id);
       setStats(s);
     } catch {
-      // No stats yet — user hasn't synced.
-      setStats(null);
+      // No stats stored yet. If the student has linked a LeetCode
+      // username, fetch the score automatically right now (owner's
+      // rule: the score displays the instant the username is on the
+      // profile - nobody presses a Sync button first). This also
+      // covers a username added seconds ago in Edit Profile, because
+      // the effect re-runs when the profile refreshes.
+      if (profile?.leetcode_username) {
+        try {
+          const s = await syncStats(profile.id);
+          setStats(s);
+        } catch {
+          setStats(null);
+        }
+      } else {
+        setStats(null);
+      }
     } finally {
       setStatsLoading(false);
     }
-  }, [profile?.id]);
+  }, [profile?.id, profile?.leetcode_username]);
 
   const loadRecommendation = useCallback(async () => {
     if (!profile?.id) return;
