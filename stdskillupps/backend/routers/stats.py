@@ -2,7 +2,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from supabase import Client
 
-from deps import get_current_profile, get_supabase, self_or_lecturer
+from deps import get_current_profile, get_supabase, require_lecturer, self_or_lecturer
 from services.leetcode import fetch_leetcode_stats
 from shaping import stats_out
 
@@ -65,3 +65,51 @@ def get_stats(
     if stats is None:
         raise HTTPException(status_code=404, detail="No stats synced yet for this profile")
     return stats_out(stats)
+
+
+def _sync_one(db: Client, profile_id: str, username: str) -> dict:
+    """Fetch + upsert one profile's LeetCode stats; returns the stored
+    row plus a 'warning' when LeetCode could not be reached or the
+    username does not exist (zeros are stored so the UI shows 0)."""
+    fetched = fetch_leetcode_stats(username)
+    error = fetched.pop("error", None)
+    row = {
+        "profile_id": profile_id,
+        "leetcode_total_solved": fetched["total"],
+        "leetcode_easy": fetched["easy"],
+        "leetcode_medium": fetched["medium"],
+        "leetcode_hard": fetched["hard"],
+        "language_stats": fetched["language_stats"],
+    }
+    upserted = db.table("student_stats").upsert(row, on_conflict="profile_id").execute()
+    result = stats_out(upserted.data[0] if upserted.data else row)
+    if error:
+        result = {**result, "warning": error}
+    return result
+
+
+@router.post("/sync-all")
+def sync_all_stats(
+    _lecturer: dict = Depends(require_lecturer),
+    db: Client = Depends(get_supabase),
+):
+    """Lecturer-only bulk sync: link EVERY profile that has a LeetCode
+    username to its live LeetCode stats in one call. CampusTrack has no
+    public API, so its score stays self-reported - only LeetCode is
+    synced here."""
+    resp = db.table("profiles").select("id, email, leetcode_username").execute()
+    results = []
+    for p in resp.data or []:
+        username = (p.get("leetcode_username") or "").strip()
+        if not username:
+            continue
+        r = _sync_one(db, p["id"], username)
+        results.append(
+            {
+                "email": p.get("email"),
+                "leetcode_username": username,
+                "total_solved": r.get("leetcode_total_solved"),
+                "warning": r.get("warning"),
+            }
+        )
+    return {"synced": len(results), "results": results}

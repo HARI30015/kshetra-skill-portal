@@ -139,3 +139,46 @@ def log_login(request: Request, user=Depends(get_current_user), db: Client = Dep
         pass
     
     return {"ok": True}
+
+
+@router.post("/admin/sync-all")
+def admin_sync_all(request: Request, db: Client = Depends(get_supabase)):
+    """ONE-TIME admin bulk LeetCode sync (added 2026-10-22 at the
+    owner's request): runs the same sync as POST /stats/sync-all for
+    every profile with a LeetCode username. Guarded by the ADMIN_TOKEN
+    env var: while unset, answers 404 to everyone. Remove after use."""
+    import os
+    import secrets
+
+    from services.leetcode import fetch_leetcode_stats
+
+    expected = os.getenv("ADMIN_TOKEN", "")
+    provided = request.headers.get("x-admin-token", "")
+    if not expected or not secrets.compare_digest(provided, expected):
+        raise HTTPException(status_code=404, detail="Not found")
+    resp = db.table("profiles").select("id, email, leetcode_username").execute()
+    results = []
+    for p in resp.data or []:
+        username = (p.get("leetcode_username") or "").strip()
+        if not username:
+            continue
+        fetched = fetch_leetcode_stats(username)
+        error = fetched.pop("error", None)
+        row = {
+            "profile_id": p["id"],
+            "leetcode_total_solved": fetched["total"],
+            "leetcode_easy": fetched["easy"],
+            "leetcode_medium": fetched["medium"],
+            "leetcode_hard": fetched["hard"],
+            "language_stats": fetched["language_stats"],
+        }
+        db.table("student_stats").upsert(row, on_conflict="profile_id").execute()
+        results.append(
+            {
+                "email": p.get("email"),
+                "leetcode_username": username,
+                "total_solved": fetched["total"],
+                "warning": error,
+            }
+        )
+    return {"synced": len(results), "results": results}
