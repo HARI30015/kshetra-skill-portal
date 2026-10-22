@@ -17,11 +17,25 @@ def create_app() -> FastAPI:
         version="0.1.0",
     )
 
-    # Dev convenience: allow all origins. RESTRICT in production via FRONTEND_URL.
-    allowed_origins = os.getenv("FRONTEND_URL")
+    # CORS: the production site must ALWAYS be allowed, no matter what
+    # FRONTEND_URL happens to hold in the host's dashboard. A stale or
+    # mistyped FRONTEND_URL there once made Starlette answer every
+    # browser preflight with 400 "Disallowed CORS origin", which broke
+    # ALL backend calls from the real website (profile loads, sign-up
+    # checks) while curl tests kept passing — CORS is browser-only.
+    origins = {
+        "https://stdskillupps.vercel.app",
+        "http://localhost:5173",
+        "http://localhost:3000",
+    }
+    env_frontend = os.getenv("FRONTEND_URL", "").strip().rstrip("/")
+    if env_frontend:
+        origins.add(env_frontend)
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=[allowed_origins] if allowed_origins else ["*"],
+        allow_origins=sorted(origins),
+        # Vercel preview deployments for this project.
+        allow_origin_regex=r"https://stdskillupps[a-z0-9-]*\.vercel\.app",
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
