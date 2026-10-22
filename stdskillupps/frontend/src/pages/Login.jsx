@@ -6,6 +6,7 @@ import AnimatedInput from '../components/AnimatedInput';
 import AnimatedButton from '../components/AnimatedButton';
 import { supabase } from '../supabaseClient';
 import { useAuth } from '../context/AuthContext';
+import { checkEmailExists } from '../api';
 
 export default function Login() {
   const navigate = useNavigate();
@@ -14,6 +15,7 @@ export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [noAccount, setNoAccount] = useState(false);
   const [loading, setLoading] = useState(false);
   const [shakeKey, setShakeKey] = useState(0);
 
@@ -27,6 +29,7 @@ export default function Login() {
   const handlePasswordLogin = async (e) => {
     e.preventDefault();
     setError('');
+    setNoAccount(false);
     setLoading(true);
     try {
       const { error: authError } = await supabase.auth.signInWithPassword({ email, password });
@@ -34,7 +37,21 @@ export default function Login() {
       await refreshProfile();
       goToDashboard();
     } catch (err) {
-      setError(err?.message || 'Sign in failed. Check your email and password.');
+      let message = err?.message || 'Sign in failed. Check your email and password.';
+      // Wrong password vs no account look identical from Supabase — check
+      // so a new user gets pointed to sign-up instead of guessing.
+      if (/invalid login credentials/i.test(message)) {
+        try {
+          const exists = await checkEmailExists(email.trim());
+          if (!exists) {
+            setNoAccount(true);
+            message = 'No account found for this email. Create an account first.';
+          }
+        } catch {
+          // check failed (server waking) — keep the generic message
+        }
+      }
+      setError(message);
       setShakeKey((k) => k + 1);
     } finally {
       setLoading(false);
@@ -133,6 +150,15 @@ export default function Login() {
                   </motion.div>
                 )}
               </AnimatePresence>
+              {noAccount && (
+                <button
+                  type="button"
+                  onClick={() => navigate('/signup')}
+                  className="w-full rounded-xl bg-gradient-to-r from-violet-600 to-cyan-500 px-4 py-3 text-sm font-semibold text-white shadow-glow"
+                >
+                  Create an account →
+                </button>
+              )}
               <motion.div
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}

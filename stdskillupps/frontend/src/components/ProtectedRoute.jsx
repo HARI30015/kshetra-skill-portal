@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import Loader from './Loader';
@@ -6,36 +6,44 @@ import Loader from './Loader';
 export default function ProtectedRoute({ children, roles }) {
   const { isAuthenticated, role, needsOnboarding, loading, profileLoading, profile, fetchProfile } = useAuth();
   const location = useLocation();
-  const [waitedLong, setWaitedLong] = useState(false);
+  const [deadlinePassed, setDeadlinePassed] = useState(false);
   const [slowLoad, setSlowLoad] = useState(false);
   const [retrying, setRetrying] = useState(false);
+  const retryTimer = useRef(null);
 
-  // The backend sleeps when idle and can take 30-60s to wake; the profile
-  // fetch retries automatically during that window. Only treat the load
-  // as stuck (and offer a manual retry) after 90s. After 10s, show a
-  // "server is waking up" hint so the wait doesn't look like a hang.
+  // The backend sleeps when idle and can take 30-60s to wake. While it
+  // wakes it fails FAST (502s), so a single fetchProfile() call can
+  // exhaust its own retries before the server is even up. Stay patient
+  // here: keep auto-retrying every 10s and only declare the load stuck
+  // after a 90s deadline — the manual "Try Again" screen is a last
+  // resort, not the first response to a cold server.
   useEffect(() => {
-    if (!profileLoading) {
-      setWaitedLong(false);
-      setSlowLoad(false);
-      return;
-    }
-    const t = setTimeout(() => setWaitedLong(true), 90000);
+    setDeadlinePassed(false);
+    setSlowLoad(false);
+    const t = setTimeout(() => setDeadlinePassed(true), 90000);
     const t2 = setTimeout(() => setSlowLoad(true), 10000);
     return () => {
       clearTimeout(t);
       clearTimeout(t2);
     };
-  }, [profileLoading, location.pathname]);
+  }, [location.pathname]);
+
+  // Auto-retry the profile fetch while we wait for the server to wake.
+  useEffect(() => {
+    if (!isAuthenticated || profile || profileLoading || deadlinePassed) return undefined;
+    retryTimer.current = setTimeout(() => {
+      fetchProfile();
+    }, 10000);
+    return () => clearTimeout(retryTimer.current);
+  }, [isAuthenticated, profile, profileLoading, deadlinePassed, fetchProfile]);
 
   const handleRetry = async () => {
     setRetrying(true);
-    setWaitedLong(false);
+    setDeadlinePassed(false);
     try {
       await fetchProfile();
     } finally {
       setRetrying(false);
-      // If it still fails, the timer will re-arm via the effect above.
     }
   };
 
@@ -51,10 +59,9 @@ export default function ProtectedRoute({ children, roles }) {
     return <Navigate to="/login" state={{ from: location.pathname }} replace />;
   }
 
-  // Profile failed to load (not just slow): show a retry screen instead of
-  // hanging forever. This covers backend hiccups and network blips.
-  const profileStuck = !profileLoading && !profile && location.pathname !== '/onboarding';
-  if (waitedLong || profileStuck) {
+  // Profile still missing after the full patience window: last-resort
+  // retry screen.
+  if (!profile && deadlinePassed) {
     return (
       <div className="min-h-screen flex items-center justify-center px-4">
         <div className="text-center max-w-sm">
@@ -75,8 +82,11 @@ export default function ProtectedRoute({ children, roles }) {
     );
   }
 
-  // Wait for the profile to resolve before deciding about roles/onboarding.
-  if (profileLoading || (isAuthenticated && !role && location.pathname !== '/onboarding')) {
+  // Wait for the profile to resolve before deciding about roles or
+  // onboarding — including on /onboarding itself, where a brand-new
+  // user's profile may still be creating. Never bounce a user whose
+  // role simply isn't known yet.
+  if (profileLoading || !profile) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center">
         <Loader label="Loading your profile…" />
@@ -89,7 +99,7 @@ export default function ProtectedRoute({ children, roles }) {
     );
   }
 
-  if (roles && !roles.includes(role)) {
+  if (roles && role && !roles.includes(role)) {
     return <Navigate to={role === 'lecturer' ? '/lecturer' : '/dashboard'} replace />;
   }
 

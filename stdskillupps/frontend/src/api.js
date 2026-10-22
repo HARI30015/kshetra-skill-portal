@@ -25,6 +25,8 @@ api.interceptors.request.use(async (config) => {
 
 // ---- Profiles ----
 export const getMyProfile = () => api.get('/profiles/me').then((r) => r.data);
+export const checkEmailExists = (email) =>
+  api.get('/profiles/email-exists', { params: { email } }).then((r) => !!r.data?.exists);
 export const deleteMyIncompleteProfile = () =>
   api.delete('/profiles/me/incomplete').then((r) => r.data);
 export const createProfile = (payload) => api.post('/profiles', payload).then((r) => r.data);

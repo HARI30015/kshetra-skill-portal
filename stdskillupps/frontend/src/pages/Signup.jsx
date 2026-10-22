@@ -6,6 +6,7 @@ import AnimatedInput from '../components/AnimatedInput';
 import AnimatedButton from '../components/AnimatedButton';
 import { supabase } from '../supabaseClient';
 import { useAuth } from '../context/AuthContext';
+import { checkEmailExists } from '../api';
 
 const ROLES = [
   { value: 'student', label: 'Student', icon: '🎓' },
@@ -23,6 +24,7 @@ export default function Signup() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [step, setStep] = useState('details'); // 'details' | 'code' | 'password'
   const [error, setError] = useState('');
+  const [accountExists, setAccountExists] = useState(false);
   const [loading, setLoading] = useState(false);
   const [shakeKey, setShakeKey] = useState(0);
 
@@ -40,8 +42,24 @@ export default function Signup() {
   const handleSendCode = async (e) => {
     e.preventDefault();
     setError('');
+    setAccountExists(false);
     setLoading(true);
     try {
+      // Existing account? Send them to sign-in instead of creating a
+      // duplicate account. Fail-open: if the check itself errors (e.g.
+      // the server is still waking up), carry on with sign-up.
+      let exists = false;
+      try {
+        exists = await checkEmailExists(email.trim());
+      } catch {
+        exists = false;
+      }
+      if (exists) {
+        setAccountExists(true);
+        setError('An account with this email already exists. Please sign in instead.');
+        setShakeKey((k) => k + 1);
+        return;
+      }
       const { error: otpError } = await supabase.auth.signInWithOtp({
         email,
         options: { shouldCreateUser: true, data: { full_name: fullName, role } },
@@ -226,6 +244,15 @@ export default function Signup() {
                   </div>
                 </motion.div>
                 {renderError()}
+                {accountExists && (
+                  <button
+                    type="button"
+                    onClick={() => navigate('/login')}
+                    className="w-full rounded-xl bg-gradient-to-r from-violet-600 to-cyan-500 px-4 py-3 text-sm font-semibold text-white shadow-glow"
+                  >
+                    Sign In instead →
+                  </button>
+                )}
                 <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.46 }}>
                   <AnimatedButton type="submit" loading={loading} className="w-full">
                     {loading ? 'Sending code…' : 'Send Verification Code'}

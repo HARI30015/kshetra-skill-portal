@@ -32,7 +32,7 @@ export function AuthProvider({ children }) {
       const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
       let fetched = null;
       let err = null;
-      for (let attempt = 0; attempt < 4; attempt++) {
+      for (let attempt = 0; attempt < 6; attempt++) {
         try {
           fetched = await getMyProfile();
           err = null;
@@ -43,8 +43,11 @@ export function AuthProvider({ children }) {
           // 404 = no profile row yet (handled below). 401/403 = an auth
           // problem retrying can't fix. Anything else (network error,
           // 502/503/504 while the server wakes) is worth another try.
+          // While the server wakes it fails FAST (502s), so keep
+          // retrying for a good while — 6 attempts, 8s apart — instead
+          // of giving up before the server is even up.
           if (status === 404 || status === 401 || status === 403) break;
-          if (attempt < 3) await sleep(5000);
+          if (attempt < 5) await sleep(8000);
         }
       }
       if (fetched) {

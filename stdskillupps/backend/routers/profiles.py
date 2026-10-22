@@ -35,6 +35,22 @@ def create_profile(
     return profile_out(created)
 
 
+@router.get("/email-exists")
+def email_exists(email: str, db: Client = Depends(get_supabase)):
+    """Pre-auth check for the sign-up / sign-in forms: does this email
+    already have an account (i.e. a profile row)? The UI uses it to send
+    existing users to sign-in instead of a duplicate sign-up, and to
+    tell unknown emails apart from wrong passwords at sign-in."""
+    resp = (
+        db.table("profiles")
+        .select("id")
+        .ilike("email", email.strip())
+        .limit(1)
+        .execute()
+    )
+    return {"exists": bool(resp.data)}
+
+
 @router.get("/me")
 def get_me(profile: dict = Depends(get_current_profile)):
     return profile_out(profile)
