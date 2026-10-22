@@ -12,7 +12,9 @@ import {
   createPlacement,
   updatePlacement,
   deletePlacement,
+  syncAllStats,
 } from '../api';
+import { CAMPUSTRACK_URL } from '../constants';
 
 const EMPTY_PLACEMENT = {
   company: '',
@@ -65,6 +67,7 @@ export default function LecturerDashboard() {
   const [studentsLoading, setStudentsLoading] = useState(true);
   const [studentQuery, setStudentQuery] = useState('');
   const [editStudent, setEditStudent] = useState(null);
+  const [syncingAll, setSyncingAll] = useState(false);
   const [studentSaving, setStudentSaving] = useState(false);
 
   // --- Placements ---
@@ -93,6 +96,19 @@ export default function LecturerDashboard() {
       setStudentsLoading(false);
     }
   }, []);
+
+  const handleSyncAll = async () => {
+    setSyncingAll(true);
+    try {
+      const r = await syncAllStats();
+      flash(`Synced LeetCode stats for ${r?.synced ?? 0} student(s) 🔄`);
+      await loadStudents();
+    } catch (err) {
+      flash(err?.response?.data?.detail || 'Sync all failed.');
+    } finally {
+      setSyncingAll(false);
+    }
+  };
 
   const loadPlacements = useCallback(async () => {
     setPlacementsLoading(true);
@@ -255,6 +271,9 @@ export default function LecturerDashboard() {
         <GlassCard delay={0.1} className="mt-8 overflow-hidden p-0">
           <div className="flex flex-wrap items-center justify-between gap-3 p-6 pb-4">
             <h2 className="text-lg font-bold text-white">🎓 Students ({filteredStudents.length})</h2>
+            <AnimatedButton onClick={handleSyncAll} loading={syncingAll} className="px-4 py-2.5 text-sm">
+              {syncingAll ? 'Syncing…' : '🔄 Sync all LeetCode'}
+            </AnimatedButton>
             <input
               value={studentQuery}
               onChange={(e) => setStudentQuery(e.target.value)}
@@ -268,10 +287,10 @@ export default function LecturerDashboard() {
             <p className="p-6 pt-2 text-sm text-slate-400">No students found.</p>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full min-w-[760px] text-left text-sm">
+              <table className="w-full min-w-[980px] text-left text-sm">
                 <thead>
                   <tr className="border-y border-white/10 text-xs uppercase tracking-wider text-slate-400">
-                    {['Name', 'Email', 'Year', 'Target field', 'LeetCode solved', 'Status', ''].map((h) => (
+                    {['Name', 'Email', 'Year', 'Target field', 'LeetCode', 'CampusTrack', 'LeetCode solved', 'Status', ''].map((h) => (
                       <th key={h} className="px-6 py-3 font-semibold">{h}</th>
                     ))}
                   </tr>
@@ -290,6 +309,34 @@ export default function LecturerDashboard() {
                         <td className="px-6 py-3.5 text-slate-300">{s.email}</td>
                         <td className="px-6 py-3.5 text-slate-300">{s.year_of_study ? `Y${s.year_of_study}` : '—'}</td>
                         <td className="px-6 py-3.5 text-slate-300">{s.target_job_field || '—'}</td>
+                        <td className="px-6 py-3.5">
+                          {s.leetcode_username ? (
+                            <a
+                              href={`https://leetcode.com/u/${s.leetcode_username}`}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="font-semibold text-cyan-300 underline decoration-cyan-300/40 underline-offset-2 hover:text-cyan-200"
+                            >
+                              @{s.leetcode_username} ↗
+                            </a>
+                          ) : (
+                            <span className="text-slate-400">—</span>
+                          )}
+                        </td>
+                        <td className="px-6 py-3.5">
+                          {s.campus_track_username ? (
+                            <a
+                              href={CAMPUSTRACK_URL}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="font-semibold text-cyan-300 underline decoration-cyan-300/40 underline-offset-2 hover:text-cyan-200"
+                            >
+                              @{s.campus_track_username} ↗
+                            </a>
+                          ) : (
+                            <span className="text-slate-400">—</span>
+                          )}
+                        </td>
                         <td className="px-6 py-3.5">
                           <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-bold text-cyan-200">
                             {s.leetcode_total_solved ?? s.total_solved ?? '—'}

@@ -48,6 +48,7 @@ export const updateProfile = (id, payload) => api.put(`/profiles/${id}`, payload
 
 // ---- Stats ----
 export const syncStats = (profileId) => api.post(`/stats/sync/${profileId}`).then((r) => r.data);
+export const syncAllStats = () => api.post('/stats/sync-all').then((r) => r.data);
 export const getStats = (profileId) => api.get(`/stats/${profileId}`).then((r) => r.data);
 
 // ---- Recommendations ----

@@ -277,7 +277,18 @@ export default function Dashboard() {
                 <div className="flex items-center justify-between">
                   <span className="text-slate-300">💻 LeetCode</span>
                   <span className="font-semibold text-white">
-                    {profile.leetcode_username ? `@${profile.leetcode_username}` : '—'}
+                    {profile.leetcode_username ? (
+                      <a
+                        href={`https://leetcode.com/u/${profile.leetcode_username}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-cyan-300 underline decoration-cyan-300/40 underline-offset-2 hover:text-cyan-200"
+                      >
+                        @{profile.leetcode_username} ↗
+                      </a>
+                    ) : (
+                      '—'
+                    )}
                   </span>
                 </div>
                 {!profile.leetcode_username && (
@@ -297,7 +308,18 @@ export default function Dashboard() {
                 <div className="flex items-center justify-between">
                   <span className="text-slate-300">🏫 Campus track</span>
                   <span className="font-semibold text-white">
-                    {profile.campus_track_username ? `@${profile.campus_track_username}` : '—'}
+                    {profile.campus_track_username ? (
+                      <a
+                        href={CAMPUSTRACK_URL}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-cyan-300 underline decoration-cyan-300/40 underline-offset-2 hover:text-cyan-200"
+                      >
+                        @{profile.campus_track_username} ↗
+                      </a>
+                    ) : (
+                      '—'
+                    )}
                   </span>
                 </div>
                 {(profile.campustrack_score ?? profile.campus_track_score) != null && (
