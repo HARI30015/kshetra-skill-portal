@@ -14,7 +14,7 @@ const ROLES = [
 
 export default function Signup() {
   const navigate = useNavigate();
-  const { ensureProfile, refreshProfile } = useAuth();
+  const { ensureProfile } = useAuth();
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [role, setRole] = useState('student');
@@ -27,14 +27,20 @@ export default function Signup() {
   const [loading, setLoading] = useState(false);
   const [shakeKey, setShakeKey] = useState(0);
 
-  const goToDashboard = async () => {
-    const p = await ensureProfile(fullName, role);
-    if (p?.role === 'student') navigate('/onboarding', { replace: true });
-    else if (p?.role === 'lecturer') navigate('/lecturer', { replace: true });
-    else {
-      await refreshProfile();
-      navigate('/dashboard', { replace: true });
-    }
+  // After the account is created, take the user straight to the Login
+  // page to sign in fresh (owner's flow, 2026-10-22) instead of entering
+  // the app directly. The profile row is created first so it exists
+  // when they sign in; then the sign-up session is ended via
+  // supabase.auth.signOut() DIRECTLY - not the context logout(), which
+  // would delete the just-created (not yet onboarded) profile as
+  // half-done.
+  const goToLogin = async () => {
+    await ensureProfile(fullName, role);
+    await supabase.auth.signOut();
+    navigate('/login', {
+      replace: true,
+      state: { notice: 'Account created! Sign in with your email and password to continue.' },
+    });
   };
 
   // Step 1: send OTP to the new email.
@@ -120,7 +126,7 @@ export default function Signup() {
     try {
       const { error: updateError } = await supabase.auth.updateUser({ password });
       if (updateError) throw updateError;
-      await goToDashboard();
+      await goToLogin();
     } catch (err) {
       setError(err?.message || 'Could not set password. Please try again.');
       setShakeKey((k) => k + 1);
