@@ -27,6 +27,11 @@ def create_app() -> FastAPI:
         "https://stdskillupps.vercel.app",
         "http://localhost:5173",
         "http://localhost:3000",
+        # The CampusTrack bookmarklet posts the student's score from
+        # their logged-in CampusTrack tab (see routers/campustrack_sync).
+        # Without this entry the CORS middleware itself rejects that
+        # origin's preflight before the sync route ever runs.
+        "https://vardhaman.campustrack.in",
     }
     env_frontend = os.getenv("FRONTEND_URL", "").strip().rstrip("/")
     if env_frontend:
