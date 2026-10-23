@@ -452,7 +452,9 @@ export default function Dashboard() {
     } catch {
       /* storage unavailable */
     }
-    window.location.assign('/');
+    // Owner's flow (2026-10-23): after logout, go to the Login page,
+    // not the landing page.
+    window.location.assign('/login');
   };
 
   if (!profile) {

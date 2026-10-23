@@ -30,7 +30,9 @@ export default function Navbar() {
     await logout();
     setConfirmOpen(false);
     setLeaving(false);
-    navigate('/', { replace: true });
+    // Owner's flow (2026-10-23): after logout, go to the Login page,
+    // not the landing page.
+    navigate('/login', { replace: true });
   };
 
   return (
