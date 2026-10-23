@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import PageWrapper from '../components/PageWrapper';
@@ -42,6 +42,25 @@ export default function Onboarding() {
     if (step === 1) return field !== '';
     return true; // usernames are optional
   };
+
+  // Owner's rule (2026-10-23): pressing Enter performs the step's
+  // action — it saves and jumps to the next step (Finish on the last
+  // step). Buttons/links/selects keep their native Enter behaviour,
+  // so this only fires from text inputs and the page itself.
+  useEffect(() => {
+    const onKey = (e) => {
+      if (e.key !== 'Enter' || loading) return;
+      if (e.target.closest('button, a, select, textarea')) return;
+      e.preventDefault();
+      if (step < totalSteps - 1) {
+        if (canContinue()) go(step + 1);
+      } else {
+        finish();
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  });
 
   const finish = async () => {
     setLoading(true);
@@ -93,8 +112,8 @@ export default function Onboarding() {
               <motion.button
                 key={y}
                 type="button"
-                whileHover={{ scale: 1.06, y: -3 }}
-                whileTap={{ scale: 0.94 }}
+                whileTap={{ scale: 0.98 }}
+                transition={{ duration: 0.08 }}
                 onClick={() => setYear(y)}
                 className={`relative rounded-2xl border px-4 py-6 text-center transition-colors ${
                   active
@@ -130,8 +149,8 @@ export default function Onboarding() {
               <motion.button
                 key={f}
                 type="button"
-                whileHover={{ scale: 1.08 }}
-                whileTap={{ scale: 0.94 }}
+                whileTap={{ scale: 0.98 }}
+                transition={{ duration: 0.08 }}
                 onClick={() => setField(f)}
                 className={`rounded-full border px-5 py-2.5 text-sm font-semibold transition-colors ${
                   active
@@ -162,8 +181,8 @@ export default function Onboarding() {
             href={LEETCODE_URL}
             target="_blank"
             rel="noreferrer"
-            whileHover={{ scale: 1.04 }}
-            whileTap={{ scale: 0.96 }}
+            whileTap={{ scale: 0.98 }}
+            transition={{ duration: 0.08 }}
             className="mt-4 inline-flex items-center gap-2 rounded-xl border border-white/20 bg-white/10 px-4 py-2.5 text-sm font-semibold text-white hover:bg-white/15"
           >
             🔗 Not signed in? Open leetcode.com to sign in first ↗
@@ -201,8 +220,8 @@ export default function Onboarding() {
             href={CAMPUSTRACK_URL}
             target="_blank"
             rel="noreferrer"
-            whileHover={{ scale: 1.04 }}
-            whileTap={{ scale: 0.96 }}
+            whileTap={{ scale: 0.98 }}
+            transition={{ duration: 0.08 }}
             className="inline-flex items-center gap-2 rounded-xl border border-white/20 bg-white/10 px-4 py-2.5 text-sm font-semibold text-white hover:bg-white/15"
           >
             🔗 Not signed in? Open campustrack.in to sign in first ↗

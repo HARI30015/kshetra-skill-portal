@@ -26,7 +26,8 @@ export default function Navbar() {
 
   const handleLogout = async () => {
     setLeaving(true);
-    await new Promise((r) => setTimeout(r, 700));
+    // No artificial wait (owner's rule, 2026-10-23): a normal single
+    // click acts instantly.
     await logout();
     setConfirmOpen(false);
     setLeaving(false);
@@ -47,7 +48,6 @@ export default function Navbar() {
           <nav className="glass flex items-center justify-between px-4 py-3 sm:px-6">
             <Link to="/" className="flex items-center gap-2">
               <motion.div
-                whileHover={{ rotate: 12, scale: 1.1 }}
                 className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-violet-600 to-cyan-500 text-lg font-black text-white shadow-glow"
               >
                 S
@@ -89,8 +89,8 @@ export default function Navbar() {
                   </NavLink>
                   <Link to="/signup">
                     <motion.span
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
+                      whileTap={{ scale: 0.98 }}
+                      transition={{ duration: 0.08 }}
                       className="btn-shimmer ml-1 inline-block rounded-lg bg-gradient-to-r from-violet-600 to-cyan-500 px-4 py-2 text-sm font-semibold text-white shadow-glow"
                     >
                       Get started
@@ -99,8 +99,8 @@ export default function Navbar() {
                 </>
               ) : (
                 <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
+                  whileTap={{ scale: 0.98 }}
+                  transition={{ duration: 0.08 }}
                   onClick={() => setConfirmOpen(true)}
                   className="ml-1 rounded-lg border border-rose-400/40 bg-rose-500/10 px-4 py-2 text-sm font-semibold text-rose-200 transition hover:bg-rose-500/20"
                 >
@@ -224,16 +224,16 @@ export default function Navbar() {
                   </p>
                   <div className="mt-6 flex gap-3">
                     <motion.button
-                      whileHover={{ scale: 1.04 }}
-                      whileTap={{ scale: 0.96 }}
+                      whileTap={{ scale: 0.98 }}
+                      transition={{ duration: 0.08 }}
                       onClick={() => setConfirmOpen(false)}
                       className="flex-1 rounded-xl border border-white/20 bg-white/10 px-4 py-2.5 text-sm font-semibold text-white"
                     >
                       Stay
                     </motion.button>
                     <motion.button
-                      whileHover={{ scale: 1.04 }}
-                      whileTap={{ scale: 0.96 }}
+                      whileTap={{ scale: 0.98 }}
+                      transition={{ duration: 0.08 }}
                       onClick={handleLogout}
                       className="btn-shimmer flex-1 rounded-xl bg-gradient-to-r from-rose-600 to-red-500 px-4 py-2.5 text-sm font-semibold text-white"
                     >
