@@ -7,7 +7,7 @@ import AnimatedInput from '../components/AnimatedInput';
 import Loader from '../components/Loader';
 import { useAuth } from '../context/AuthContext';
 import { LEETCODE_URL, CAMPUSTRACK_URL } from '../constants';
-import { syncStats, getStats, generateRecommendation, getRecommendation, updateProfile } from '../api';
+import { syncStats, getStats, generateRecommendation, getRecommendation, updateProfile, getCtSyncKey } from '../api';
 
 // Static core-language mapping per target job field.
 const FIELD_RESOURCES = {
@@ -116,6 +116,18 @@ export default function Dashboard() {
     loadStats();
     loadRecommendation();
   }, [loadStats, loadRecommendation]);
+
+  // Personal CampusTrack sync bookmark (bookmarklet): CampusTrack is
+  // a closed system, so the student's own browser carries the score
+  // from their logged-in CampusTrack profile page to here.
+  const [ctSync, setCtSync] = useState(null);
+  useEffect(() => {
+    let alive = true;
+    getCtSyncKey()
+      .then((data) => { if (alive) setCtSync(data); })
+      .catch(() => { if (alive) setCtSync(null); });
+    return () => { alive = false; };
+  }, []);
 
   const handleSync = async () => {
     setSyncing(true);
@@ -365,6 +377,36 @@ export default function Dashboard() {
                     🔗 Not signed in? Open campustrack.in ↗
                   </motion.a>
                 )}
+                <div className="mt-3 border-t border-white/10 pt-3">
+                  <p className="text-xs font-semibold text-white">🔄 Sync your real CampusTrack score</p>
+                  <p className="mt-1 text-xs leading-relaxed text-slate-400">
+                    CampusTrack has no public link, so the sync runs in your own browser: drag the
+                    button below to your bookmarks bar, then open CampusTrack, log in, open your
+                    Profile page there, and click the bookmark. Your real score lands here by itself.
+                  </p>
+                  {ctSync?.bookmarklet ? (
+                    <>
+                      <a
+                        href={ctSync.bookmarklet}
+                        onClick={(e) => e.preventDefault()}
+                        className="mt-2 inline-flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-violet-500 to-cyan-400 px-3 py-1.5 text-xs font-bold text-white"
+                      >
+                        🔖 Sync to stdskillupps — drag me to your bookmarks
+                      </a>
+                      <textarea
+                        readOnly
+                        value={ctSync.bookmarklet}
+                        onFocus={(e) => e.target.select()}
+                        className="mt-2 h-14 w-full rounded-lg border border-white/10 bg-black/30 p-2 text-[10px] text-slate-400"
+                      />
+                      <p className="mt-1 text-[11px] text-slate-500">
+                        If dragging fails: copy the code above, add a new bookmark in your browser, and paste the code as its URL.
+                      </p>
+                    </>
+                  ) : (
+                    <p className="mt-2 text-xs text-slate-500">Loading your personal sync bookmark…</p>
+                  )}
+                </div>
               </div>
             </div>
           </GlassCard>
@@ -648,7 +690,7 @@ export default function Dashboard() {
                       type="number"
                       placeholder="e.g. 85"
                     />
-                    <p className="mt-1 text-xs text-slate-500">No auto-sync — verified later by your lecturer.</p>
+                    <p className="mt-1 text-xs text-slate-500">Tip: use the Sync bookmark on your dashboard to pull your real score from CampusTrack automatically.</p>
                   </div>
                   <div className="flex gap-3 pt-2">
                     <AnimatedButton type="button" variant="secondary" onClick={() => setEditOpen(false)} className="flex-1">

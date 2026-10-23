@@ -7,7 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 load_dotenv()
 
-from routers import placements, profiles, recommendations, stats  # noqa: E402
+from routers import campustrack_sync, placements, profiles, recommendations, stats  # noqa: E402
 
 
 def create_app() -> FastAPI:
@@ -42,6 +42,7 @@ def create_app() -> FastAPI:
     )
 
     app.include_router(profiles.router)
+    app.include_router(campustrack_sync.router)
     app.include_router(stats.router)
     app.include_router(recommendations.router)
     app.include_router(placements.router)

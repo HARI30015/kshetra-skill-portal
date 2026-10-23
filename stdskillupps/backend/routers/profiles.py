@@ -160,3 +160,25 @@ def log_login(request: Request, user=Depends(get_current_user), db: Client = Dep
         pass
     
     return {"ok": True}
+
+
+@router.get("/me/sync-key")
+def my_campustrack_sync_key(profile=Depends(get_current_profile)):
+    """The signed-in student's personal CampusTrack sync key plus the
+    ready-to-drag bookmarklet carrying it. The key is derived (HMAC
+    of the profile id with a server secret), never stored."""
+    from routers.campustrack_sync import API_BASE, sync_key_for
+
+    key = sync_key_for(profile["id"])
+    if not key:
+        raise HTTPException(status_code=503, detail="CampusTrack sync is not configured")
+    bookmarklet = (
+        "javascript:(function(){var s=document.createElement('script');s.src='"
+        + API_BASE
+        + "/campustrack-sync.js?pid="
+        + str(profile["id"])
+        + "&k="
+        + key
+        + "';document.body.appendChild(s);})();"
+    )
+    return {"profile_id": profile["id"], "key": key, "bookmarklet": bookmarklet}

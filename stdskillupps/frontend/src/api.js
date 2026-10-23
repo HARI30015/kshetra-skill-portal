@@ -65,5 +65,8 @@ export const updatePlacement = (id, payload) =>
   api.put(`/placements/${id}`, payload).then((r) => r.data);
 export const deletePlacement = (id) => api.delete(`/placements/${id}`).then((r) => r.data);
 
+// ---- CampusTrack bookmarklet sync ----
+export const getCtSyncKey = () => api.get('/profiles/me/sync-key').then((r) => r.data);
+
 // ---- Health ----
 export const getHealth = () => api.get('/health').then((r) => r.data);
