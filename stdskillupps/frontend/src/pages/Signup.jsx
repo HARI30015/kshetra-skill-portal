@@ -87,12 +87,16 @@ export default function Signup() {
       } = await supabase.auth.getUser();
       const createdAt = user?.created_at ? new Date(user.created_at).getTime() : Date.now();
       if (Date.now() - createdAt > 60 * 60 * 1000) {
+        // Mail already has an account (owner's rule, 2026-10-23):
+        // never create it again, and never strand the user on an
+        // error screen - redirect straight to Login. After sign-in
+        // the app continues with the usual next steps (the setup
+        // questions if they are pending, otherwise the dashboard).
         await supabase.auth.signOut();
-        setAccountExists(true);
-        setError('An account with this email already exists. Please sign in instead.');
-        setStep('details');
-        setCode('');
-        setShakeKey((k) => k + 1);
+        navigate('/login', {
+          replace: true,
+          state: { notice: 'This email already has an account. Sign in to continue.' },
+        });
         return;
       }
       setStep('password');
