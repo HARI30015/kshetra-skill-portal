@@ -30,7 +30,11 @@ def create_profile(
     """
     if body.role not in ("student", "lecturer"):
         raise HTTPException(status_code=400, detail="role must be 'student' or 'lecturer'")
-    row = {"id": user.id, "full_name": body.full_name, "role": body.role, "email": body.email}
+    # The JWT's email is authoritative: the frontend does not send
+    # one, and writing null here silently wiped the email of profiles
+    # that already had one (found by smoke test, 2026-10-23), which
+    # broke the email-exists routing for those accounts.
+    row = {"id": user.id, "full_name": body.full_name, "role": body.role, "email": body.email or user.email}
     resp = db.table("profiles").upsert(row, on_conflict="id").execute()
     created = resp.data[0] if resp.data else row
     return profile_out(created)

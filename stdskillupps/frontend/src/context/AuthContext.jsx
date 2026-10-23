@@ -180,8 +180,35 @@ export function AuthProvider({ children }) {
     // app creates/loads their profile — instead of every one of those
     // steps waiting on a cold server. Fire-and-forget.
     getHealth().catch(() => {});
-    supabase.auth.getSession().then(({ data: { session: s } }) => {
+    supabase.auth.getSession().then(async ({ data: { session: s } }) => {
       if (!mounted) return;
+      // Zombie-session guard (owner report, 2026-10-23: "after creating
+      // pass the dashboard not working"): getSession() trusts whatever
+      // is stored locally, so a session left over from an account that
+      // no longer exists (deleted test accounts, old sign-ups) passes
+      // as "signed in" while every profile call fails - the app then
+      // sits on the loading screen forever. Validate the stored
+      // session against the server once; if the server rejects the
+      // user itself, clear everything and start clean. Transient
+      // network failures do NOT clear the session.
+      if (s) {
+        try {
+          const { data: { user }, error } = await supabase.auth.getUser();
+          const rejected =
+            !user ||
+            (error && (error.status === 401 || error.status === 403 || /not found/i.test(error.message || '')));
+          if (rejected) {
+            await supabase.auth.signOut();
+            clearCachedProfile();
+            if (!mounted) return;
+            setSession(null);
+            setLoading(false);
+            return;
+          }
+        } catch {
+          // validation unreachable - keep the session and proceed
+        }
+      }
       setSession(s);
       if (s) {
         userIdRef.current = s.user?.id || null;

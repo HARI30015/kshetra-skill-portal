@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import Loader from './Loader';
 
 export default function ProtectedRoute({ children, roles }) {
-  const { isAuthenticated, role, needsOnboarding, loading, profileLoading, profile, fetchProfile } = useAuth();
+  const { isAuthenticated, role, needsOnboarding, loading, profileLoading, profile, fetchProfile, logout } = useAuth();
   const location = useLocation();
   const [deadlinePassed, setDeadlinePassed] = useState(false);
   const [slowLoad, setSlowLoad] = useState(false);
@@ -77,6 +77,14 @@ export default function ProtectedRoute({ children, roles }) {
           >
             {retrying ? 'Retrying…' : 'Try Again'}
           </button>
+          <div className="mt-4">
+            <button
+              onClick={async () => { await logout(); }}
+              className="text-sm text-white/60 underline underline-offset-2 hover:text-white"
+            >
+              Sign out and start fresh
+            </button>
+          </div>
         </div>
       </div>
     );
