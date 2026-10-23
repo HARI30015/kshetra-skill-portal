@@ -27,20 +27,16 @@ export default function Signup() {
   const [loading, setLoading] = useState(false);
   const [shakeKey, setShakeKey] = useState(0);
 
-  // After the account is created, take the user straight to the Login
-  // page to sign in fresh (owner's flow, 2026-10-22) instead of entering
-  // the app directly. The profile row is created first so it exists
-  // when they sign in; then the sign-up session is ended via
-  // supabase.auth.signOut() DIRECTLY - not the context logout(), which
-  // would delete the just-created (not yet onboarded) profile as
-  // half-done.
+  // After the account is created, go DIRECTLY into the app
+  // (owner's flow, 2026-10-23): students land on setup - year,
+  // LeetCode, CampusTrack - and then their dashboard; lecturers land
+  // on the lecturer dashboard. No sign-out / login bounce: the
+  // student is already signed in, and the profile row is created
+  // first so setup attaches to it. (Replaces the 2026-10-22
+  // sign-up -> login flow at the owner's instruction.)
   const goToLogin = async () => {
     await ensureProfile(fullName, role);
-    await supabase.auth.signOut();
-    navigate('/login', {
-      replace: true,
-      state: { notice: 'Account created! Sign in with your email and password to continue.' },
-    });
+    navigate(role === 'lecturer' ? '/lecturer' : '/onboarding', { replace: true });
   };
 
   // Step 1: send OTP to the new email.

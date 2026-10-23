@@ -1,14 +1,55 @@
-import React, { createContext, useContext, useEffect, useMemo, useState, useCallback } from 'react';
+import React, { createContext, useContext, useEffect, useMemo, useRef, useState, useCallback } from 'react';
 import { supabase } from '../supabaseClient';
 import { getMyProfile, createProfile, deleteMyIncompleteProfile, getHealth } from '../api';
 
 const AuthContext = createContext(null);
+
+// Last-known profile cache (owner's rule, 2026-10-23): the dashboard
+// must show the profile instantly instead of waiting on a cold server.
+// Keyed by user id, so one user's cache never renders for another.
+const PROFILE_CACHE_KEY = 'stdskillupps_profile_cache';
+
+function readCachedProfile(userId) {
+  if (!userId) return null;
+  try {
+    const raw = localStorage.getItem(PROFILE_CACHE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    return parsed && parsed.userId === userId && parsed.profile ? parsed.profile : null;
+  } catch {
+    return null;
+  }
+}
+
+function writeCachedProfile(userId, profile) {
+  if (!userId || !profile) return;
+  try {
+    localStorage.setItem(PROFILE_CACHE_KEY, JSON.stringify({ userId, profile }));
+  } catch {
+    // storage unavailable/full - caching is best-effort
+  }
+}
+
+function clearCachedProfile() {
+  try {
+    localStorage.removeItem(PROFILE_CACHE_KEY);
+  } catch {
+    // ignore
+  }
+}
 
 export function AuthProvider({ children }) {
   const [session, setSession] = useState(null);
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [profileLoading, setProfileLoading] = useState(false);
+
+  const profileRef = useRef(null);
+  const userIdRef = useRef(null);
+  const applyProfile = useCallback((p) => {
+    profileRef.current = p;
+    setProfile(p);
+  }, []);
 
   // Remove half-done profile data after a broken sign-in. The backend
   // only deletes a profile that was never onboarded and has no
@@ -51,7 +92,8 @@ export function AuthProvider({ children }) {
         }
       }
       if (fetched) {
-        setProfile(fetched);
+        applyProfile(fetched);
+        writeCachedProfile(userIdRef.current, fetched);
         return fetched;
       }
       if (err?.response?.status === 404) {
@@ -66,7 +108,8 @@ export function AuthProvider({ children }) {
             full_name: meta.full_name || user?.email?.split('@')[0] || 'Student',
             role: meta.role === 'lecturer' ? 'lecturer' : 'student',
           });
-          setProfile(p);
+          applyProfile(p);
+          writeCachedProfile(userIdRef.current, p);
           return p;
         } catch (createErr) {
           // eslint-disable-next-line no-console
@@ -82,12 +125,17 @@ export function AuthProvider({ children }) {
       // briefly unreachable server must not destroy a valid sign-in.
       // (Signing out here is what surfaced "Auth session missing"
       // during sign-in.) Half-done data cleanup happens on logout.
-      setProfile(null);
-      return null;
+      // If a profile is already on screen (e.g. the cached one), keep
+      // showing it - a slow server must not blank a dashboard that
+      // already rendered. Only clear when there is nothing to show.
+      if (!profileRef.current) {
+        setProfile(null);
+      }
+      return profileRef.current;
     } finally {
       setProfileLoading(false);
     }
-  }, [cleanupIncomplete]);
+  }, [cleanupIncomplete, applyProfile]);
 
   // Ensure a profile row exists for a freshly-signed-up user, then load it.
   const ensureProfile = useCallback(
@@ -96,7 +144,8 @@ export function AuthProvider({ children }) {
       if (existing) return existing;
       try {
         const p = await createProfile({ full_name: fallbackName, role: fallbackRole });
-        setProfile(p);
+        applyProfile(p);
+        writeCachedProfile(userIdRef.current, p);
         return p;
       } catch (err) {
         // eslint-disable-next-line no-console
@@ -117,9 +166,11 @@ export function AuthProvider({ children }) {
     // backend guard decides), so this is safe for finished accounts.
     await cleanupIncomplete();
     await supabase.auth.signOut();
-    setProfile(null);
+    clearCachedProfile();
+    userIdRef.current = null;
+    applyProfile(null);
     setSession(null);
-  }, [cleanupIncomplete]);
+  }, [cleanupIncomplete, applyProfile]);
 
   useEffect(() => {
     let mounted = true;
@@ -133,10 +184,17 @@ export function AuthProvider({ children }) {
       if (!mounted) return;
       setSession(s);
       if (s) {
-        fetchProfile().finally(() => mounted && setLoading(false));
-      } else {
-        setLoading(false);
+        userIdRef.current = s.user?.id || null;
+        // Instant profile: show this user's last known profile right
+        // away (2026-10-23); the fetch refreshes it in the background.
+        const cached = readCachedProfile(userIdRef.current);
+        if (cached && !profileRef.current) applyProfile(cached);
+        fetchProfile();
       }
+      // The session is known - end the session loader now instead of
+      // waiting on the profile fetch (which can take a minute on a
+      // cold server). The profile resolves separately.
+      setLoading(false);
     });
 
     const {
@@ -145,9 +203,14 @@ export function AuthProvider({ children }) {
       if (!mounted) return;
       setSession(s);
       if (s) {
+        userIdRef.current = s.user?.id || null;
+        const cached = readCachedProfile(userIdRef.current);
+        if (cached && !profileRef.current) applyProfile(cached);
         await fetchProfile();
       } else {
-        setProfile(null);
+        userIdRef.current = null;
+        clearCachedProfile();
+        applyProfile(null);
       }
     });
 
@@ -155,7 +218,7 @@ export function AuthProvider({ children }) {
       mounted = false;
       subscription.unsubscribe();
     };
-  }, [fetchProfile]);
+  }, [fetchProfile, applyProfile]);
 
   const value = useMemo(
     () => ({
