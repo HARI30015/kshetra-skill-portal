@@ -135,7 +135,7 @@ export default function Background3D() {
               boxShadow: `0 0 ${s.size * 3}px ${s.color}`,
               willChange: 'transform, opacity',
             }}
-            animate={{ opacity: [s.opacity * 0.3, s.opacity, s.opacity * 0.3], scale: [0.8, 1.2, 0.8] }}
+            animate={{ opacity: [s.opacity * 0.3, s.opacity, s.opacity * 0.3] }}
             transition={{ duration: s.duration, delay: s.delay, repeat: Infinity, ease: 'easeInOut' }}
           />
         ))}

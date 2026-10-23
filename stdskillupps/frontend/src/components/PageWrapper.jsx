@@ -26,9 +26,13 @@ function FloatingShape({ shape }) {
     height: shape.size,
     left: `${shape.left}%`,
     top: `${shape.top}%`,
-    filter: `blur(${shape.blur}px)`,
+    // No filter: blur() here (owner fix, 2026-10-23): re-blurring a
+    // large moving shape every frame starved the main thread and made
+    // taps register late. The radial gradient now fades fully to
+    // transparent, so the blob's edge is soft on its own - same blurry
+    // look, composited for free (same trick as Background3D).
     opacity: shape.opacity,
-    background: `radial-gradient(circle, hsla(${shape.hue}, 80%, 65%, 0.8), hsla(${shape.hue}, 80%, 50%, 0.2))`,
+    background: `radial-gradient(circle, hsla(${shape.hue}, 80%, 65%, 0.75) 0%, hsla(${shape.hue}, 80%, 55%, 0.28) 52%, transparent 72%)`,
     borderRadius: shape.shape === 'circle' ? '50%' : shape.shape === 'diamond' ? '20%' : '30%',
     transform: shape.shape === 'diamond' ? 'rotate(45deg)' : undefined,
     animationDuration: `${shape.duration}s`,
@@ -122,16 +126,14 @@ export default function PageWrapper({ children, className = '' }) {
       exit={{ opacity: 0 }}
       transition={{ duration: 0.5 }}
       className={`relative min-h-screen ${className}`}
-      style={{ perspective: '2000px' }}
     >
       <Scene3D />
-      <div className="relative" style={{ zIndex: 1, transformStyle: 'preserve-3d' }}>
+      <div className="relative" style={{ zIndex: 1 }}>
         <motion.div
-          initial={{ opacity: 0, y: 30, rotateX: -8, scale: 0.98 }}
-          animate={{ opacity: 1, y: 0, rotateX: 0, scale: 1 }}
-          exit={{ opacity: 0, y: -20, rotateX: 8, scale: 0.98 }}
-          transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-          style={{ transformStyle: 'preserve-3d' }}
+          initial={{ opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -16 }}
+          transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
         >
           {children}
         </motion.div>

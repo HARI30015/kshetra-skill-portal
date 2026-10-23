@@ -9,6 +9,14 @@
     scroll-behavior: smooth;
   }
 
+  /* Instant taps (owner fix, 2026-10-23): buttons must respond on
+     the FIRST tap. touch-action: manipulation removes the
+     double-tap-zoom wait mobile browsers insert before a click. */
+  button, a, [role='button'], input, select, textarea, label {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+
   body {
     @apply bg-ink-950 text-slate-100 font-sans antialiased;
     background-image:
