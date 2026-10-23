@@ -6,6 +6,7 @@ import AnimatedInput from '../components/AnimatedInput';
 import AnimatedButton from '../components/AnimatedButton';
 import { supabase } from '../supabaseClient';
 import { useAuth } from '../context/AuthContext';
+import { updateProfile } from '../api';
 
 const ROLES = [
   { value: 'student', label: 'Student', icon: '🎓' },
@@ -18,6 +19,7 @@ export default function Signup() {
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [role, setRole] = useState('student');
+  const [year, setYear] = useState(null);
   const [code, setCode] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -38,7 +40,21 @@ export default function Signup() {
   // AuthContext logout — that one deletes half-done profiles, and a
   // brand-new profile must be kept.
   const goToLogin = async () => {
-    await ensureProfile(fullName, role);
+    const created = await ensureProfile(fullName, role);
+    // Owner's flow (2026-10-23): the year is asked HERE, in Sign Up,
+    // so after sign-in the profile shows directly — no year-selection
+    // step after login. Save the year and mark the student onboarded
+    // now, while still signed in. Target field, LeetCode and
+    // CampusTrack are set from the dashboard cards / Edit profile.
+    // Best-effort: if this save misses (server waking), the setup
+    // questions simply appear after sign-in as before.
+    if (role === 'student' && created?.id && year) {
+      try {
+        await updateProfile(created.id, { year_of_study: year, onboarded: true });
+      } catch {
+        // setup questions after sign-in will collect it instead
+      }
+    }
     await supabase.auth.signOut();
     navigate('/login', {
       replace: true,
@@ -56,11 +72,19 @@ export default function Signup() {
     e.preventDefault();
     setError('');
     setAccountExists(false);
+    if (role === 'student' && !year) {
+      setError('Please select your year of study.');
+      setShakeKey((k) => k + 1);
+      return;
+    }
     setLoading(true);
     try {
       const { error: otpError } = await supabase.auth.signInWithOtp({
         email,
-        options: { shouldCreateUser: true, data: { full_name: fullName, role } },
+        options: {
+          shouldCreateUser: true,
+          data: { full_name: fullName, role, year_of_study: year },
+        },
       });
       if (otpError) throw otpError;
       setStep('code');
@@ -263,6 +287,30 @@ export default function Signup() {
                     })}
                   </div>
                 </motion.div>
+                {role === 'student' && (
+                  <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.42 }}>
+                    <span className="mb-1.5 block text-sm font-medium text-slate-300">Year of study</span>
+                    <div className="grid grid-cols-4 gap-2 rounded-2xl border border-white/20 bg-white/10 p-1.5 backdrop-blur-xl">
+                      {[1, 2, 3, 4].map((y) => {
+                        const active = year === y;
+                        return (
+                          <button
+                            key={y}
+                            type="button"
+                            onClick={() => setYear(y)}
+                            className={`rounded-xl px-2 py-2.5 text-sm font-semibold transition-colors ${
+                              active
+                                ? 'bg-gradient-to-r from-violet-600 to-cyan-500 text-white shadow-glow'
+                                : 'text-slate-300 hover:text-white'
+                            }`}
+                          >
+                            Year {y}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </motion.div>
+                )}
                 {renderError()}
                 {accountExists && (
                   <button
