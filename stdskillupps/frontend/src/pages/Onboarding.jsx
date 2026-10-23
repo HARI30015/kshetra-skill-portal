@@ -20,6 +20,14 @@ const stepVariants = {
 export default function Onboarding() {
   const navigate = useNavigate();
   const { profile, refreshProfile } = useAuth();
+
+  // Self-exit guard: if this account is already onboarded (e.g. a
+  // stale cached profile briefly bounced the user back here right
+  // after finishing), go straight to the dashboard instead of
+  // showing Step 1 again.
+  useEffect(() => {
+    if (profile?.onboarded) navigate('/dashboard', { replace: true });
+  }, [profile, navigate]);
   const [step, setStep] = useState(0);
   const [dir, setDir] = useState(1);
   const [year, setYear] = useState(null);
