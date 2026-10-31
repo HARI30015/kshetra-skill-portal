@@ -64,6 +64,10 @@ const YEAR_GUIDE = {
 
 const CT_LOGIN_URL = 'https://vardhaman.campustrack.in/login';
 
+// INTERIM (for now): the LeetCode Add action directs to LeetCode's login
+// page first; the username panel still opens so the profile can be saved.
+const LEETCODE_LOGIN_URL = 'https://leetcode.com/accounts/login/';
+
 /* ------------------------------------------------------------------ */
 /* Helpers                                                             */
 /* ------------------------------------------------------------------ */
@@ -78,6 +82,13 @@ const errMsg = (e, fallback) => {
   if (typeof d === 'string' && d) return d;
   if (!e?.response) return 'Couldn’t reach the server. It may still be waking up.';
   return fallback;
+};
+
+// Turns the backend's raw LeetCode warning into something readable.
+const friendlyLeetCodeWarning = (w) => {
+  const t = String(w || '');
+  if (/not found/i.test(t)) return 'LeetCode user not found. Check the username and try again.';
+  return 'Couldn’t reach LeetCode right now. Tap Sync to try again.';
 };
 
 // Retries transient failures (server waking up) for up to ~100s in total.
@@ -366,6 +377,8 @@ export default function Dashboard() {
   const bmRef = useRef(null);
   const autoSyncKey = useRef('');
   const autoPlanKey = useRef('');
+  const statsRef = useRef(null);
+  statsRef.current = stats.data;
 
   const doSync = useCallback(
     async (opts = {}) => {
@@ -379,16 +392,18 @@ export default function Dashboard() {
         // looked dead on the first tap after idle. syncStats is an
         // idempotent upsert, so retrying it is safe.
         const s = await withRetry(() => syncStats(pid), () => true, () => {});
-        setStatsData(s);
-        // A sync that stored 0 because LeetCode was briefly
-        // unreachable must never masquerade as success: the backend
-        // returns a `warning` in that case — show it honestly
-        // (inline under the card via syncError, plus a toast).
         if (s?.warning) {
-          setSyncError(s.warning);
-          if (!opts.silent) toast(s.warning, 4500);
-        } else if (!opts.silent) {
-          toast('LeetCode stats synced 🎉');
+          // LeetCode could not be read. A warning response is never
+          // real data, so its numbers are NOT shown: any stats the
+          // card already has stay, and the readable warning appears
+          // (inline under the card, or as the error card with Retry
+          // when there is nothing to show yet), plus a toast.
+          const msg = friendlyLeetCodeWarning(s.warning);
+          setSyncError(msg);
+          if (!opts.silent) toast(msg, 4500);
+        } else {
+          setStatsData(s);
+          if (!opts.silent) toast('LeetCode stats synced 🎉');
         }
       } catch (e) {
         const msg = errMsg(e, 'Sync failed. Check your LeetCode username.');
@@ -529,6 +544,25 @@ export default function Dashboard() {
         }
       }
     }, 50);
+  };
+
+  // INTERIM: first-time LeetCode Add opens LeetCode's login page in a new
+  // tab AND opens the username panel, so the user can log in, return, type
+  // their username and save. Existing-username behaviour is unchanged.
+  const openLeetCodeAdd = () => {
+    // The login tab opens only on the first Add tap. While the panel is
+    // already open, tapping Add just brings the panel back into focus,
+    // so the user can type and save instead of looping on the login tab.
+    if (editing !== 'lc') {
+      const a = document.createElement('a');
+      a.href = LEETCODE_LOGIN_URL;
+      a.target = '_blank';
+      a.rel = 'noreferrer';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    }
+    openEdit('lc');
   };
 
   // Always send the full field set so a partial edit never wipes other fields.
@@ -733,7 +767,7 @@ export default function Dashboard() {
     statsBody = (
       <div className="mt-6 rounded-2xl border border-dashed border-white/20 bg-white/5 p-6 text-center">
         <p className="text-sm text-slate-300">Add your LeetCode username to see your solved counts here.</p>
-        <TapButton onClick={() => openEdit('lc')} className="mt-3">
+        <TapButton onClick={openLeetCodeAdd} className="mt-3">
           ➕ Add username
         </TapButton>
       </div>
@@ -917,7 +951,7 @@ export default function Dashboard() {
           <GlassCard delay={0.1} className="lg:col-span-2">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <h2 className="text-lg font-bold text-white">📊 LeetCode</h2>
-              <TapButton onClick={() => (username ? doSync() : openEdit('lc'))} loading={syncBusy}>
+              <TapButton onClick={() => (username ? doSync() : openLeetCodeAdd())} loading={syncBusy}>
                 {syncBusy ? 'Syncing…' : '🔄 Sync'}
               </TapButton>
             </div>
@@ -936,7 +970,7 @@ export default function Dashboard() {
               ) : (
                 <span className="font-semibold text-white">—</span>
               )}
-              <TapButton variant="ghost" onClick={() => openEdit('lc')} className="px-1 py-1">
+              <TapButton variant="ghost" onClick={() => (username ? openEdit('lc') : openLeetCodeAdd())} className="px-1 py-1">
                 ✏️ {username ? 'Change' : 'Add'}
               </TapButton>
               {!username && (
@@ -959,6 +993,12 @@ export default function Dashboard() {
                   onChange={setField('leetcode_username')}
                   placeholder="your-leetcode-username"
                 />
+                {!username && (
+                  <p className="text-xs text-slate-300">
+                    Log in to LeetCode in the tab that just opened, then come back, type your LeetCode username
+                    (the name in leetcode.com/u/…) and Save.
+                  </p>
+                )}
                 <p className="text-xs text-slate-400">Saving fetches your fresh score right away.</p>
               </EditPanel>
             )}

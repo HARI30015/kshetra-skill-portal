@@ -47,11 +47,15 @@ def sync_stats(
         "leetcode_hard": fetched["hard"],
         "language_stats": fetched["language_stats"],
     }
-    upserted = db.table("student_stats").upsert(row, on_conflict="profile_id").execute()
-    result = stats_out(upserted.data[0] if upserted.data else row)
     if error:
-        result = {**result, "warning": error}
-    return result
+        # LeetCode could not be read: never overwrite a student's real
+        # stored stats with zeros (one blip used to wipe a real score).
+        # Return what is already stored (or unsaved zeros if nothing is
+        # stored yet) together with the warning.
+        existing = _get_stats(db, profile_id)
+        return {**stats_out(existing if existing else row), "warning": error}
+    upserted = db.table("student_stats").upsert(row, on_conflict="profile_id").execute()
+    return stats_out(upserted.data[0] if upserted.data else row)
 
 
 @router.get("/{profile_id}")
