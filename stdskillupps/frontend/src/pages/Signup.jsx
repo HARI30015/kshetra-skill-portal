@@ -33,26 +33,67 @@ export default function Signup() {
   // (owner's flow, 2026-10-23 evening): the profile row is created
   // first, while still signed in from verification, then we sign
   // out and land on /login with a notice, so the user signs in with
-  // the password they just set. After sign-in the app continues
-  // with the usual next steps — setup questions if they are still
-  // pending, otherwise the dashboard (lecturers: lecturer home).
+  // the password they just set. After sign-in the dashboard comes
+  // DIRECTLY (no setup questions) because the year + onboarded flag
+  // are saved AND verified here, before signing out.
+  // (Owner report, 2026-10-31: "after clicking create account the
+  // dashboard not working, the direct profile should come" — the
+  // old code saved year/onboarded in one best-effort attempt and
+  // swallowed the error, so when the sleeping backend missed it the
+  // profile stayed onboarded=false and login bounced to /onboarding
+  // instead of the dashboard. This version retries until the save is
+  // proven, and never signs out into an unsaved state.)
   // NOTE: this calls supabase.auth.signOut() directly, NOT the
   // AuthContext logout — that one deletes half-done profiles, and a
   // brand-new profile must be kept.
+  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
   const goToLogin = async () => {
-    const created = await ensureProfile(fullName, role);
-    // Owner's flow (2026-10-23): the year is asked HERE, in Sign Up,
-    // so after sign-in the profile shows directly — no year-selection
-    // step after login. Save the year and mark the student onboarded
-    // now, while still signed in. Target field, LeetCode and
-    // CampusTrack are set from the dashboard cards / Edit profile.
-    // Best-effort: if this save misses (server waking), the setup
-    // questions simply appear after sign-in as before.
+    // 1) The profile row must exist. ensureProfile already retries
+    // the fetch internally; retry the whole ensure once more in
+    // case the backend was still waking.
+    let created = null;
+    for (let attempt = 0; attempt < 2 && !created; attempt++) {
+      created = await ensureProfile(fullName, role);
+      if (!created && attempt < 1) await sleep(8000);
+    }
+    if (!created) {
+      // Never sign out into a broken state: the user stays signed
+      // in on the password step and can tap Create Account again
+      // once the server is awake. handleSetPassword shows this
+      // error on the password step.
+      throw new Error(
+        'Server is waking up — your profile could not be saved yet. Please tap Create Account again in a moment.'
+      );
+    }
+    // 2) Students: save the year picked in Sign Up and mark
+    // onboarded, RETRYING until the backend confirms it. This is
+    // the guarantee that makes the dashboard come directly after
+    // sign-in. Target field, LeetCode and CampusTrack are still
+    // set later from the dashboard cards / Edit profile.
     if (role === 'student' && created?.id && year) {
-      try {
-        await updateProfile(created.id, { year_of_study: year, onboarded: true });
-      } catch {
-        // setup questions after sign-in will collect it instead
+      let saved = false;
+      for (let attempt = 0; attempt < 5 && !saved; attempt++) {
+        try {
+          await updateProfile(created.id, { year_of_study: year, onboarded: true });
+          saved = true;
+        } catch {
+          if (attempt < 4) await sleep(8000);
+        }
+      }
+      // 3) Verify the save landed before signing out.
+      if (saved) {
+        try {
+          const fresh = await ensureProfile(fullName, role);
+          if (!fresh?.onboarded) saved = false;
+        } catch {
+          saved = false;
+        }
+      }
+      if (!saved) {
+        throw new Error(
+          'Server is waking up — your year could not be saved yet. Please tap Create Account again in a moment.'
+        );
       }
     }
     await supabase.auth.signOut();
