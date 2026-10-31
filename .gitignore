@@ -12,6 +12,7 @@ venv/
 node_modules/
 frontend/build/
 frontend/.cache/
+dist/
 
 # OS / local files
 .DS_Store
