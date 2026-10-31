@@ -1,6 +1,25 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 
+function EyeIcon({ off }) {
+  if (off) {
+    return (
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <path d="M17.94 17.94A10.6 10.6 0 0 1 12 19c-6.5 0-10-7-10-7a17.6 17.6 0 0 1 4.06-5.94" />
+        <path d="M9.9 4.24A9.5 9.5 0 0 1 12 5c6.5 0 10 7 10 7a17.7 17.7 0 0 1-2.16 3.19" />
+        <path d="m1 1 22 22" />
+        <path d="M14.12 14.12A3 3 0 0 1 9.88 9.88" />
+      </svg>
+    );
+  }
+  return (
+    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z" />
+      <circle cx="12" cy="12" r="3" />
+    </svg>
+  );
+}
+
 export default function AnimatedInput({
   label,
   type = 'text',
@@ -11,8 +30,13 @@ export default function AnimatedInput({
   required = false,
   autoComplete,
   inputMode,
+  showPasswordToggle = false,
 }) {
   const [focused, setFocused] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+
+  const useToggle = showPasswordToggle && type === 'password';
+  const inputType = useToggle && showPassword ? 'text' : type;
 
   return (
     <label className="block perspective-1000">
@@ -34,11 +58,11 @@ export default function AnimatedInput({
             : '0 4px 16px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.08)',
         }}
         transition={{ type: 'spring', stiffness: 350, damping: 24 }}
-        className="rounded-xl border border-white/20 bg-white/10 backdrop-blur-xl overflow-hidden preserve-3d"
+        className="relative rounded-xl border border-white/20 bg-white/10 backdrop-blur-xl overflow-hidden preserve-3d"
         style={{ transformStyle: 'preserve-3d' }}
       >
         <input
-          type={type}
+          type={inputType}
           name={name}
           value={value}
           onChange={onChange}
@@ -48,9 +72,22 @@ export default function AnimatedInput({
           inputMode={inputMode}
           onFocus={() => setFocused(true)}
           onBlur={() => setFocused(false)}
-          className="w-full bg-transparent px-4 py-3 text-white placeholder-slate-400 outline-none"
+          className={`w-full bg-transparent px-4 py-3 text-white placeholder-slate-400 outline-none ${useToggle ? 'pr-12' : ''}`}
           style={{ transform: 'translateZ(5px)' }}
         />
+        {useToggle && (
+          <button
+            type="button"
+            aria-label={showPassword ? 'Hide password' : 'Show password'}
+            aria-pressed={showPassword}
+            tabIndex={0}
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={() => setShowPassword((v) => !v)}
+            className="absolute right-3 top-1/2 -translate-y-1/2 z-10 flex h-8 w-8 touch-manipulation items-center justify-center rounded-full text-slate-300 hover:text-white active:text-white"
+          >
+            <EyeIcon off={showPassword} />
+          </button>
+        )}
         {/* Bottom glow line */}
         <motion.div
           animate={{ scaleX: focused ? 1 : 0, opacity: focused ? 1 : 0 }}

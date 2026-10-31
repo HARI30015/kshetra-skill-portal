@@ -313,13 +313,9 @@ export default function Signup() {
                 )}
                 {renderError()}
                 {accountExists && (
-                  <button
-                    type="button"
-                    onClick={() => navigate('/login')}
-                    className="w-full rounded-xl bg-gradient-to-r from-violet-600 to-cyan-500 px-4 py-3 text-sm font-semibold text-white shadow-glow"
-                  >
+                  <AnimatedButton variant="primary" size="sm" onClick={() => navigate('/login')} className="w-full">
                     Sign In instead →
-                  </button>
+                  </AnimatedButton>
                 )}
                 <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.46 }}>
                   <AnimatedButton type="submit" loading={loading} className="w-full">
@@ -371,6 +367,7 @@ export default function Signup() {
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="Min. 6 characters"
                     autoComplete="new-password"
+                    showPasswordToggle
                     required
                   />
                 </motion.div>
@@ -383,6 +380,7 @@ export default function Signup() {
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     placeholder="Repeat your password"
                     autoComplete="new-password"
+                    showPasswordToggle
                     required
                   />
                 </motion.div>

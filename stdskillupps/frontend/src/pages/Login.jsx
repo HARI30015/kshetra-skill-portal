@@ -133,6 +133,7 @@ export default function Login() {
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
                   autoComplete="current-password"
+                  showPasswordToggle
                   required
                 />
               </motion.div>
@@ -151,13 +152,9 @@ export default function Login() {
                 )}
               </AnimatePresence>
               {noAccount && (
-                <button
-                  type="button"
-                  onClick={() => navigate('/signup')}
-                  className="w-full rounded-xl bg-gradient-to-r from-violet-600 to-cyan-500 px-4 py-3 text-sm font-semibold text-white shadow-glow"
-                >
+                <AnimatedButton variant="primary" size="sm" onClick={() => navigate('/signup')} className="w-full">
                   Create an account →
-                </button>
+                </AnimatedButton>
               )}
               <motion.div
                 initial={{ opacity: 0, y: 12 }}
