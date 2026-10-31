@@ -243,6 +243,7 @@ function BookmarkletLink({ code }) {
 function EditPanel({ onSubmit, onCancel, saving, children }) {
   return (
     <motion.form
+      data-edit-panel
       onSubmit={onSubmit}
       initial={{ opacity: 0, y: -6 }}
       animate={{ opacity: 1, y: 0 }}
@@ -514,6 +515,20 @@ export default function Dashboard() {
       campustrack_score: ctScore ?? '',
     });
     setEditing(kind);
+    // Make the opened panel unmistakable: once React has rendered
+    // it, scroll it into the middle of the viewport and focus its
+    // first field, so a tap can never look like "nothing happened".
+    setTimeout(() => {
+      const field = document.querySelector('[data-edit-panel] input, [data-edit-panel] select');
+      if (field) {
+        field.scrollIntoView({ block: 'center', behavior: 'smooth' });
+        try {
+          field.focus();
+        } catch {
+          // focus is best-effort (e.g. touch keyboards)
+        }
+      }
+    }, 50);
   };
 
   // Always send the full field set so a partial edit never wipes other fields.
@@ -533,13 +548,22 @@ export default function Dashboard() {
     try {
       const nextYear = Number(form.year_of_study) || 1;
       const nextField = (form.target_job_field || '').trim() || null;
-      await updateProfile(
-        profile.id,
-        payloadWith({
-          full_name: (form.full_name || '').trim() || profile.full_name || '',
-          year_of_study: nextYear,
-          target_job_field: nextField,
-        })
+      // Same retry as the LeetCode Save: a sleeping backend must not
+      // fail the Edit profile Save on the first tap. withRetry
+      // rethrows real 400s at once — only transient failures retry.
+      // updateProfile is idempotent, so retrying is safe.
+      await withRetry(
+        () =>
+          updateProfile(
+            profile.id,
+            payloadWith({
+              full_name: (form.full_name || '').trim() || profile.full_name || '',
+              year_of_study: nextYear,
+              target_job_field: nextField,
+            })
+          ),
+        () => true,
+        () => {}
       );
       const changed = nextYear !== year || nextField !== (profile.target_job_field || null);
       setEditing(null);
