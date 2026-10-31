@@ -73,8 +73,27 @@ export default function Onboarding() {
   const finish = async () => {
     setLoading(true);
     setError('');
+    // The free backend sleeps when idle and fails fast with 502
+    // while waking — retry the save instead of failing the Finish
+    // button on the first tap after idle (same fix as Signup's
+    // Create Account, 2026-10-31). Only transient failures retry;
+    // a real 400 (e.g. unknown LeetCode username) surfaces at once.
+    const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+    const isTransient = (e) =>
+      !e?.response || [408, 429, 500, 502, 503, 504].includes(e.response.status);
+    const saveWithRetry = async (payload) => {
+      const started = Date.now();
+      for (let i = 0; ; i++) {
+        try {
+          return await updateProfile(profile.id, payload);
+        } catch (e) {
+          if (!isTransient(e) || Date.now() - started > 100000) throw e;
+          await sleep(Math.min(3000 * (i + 1), 12000));
+        }
+      }
+    };
     try {
-      await updateProfile(profile.id, {
+      await saveWithRetry({
         year_of_study: year,
         target_job_field: field,
         leetcode_username: leetcode.trim() || null,

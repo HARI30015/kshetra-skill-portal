@@ -372,9 +372,23 @@ export default function Dashboard() {
       setSyncBusy(true);
       setSyncError('');
       try {
-        const s = await syncStats(pid);
+        // Retry transient failures (free server waking up) the same
+        // way the page loads do — a single attempt fails fast with
+        // 502 while the server wakes, which is why the Sync button
+        // looked dead on the first tap after idle. syncStats is an
+        // idempotent upsert, so retrying it is safe.
+        const s = await withRetry(() => syncStats(pid), () => true, () => {});
         setStatsData(s);
-        if (!opts.silent) toast('LeetCode stats synced 🎉');
+        // A sync that stored 0 because LeetCode was briefly
+        // unreachable must never masquerade as success: the backend
+        // returns a `warning` in that case — show it honestly
+        // (inline under the card via syncError, plus a toast).
+        if (s?.warning) {
+          setSyncError(s.warning);
+          if (!opts.silent) toast(s.warning, 4500);
+        } else if (!opts.silent) {
+          toast('LeetCode stats synced 🎉');
+        }
       } catch (e) {
         const msg = errMsg(e, 'Sync failed. Check your LeetCode username.');
         setSyncError(msg);
@@ -544,7 +558,15 @@ export default function Dashboard() {
     const next = (form.leetcode_username || '').trim();
     setSaving(true);
     try {
-      await updateProfile(profile.id, payloadWith({ leetcode_username: next || null }));
+      // Same retry as doSync: a sleeping backend must not fail the
+      // Save button on the first tap. withRetry rethrows real 400s
+      // (e.g. "LeetCode user not found") at once — only transient
+      // failures retry. updateProfile is idempotent, so retrying is safe.
+      await withRetry(
+        () => updateProfile(profile.id, payloadWith({ leetcode_username: next || null })),
+        () => true,
+        () => {}
+      );
     } catch (err) {
       toast(errMsg(err, 'Couldn’t save your username.'), 4500);
       setSaving(false);

@@ -1,4 +1,6 @@
 """Fetch public LeetCode stats for a username via the GraphQL API."""
+import time
+
 import httpx
 
 LEETCODE_GRAPHQL_URL = "https://leetcode.com/graphql"
@@ -32,21 +34,37 @@ def fetch_leetcode_stats(username: str) -> dict:
     if not username:
         return {**ZEROES, "error": "no leetcode username on profile"}
 
-    try:
-        resp = httpx.post(
-            LEETCODE_GRAPHQL_URL,
-            json={"query": _QUERY, "variables": {"username": username}},
-            headers={
-                "Content-Type": "application/json",
-                "Referer": f"https://leetcode.com/u/{username}/",
-                "User-Agent": "stdskillupps/0.1",
-            },
-            timeout=20,
-        )
-        resp.raise_for_status()
-        payload = resp.json()
-    except Exception as exc:
-        return {**ZEROES, "error": f"leetcode request failed: {exc}"}
+    # Retry transient failures before storing zeros: one blip between
+    # Render and LeetCode used to wipe a student's real score to 0.
+    # Only transient statuses retry — any other 4xx is a definitive
+    # answer and returns at once.
+    payload = None
+    last_error = None
+    for attempt in range(3):
+        try:
+            resp = httpx.post(
+                LEETCODE_GRAPHQL_URL,
+                json={"query": _QUERY, "variables": {"username": username}},
+                headers={
+                    "Content-Type": "application/json",
+                    "Referer": f"https://leetcode.com/u/{username}/",
+                    "User-Agent": "stdskillupps/0.1",
+                },
+                timeout=20,
+            )
+            resp.raise_for_status()
+            payload = resp.json()
+            break
+        except httpx.HTTPStatusError as exc:
+            if exc.response.status_code not in (429, 500, 502, 503, 504):
+                return {**ZEROES, "error": f"leetcode request failed: {exc}"}
+            last_error = exc
+        except Exception as exc:
+            last_error = exc
+        if attempt < 2:
+            time.sleep(2)
+    if payload is None:
+        return {**ZEROES, "error": f"leetcode request failed: {last_error}"}
 
     matched = (payload.get("data") or {}).get("matchedUser")
     if matched is None:
