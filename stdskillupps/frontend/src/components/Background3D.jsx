@@ -15,6 +15,13 @@ import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
 // - Animations pause while the tab is hidden, and on touch devices
 //   (no mouse to parallax with) the mousemove listener is skipped.
 
+// THE single background system for every page (PageWrapper no longer
+// draws a second one). Besides the stars/spheres/cubes/rings/orbs it now
+// also carries the slow shining light streaks that used to live in
+// PageWrapper, so the signature look (shining light + moving 3D shapes)
+// is unchanged. Phones/narrow screens get a lighter set of shapes.
+// Everything here is pointer-events: none at z-0 behind the page content.
+//
 // Global 3D background: twinkling stars, glassy floating spheres/circles,
 // glassy cubes, and soft gradient orbs — fixed behind all content.
 // Mouse parallax: every layer shifts opposite the cursor (move right ->
@@ -43,10 +50,6 @@ export default function Background3D() {
   const ringsY = useTransform(springY, (v) => -v * 38);
   const cubesX = useTransform(springX, (v) => -v * 55);
   const cubesY = useTransform(springY, (v) => -v * 55);
-  // Gentle tilt for the 3D layers (spheres + cubes) based on cursor position
-  const tiltX = useTransform(springY, (v) => -v * 10); // mouse down -> tilt back
-  const tiltY = useTransform(springX, (v) => v * 12); // mouse right -> tilt right
-
   const handleMouseMove = (e) => {
     mouseX.set(e.clientX / window.innerWidth - 0.5);
     mouseY.set(e.clientY / window.innerHeight - 0.5);
@@ -68,6 +71,14 @@ export default function Background3D() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Lighter set on phones / narrow screens (fewer animated layers).
+  const lite = useMemo(
+    () =>
+      typeof window !== 'undefined' &&
+      (window.matchMedia?.('(pointer: coarse)').matches || window.innerWidth < 768),
+    []
+  );
+
   // Deterministic pseudo-random stars (avoid hydration flicker)
   const stars = useMemo(() => {
     const arr = [];
@@ -76,7 +87,7 @@ export default function Background3D() {
       seed = (seed * 9301 + 49297) % 233280;
       return seed / 233280;
     };
-    for (let i = 0; i < 90; i++) {
+    for (let i = 0; i < (lite ? 40 : 90); i++) {
       arr.push({
         id: i,
         left: `${rand() * 100}%`,
@@ -89,9 +100,9 @@ export default function Background3D() {
       });
     }
     return arr;
-  }, []);
+  }, [lite]);
 
-  const spheres = [
+  const allSpheres = [
     { size: 180, left: '6%', top: '15%', c1: 'rgba(167,139,250,0.95)', c2: 'rgba(124,58,237,0.85)', dur: 16, delay: 0, blur: 20 },
     { size: 140, left: '85%', top: '10%', c1: 'rgba(103,232,249,0.95)', c2: 'rgba(6,182,214,0.85)', dur: 19, delay: 1, blur: 18 },
     { size: 220, left: '78%', top: '65%', c1: 'rgba(240,171,252,0.92)', c2: 'rgba(192,38,211,0.85)', dur: 22, delay: 0.5, blur: 24 },
@@ -100,24 +111,32 @@ export default function Background3D() {
     { size: 90, left: '60%', top: '85%', c1: 'rgba(253,224,71,0.90)', c2: 'rgba(202,138,4,0.85)', dur: 20, delay: 2, blur: 14 },
   ];
 
-  const cubes = [
+  const spheres = lite ? allSpheres.slice(0, 4) : allSpheres;
+
+  const allCubes = [
     { size: 56, left: '22%', top: '28%', dur: 14, delay: 0, rot: 25 },
     { size: 42, left: '72%', top: '38%', dur: 17, delay: 1.2, rot: -18 },
     { size: 68, left: '38%', top: '68%', dur: 20, delay: 0.6, rot: 40 },
     { size: 34, left: '88%', top: '55%', dur: 13, delay: 0.3, rot: -30 },
   ];
 
-  const rings = [
+  const cubes = lite ? allCubes.slice(0, 2) : allCubes;
+
+  const allRings = [
     { size: 120, left: '15%', top: '45%', dur: 24, delay: 0 },
     { size: 90, left: '65%', top: '22%', dur: 28, delay: 1 },
     { size: 150, left: '50%', top: '78%', dur: 26, delay: 0.5 },
   ];
 
+  const rings = lite ? allRings.slice(0, 2) : allRings;
+
+  // Slow shining light streaks (moved here from PageWrapper's old scene).
+  const streaks = lite ? [0] : [0, 1, 2];
+
   return (
     <div
       className="pointer-events-none fixed inset-0 z-0 overflow-hidden"
       aria-hidden="true"
-      style={{  }}
       onMouseMove={handleMouseMove}
     >
       {/* Twinkling stars — parallax layer (least depth) */}
@@ -176,28 +195,6 @@ export default function Background3D() {
                 left: '18%',
                 top: '12%',
                 background: 'radial-gradient(ellipse, rgba(255,255,255,1) 0%, rgba(255,255,255,0.6) 40%, transparent 70%)',
-              }}
-            />
-            {/* Secondary soft glow (gradient only — no blur filter) */}
-            <div
-              className="absolute rounded-full"
-              style={{
-                width: '55%',
-                height: '40%',
-                left: '10%',
-                top: '6%',
-                background: 'radial-gradient(ellipse, rgba(255,255,255,0.35), transparent 70%)',
-              }}
-            />
-            {/* Bottom glass reflection (gradient only — no blur filter) */}
-            <div
-              className="absolute rounded-full"
-              style={{
-                width: '60%',
-                height: '15%',
-                left: '20%',
-                bottom: '8%',
-                background: 'radial-gradient(ellipse, rgba(255,255,255,0.4), transparent 70%)',
               }}
             />
           </motion.div>
@@ -269,6 +266,22 @@ export default function Background3D() {
           />
         ))}
       </motion.div>
+
+      {/* Shining light streaks */}
+      {streaks.map((i) => (
+        <motion.div
+          key={`streak-${i}`}
+          className="absolute h-px w-[60vw]"
+          style={{
+            top: `${20 + i * 30}%`,
+            left: '-60vw',
+            background: 'linear-gradient(90deg, transparent, rgba(167,139,250,0.4), rgba(34,211,238,0.4), transparent)',
+            willChange: 'transform',
+          }}
+          animate={{ x: ['0vw', '160vw'] }}
+          transition={{ duration: 12 + i * 4, repeat: Infinity, ease: 'linear', delay: i * 3 }}
+        />
+      ))}
 
       {/* Soft gradient glow orbs (base layer) — parallax layer (shallow) */}
       <motion.div className="absolute inset-0" style={{ x: orbsX, y: orbsY, willChange: 'transform' }}>

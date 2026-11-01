@@ -1,123 +1,15 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
 
-// Generate random floating 3D shapes
-function useShapes(count) {
-  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
-  return useMemo(() => {
-    return Array.from({ length: count }, (_, i) => ({
-      id: i,
-      size: 60 + Math.random() * 180,
-      left: Math.random() * 100,
-      top: Math.random() * 100,
-      duration: 15 + Math.random() * 20,
-      delay: -Math.random() * 20,
-      hue: [265, 190, 320, 220, 280][i % 5],
-      shape: ['circle', 'square', 'diamond'][i % 3],
-      blur: isMobile ? 20 + Math.random() * 20 : 40 + Math.random() * 60,
-      opacity: 0.08 + Math.random() * 0.12,
-    }));
-  }, [count, isMobile]);
-}
-
-function FloatingShape({ shape }) {
-  const style = {
-    width: shape.size,
-    height: shape.size,
-    left: `${shape.left}%`,
-    top: `${shape.top}%`,
-    // No filter: blur() here (owner fix, 2026-10-23): re-blurring a
-    // large moving shape every frame starved the main thread and made
-    // taps register late. The radial gradient now fades fully to
-    // transparent, so the blob's edge is soft on its own - same blurry
-    // look, composited for free (same trick as Background3D).
-    opacity: shape.opacity,
-    background: `radial-gradient(circle, hsla(${shape.hue}, 80%, 65%, 0.75) 0%, hsla(${shape.hue}, 80%, 55%, 0.28) 52%, transparent 72%)`,
-    borderRadius: shape.shape === 'circle' ? '50%' : shape.shape === 'diamond' ? '20%' : '30%',
-    transform: shape.shape === 'diamond' ? 'rotate(45deg)' : undefined,
-    animationDuration: `${shape.duration}s`,
-    animationDelay: `${shape.delay}s`,
-  };
-
-  return (
-    <motion.div
-      className="orb animate-orb-drift absolute"
-      style={style}
-      animate={{
-        rotate: shape.shape === 'circle' ? 0 : 360,
-      }}
-      transition={{ duration: shape.duration * 2, repeat: Infinity, ease: 'linear' }}
-    />
-  );
-}
-
-// Shining light streaks
-function ShineStreaks() {
-  return (
-    <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden>
-      {[0, 1, 2].map((i) => (
-        <motion.div
-          key={i}
-          className="absolute h-px w-[60vw]"
-          style={{
-            top: `${20 + i * 30}%`,
-            left: '-60vw',
-            background: 'linear-gradient(90deg, transparent, rgba(167,139,250,0.4), rgba(34,211,238,0.4), transparent)',
-            filter: 'blur(2px)',
-          }}
-          animate={{ x: ['0vw', '160vw'] }}
-          transition={{ duration: 12 + i * 4, repeat: Infinity, ease: 'linear', delay: i * 3 }}
-        />
-      ))}
-    </div>
-  );
-}
-
-function Scene3D() {
-  // Reduce effects on mobile to prevent GPU overload / black screens
-  const isMobile = typeof window !== 'undefined' && (
-    /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
-    window.innerWidth < 768
-  );
-  const shapes = useShapes(isMobile ? 4 : 12);
-
-  return (
-    <div className="pointer-events-none fixed inset-0 overflow-hidden" aria-hidden style={{ zIndex: 0 }}>
-      {/* Deep space gradient */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,#1e1b4b_0%,#0f0d1f_50%,#08070f_100%)]" />
-
-      {/* Layer 1: Large blurry 3D orbs (far) */}
-      <div className="orb animate-orb-drift h-[600px] w-[600px] bg-violet-700/15 left-[-15%] top-[-10%]" />
-      <div className="orb animate-orb-drift h-[500px] w-[500px] bg-cyan-600/12 right-[-10%] top-[20%]" style={{ animationDelay: '-6s' }} />
-      <div className="orb animate-orb-drift h-[450px] w-[450px] bg-fuchsia-600/10 left-[20%] bottom-[-15%]" style={{ animationDelay: '-12s' }} />
-
-      {/* Layer 2: Floating 3D shapes (mid) - blurry */}
-      {shapes.map((s) => (
-        <FloatingShape key={s.id} shape={s} />
-      ))}
-
-      {/* Layer 3: Shine streaks */}
-      <ShineStreaks />
-
-      {/* Layer 4: Perspective grid for depth */}
-      <div
-        className="absolute inset-0 opacity-[0.04]"
-        style={{
-          backgroundImage: 'linear-gradient(rgba(167,139,250,0.6) 1px, transparent 1px), linear-gradient(90deg, rgba(167,139,250,0.6) 1px, transparent 1px)',
-          backgroundSize: '80px 80px',
-          transform: 'perspective(1200px) rotateX(15deg) scale(1.3)',
-          transformOrigin: 'center top',
-          maskImage: 'linear-gradient(to bottom, black 30%, transparent 80%)',
-          WebkitMaskImage: 'linear-gradient(to bottom, black 30%, transparent 80%)',
-        }}
-      />
-
-      {/* Vignette for depth */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_40%,rgba(0,0,0,0.4)_100%)]" />
-    </div>
-  );
-}
-
+// One background system only: <Background3D /> (mounted once in App.jsx)
+// draws the shining light + moving 3D shapes behind EVERY page. This
+// wrapper used to render a second full scene (Scene3D: 3 huge orbs and
+// 12 floating shapes carrying the `.orb` class, which applies
+// filter: blur(80px) to each of them every frame, plus streaks, a grid and
+// a vignette) on top of Background3D. That duplicate is removed - it was
+// the heavy layer stack that made taps register late. The page content
+// stays above the background (z-index 1); the background is
+// pointer-events: none, so it can never take a click.
 export default function PageWrapper({ children, className = '' }) {
   return (
     <motion.div
@@ -127,7 +19,6 @@ export default function PageWrapper({ children, className = '' }) {
       transition={{ duration: 0.5 }}
       className={`relative min-h-screen ${className}`}
     >
-      <Scene3D />
       <div className="relative" style={{ zIndex: 1 }}>
         <motion.div
           initial={{ opacity: 0, y: 24 }}
@@ -141,5 +32,3 @@ export default function PageWrapper({ children, className = '' }) {
     </motion.div>
   );
 }
-
-
