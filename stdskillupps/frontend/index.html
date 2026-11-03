@@ -41,84 +41,17 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="stdskillupps" />
 
-    <style>
-      /* Branded loading screen — visible before React mounts */
-      #app-loader {
-        position: fixed;
-        inset: 0;
-        z-index: 9999;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        gap: 22px;
-        background: radial-gradient(1200px 800px at 50% 20%, #1b2452 0%, #0b1026 55%, #060913 100%);
-        transition: opacity 0.5s ease;
-      }
-      #app-loader.done {
-        opacity: 0;
-        pointer-events: none;
-      }
-      #app-loader .logo {
-        font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
-        font-size: 34px;
-        font-weight: 800;
-        letter-spacing: 1px;
-        background: linear-gradient(90deg, #ff5f9e, #b16cea, #5f8cff, #3ddad7, #a3e635);
-        -webkit-background-clip: text;
-        background-clip: text;
-        color: transparent;
-      }
-      #app-loader .spinner {
-        width: 44px;
-        height: 44px;
-        border-radius: 50%;
-        border: 3px solid rgba(255, 255, 255, 0.12);
-        border-top-color: #b16cea;
-        animation: spin 0.9s linear infinite;
-      }
-      #app-loader .tag {
-        font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
-        font-size: 13px;
-        color: rgba(255, 255, 255, 0.55);
-        letter-spacing: 0.4px;
-      }
-      @keyframes spin {
-        to { transform: rotate(360deg); }
-      }
-    </style>
   </head>
   <body>
-    <div id="app-loader" aria-hidden="true">
-      <div class="logo">stdskillupps</div>
-      <div class="spinner"></div>
-      <div class="tag">Preparing your placement journey…</div>
-    </div>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
     <script>
-      // Remove the loader once React has mounted content.
-      (function () {
-        var attempts = 0;
-        var timer = setInterval(function () {
-          attempts++;
-          var root = document.getElementById('root');
-          var loader = document.getElementById('app-loader');
-          if ((root && root.children.length > 0) || attempts > 100) {
-            if (loader) {
-              loader.classList.add('done');
-              setTimeout(function () { loader.remove(); }, 600);
-            }
-            clearInterval(timer);
-          }
-        }, 100);
-        // Register service worker for PWA (offline shell + installability)
-        if ('serviceWorker' in navigator) {
-          window.addEventListener('load', function () {
-            navigator.serviceWorker.register('/sw.js').catch(function () {});
-          });
-        }
-      })();
+      // Register service worker for PWA (offline shell + installability)
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function () {
+          navigator.serviceWorker.register('/sw.js').catch(function () {});
+        });
+      }
     </script>
   </body>
 </html>
