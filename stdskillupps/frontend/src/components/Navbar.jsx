@@ -48,7 +48,7 @@ export default function Navbar() {
           <nav className="glass flex items-center justify-between px-4 py-3 sm:px-6">
             <Link to="/" className="flex items-center gap-2">
               <motion.div
-                className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-violet-600 to-cyan-500 text-lg font-black text-white shadow-glow"
+                className="flex h-9 w-9 items-center justify-center rounded-xl bg-white text-lg font-black text-black shadow-glow"
               >
                 S
               </motion.div>
@@ -66,7 +66,7 @@ export default function Navbar() {
                     `${linkBase} ${
                       isActive
                         ? 'bg-white/15 text-white'
-                        : 'text-slate-300 hover:bg-white/10 hover:text-white'
+                        : 'text-zinc-300 hover:bg-white/10 hover:text-white'
                     }`
                   }
                 >
@@ -81,7 +81,7 @@ export default function Navbar() {
                       `${linkBase} ${
                         isActive
                           ? 'bg-white/15 text-white'
-                          : 'text-slate-300 hover:bg-white/10 hover:text-white'
+                          : 'text-zinc-300 hover:bg-white/10 hover:text-white'
                       }`
                     }
                   >
@@ -91,7 +91,7 @@ export default function Navbar() {
                     <motion.span
                       whileTap={{ scale: 0.98 }}
                       transition={{ duration: 0.08 }}
-                      className="ml-1 inline-block rounded-lg bg-gradient-to-r from-violet-600 to-cyan-500 px-4 py-2 text-sm font-semibold text-white shadow-glow"
+                      className="ml-1 inline-block rounded-lg bg-white px-4 py-2 text-sm font-semibold text-black shadow-glow"
                     >
                       Get started
                     </motion.span>
@@ -102,7 +102,7 @@ export default function Navbar() {
                   whileTap={{ scale: 0.98 }}
                   transition={{ duration: 0.08 }}
                   onClick={() => setConfirmOpen(true)}
-                  className="ml-1 rounded-lg border border-rose-400/40 bg-rose-500/10 px-4 py-2 text-sm font-semibold text-rose-200 transition hover:bg-rose-500/20"
+                  className="ml-1 rounded-lg border border-white/40 bg-white/10 px-4 py-2 text-sm font-semibold text-zinc-200 transition hover:bg-white/20"
                 >
                   Logout
                 </motion.button>
@@ -111,7 +111,7 @@ export default function Navbar() {
 
             {/* Mobile menu toggle */}
             <button
-              className="rounded-lg p-2 text-slate-200 hover:bg-white/10 md:hidden"
+              className="rounded-lg p-2 text-zinc-200 hover:bg-white/10 md:hidden"
               onClick={() => setMenuOpen((v) => !v)}
               aria-label="Toggle menu"
             >
@@ -136,7 +136,7 @@ export default function Navbar() {
                     onClick={() => setMenuOpen(false)}
                     className={({ isActive }) =>
                       `block rounded-lg px-4 py-2.5 text-sm font-medium ${
-                        isActive ? 'bg-white/15 text-white' : 'text-slate-300'
+                        isActive ? 'bg-white/15 text-white' : 'text-zinc-300'
                       }`
                     }
                   >
@@ -148,14 +148,14 @@ export default function Navbar() {
                     <NavLink
                       to="/login"
                       onClick={() => setMenuOpen(false)}
-                      className="block rounded-lg px-4 py-2.5 text-sm font-medium text-slate-300"
+                      className="block rounded-lg px-4 py-2.5 text-sm font-medium text-zinc-300"
                     >
                       Sign in
                     </NavLink>
                     <NavLink
                       to="/signup"
                       onClick={() => setMenuOpen(false)}
-                      className="block rounded-lg bg-gradient-to-r from-violet-600 to-cyan-500 px-4 py-2.5 text-sm font-semibold text-white"
+                      className="block rounded-lg bg-white px-4 py-2.5 text-sm font-semibold text-black"
                     >
                       Get started
                     </NavLink>
@@ -166,7 +166,7 @@ export default function Navbar() {
                       setMenuOpen(false);
                       setConfirmOpen(true);
                     }}
-                    className="block w-full rounded-lg px-4 py-2.5 text-left text-sm font-medium text-rose-200"
+                    className="block w-full rounded-lg px-4 py-2.5 text-left text-sm font-medium text-zinc-200"
                   >
                     Logout
                   </button>
@@ -202,11 +202,11 @@ export default function Navbar() {
                   className="flex flex-col items-center gap-4 py-4"
                 >
                   <motion.div
-                    className="h-12 w-12 rounded-full border-[3px] border-transparent border-t-violet-400 border-r-cyan-400"
+                    className="h-12 w-12 rounded-full border-[3px] border-transparent border-t-white border-r-white"
                     animate={{ rotate: 360 }}
                     transition={{ repeat: Infinity, duration: 0.8, ease: 'linear' }}
                   />
-                  <p className="text-sm text-slate-300">Signing you out…</p>
+                  <p className="text-sm text-zinc-300">Signing you out…</p>
                 </motion.div>
               ) : (
                 <>
@@ -214,12 +214,12 @@ export default function Navbar() {
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
                     transition={{ type: 'spring', stiffness: 300, damping: 18, delay: 0.1 }}
-                    className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-rose-500/20 text-2xl"
+                    className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-white/20 text-2xl"
                   >
                     👋
                   </motion.div>
                   <h3 className="text-xl font-bold text-white">Log out?</h3>
-                  <p className="mt-2 text-sm text-slate-300">
+                  <p className="mt-2 text-sm text-zinc-300">
                     You'll need to sign in again to track your progress.
                   </p>
                   <div className="mt-6 flex gap-3">
@@ -235,7 +235,7 @@ export default function Navbar() {
                       whileTap={{ scale: 0.98 }}
                       transition={{ duration: 0.08 }}
                       onClick={handleLogout}
-                      className="flex-1 rounded-xl bg-gradient-to-r from-rose-600 to-red-500 px-4 py-2.5 text-sm font-semibold text-white"
+                      className="flex-1 rounded-xl bg-white px-4 py-2.5 text-sm font-semibold text-black"
                     >
                       Log out
                     </motion.button>

@@ -42,7 +42,7 @@ export default function AnimatedInput({
     <label className="block perspective-1000">
       {label && (
         <motion.span
-          animate={{ color: focused ? '#a78bfa' : '#cbd5e1', x: focused ? 4 : 0 }}
+          animate={{ color: focused ? '#ffffff' : '#d4d4d8', x: focused ? 4 : 0 }}
           className="mb-1.5 block text-sm font-medium"
         >
           {label}
@@ -54,7 +54,7 @@ export default function AnimatedInput({
           rotateX: focused ? -4 : 0,
           z: focused ? 20 : 0,
           boxShadow: focused
-            ? '0 12px 40px rgba(139,92,246,0.3), 0 0 0 2px rgba(139,92,246,0.55), inset 0 1px 0 rgba(255,255,255,0.15)'
+            ? '0 12px 40px rgba(255,255,255,0.3), 0 0 0 2px rgba(255,255,255,0.55), inset 0 1px 0 rgba(255,255,255,0.15)'
             : '0 4px 16px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.08)',
         }}
         transition={{ type: 'spring', stiffness: 350, damping: 24 }}
@@ -72,7 +72,7 @@ export default function AnimatedInput({
           inputMode={inputMode}
           onFocus={() => setFocused(true)}
           onBlur={() => setFocused(false)}
-          className={`w-full bg-transparent px-4 py-3 text-white placeholder-slate-400 outline-none ${useToggle ? 'pr-12' : ''}`}
+          className={`w-full bg-transparent px-4 py-3 text-white placeholder-zinc-400 outline-none ${useToggle ? 'pr-12' : ''}`}
           style={{ transform: 'translateZ(5px)' }}
         />
         {useToggle && (
@@ -83,7 +83,7 @@ export default function AnimatedInput({
             tabIndex={0}
             onMouseDown={(e) => e.preventDefault()}
             onClick={() => setShowPassword((v) => !v)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 z-10 flex h-8 w-8 touch-manipulation items-center justify-center rounded-full text-slate-300 hover:text-white active:text-white"
+            className="absolute right-3 top-1/2 -translate-y-1/2 z-10 flex h-8 w-8 touch-manipulation items-center justify-center rounded-full text-zinc-300 hover:text-white active:text-white"
           >
             <EyeIcon off={showPassword} />
           </button>
@@ -92,7 +92,7 @@ export default function AnimatedInput({
         <motion.div
           animate={{ scaleX: focused ? 1 : 0, opacity: focused ? 1 : 0 }}
           transition={{ duration: 0.3 }}
-          className="h-0.5 bg-gradient-to-r from-violet-500 via-fuchsia-500 to-cyan-400 origin-left"
+          className="h-0.5 bg-white origin-left"
         />
       </motion.div>
     </label>

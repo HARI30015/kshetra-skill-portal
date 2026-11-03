@@ -8,21 +8,21 @@ export default {
       },
       colors: {
         ink: {
-          950: '#070b1a',
-          900: '#0b1026',
-          800: '#131a3a',
+          950: '#000000',
+          900: '#0a0a0a',
+          800: '#171717',
         },
         neon: {
-          violet: '#8b5cf6',
-          fuchsia: '#d946ef',
-          cyan: '#22d3ee',
-          indigo: '#6366f1',
+          violet: '#ffffff',
+          fuchsia: '#e5e5e5',
+          cyan: '#d4d4d4',
+          indigo: '#a3a3a3',
         },
       },
       boxShadow: {
-        glass: '0 8px 32px 0 rgba(31, 38, 135, 0.37)',
-        'glass-sm': '0 4px 24px 0 rgba(31, 38, 135, 0.25)',
-        glow: '0 0 24px rgba(139, 92, 246, 0.45)',
+        glass: '0 8px 32px 0 rgba(0, 0, 0, 0.6)',
+        'glass-sm': '0 4px 24px 0 rgba(0, 0, 0, 0.45)',
+        glow: '0 0 24px rgba(255, 255, 255, 0.3)',
       },
       keyframes: {
         shimmer: {

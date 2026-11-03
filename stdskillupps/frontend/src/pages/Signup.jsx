@@ -216,7 +216,7 @@ export default function Signup() {
           exit={{ opacity: 0, height: 0 }}
           className="overflow-hidden"
         >
-          <div className="rounded-xl border border-rose-400/40 bg-rose-500/15 px-4 py-3 text-sm text-rose-200">
+          <div className="rounded-xl border border-white/40 bg-white/15 px-4 py-3 text-sm text-zinc-200">
             {error}
           </div>
         </motion.div>
@@ -251,12 +251,12 @@ export default function Signup() {
             transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
             whileHover={{ rotateX: 2, rotateY: -2, scale: 1.01 }}
             className="glass-3d p-8 preserve-3d"
-            style={{ transformStyle: 'preserve-3d', boxShadow: '0 30px 80px rgba(0,0,0,0.5), 0 0 60px rgba(139,92,246,0.15)' }}
+            style={{ transformStyle: 'preserve-3d', boxShadow: '0 30px 80px rgba(0,0,0,0.5), 0 0 60px rgba(255,255,255,0.15)' }}
           >
             <div style={{ transform: 'translateZ(40px)' }}>
             <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
-              <h1 className="text-2xl font-extrabold text-white" style={{ textShadow: '0 4px 20px rgba(139,92,246,0.4)' }}>{stepTitle[step]}</h1>
-              <p className="mt-1 text-sm text-slate-300">{stepSubtitle[step]}</p>
+              <h1 className="text-2xl font-extrabold text-white" style={{ textShadow: '0 4px 20px rgba(255,255,255,0.4)' }}>{stepTitle[step]}</h1>
+              <p className="mt-1 text-sm text-zinc-300">{stepSubtitle[step]}</p>
             </motion.div>
 
             {/* Step indicator */}
@@ -267,7 +267,7 @@ export default function Signup() {
                   <div
                     key={s}
                     className={`h-1.5 flex-1 rounded-full transition-colors ${
-                      i <= idx ? 'bg-gradient-to-r from-violet-500 to-cyan-400' : 'bg-white/10'
+                      i <= idx ? 'bg-white' : 'bg-white/10'
                     }`}
                   />
                 );
@@ -300,7 +300,7 @@ export default function Signup() {
                   />
                 </motion.div>
                 <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.38 }}>
-                  <span className="mb-1.5 block text-sm font-medium text-slate-300">I am a…</span>
+                  <span className="mb-1.5 block text-sm font-medium text-zinc-300">I am a…</span>
                   <div className="relative grid grid-cols-2 gap-2 rounded-2xl border border-white/20 bg-white/10 p-1.5 backdrop-blur-xl">
                     {ROLES.map((r) => {
                       const active = role === r.value;
@@ -310,14 +310,14 @@ export default function Signup() {
                           type="button"
                           onClick={() => setRole(r.value)}
                           className={`relative z-10 rounded-xl px-4 py-2.5 text-sm font-semibold transition-colors ${
-                            active ? 'text-white' : 'text-slate-300 hover:text-white'
+                            active ? 'text-black' : 'text-zinc-300 hover:text-white'
                           }`}
                         >
                           {active && (
                             <motion.span
                               layoutId="role-pill"
                               transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-                              className="absolute inset-0 -z-10 rounded-xl bg-gradient-to-r from-violet-600 to-cyan-500 shadow-glow"
+                              className="absolute inset-0 -z-10 rounded-xl bg-white shadow-glow"
                             />
                           )}
                           <span className="relative z-10">
@@ -330,7 +330,7 @@ export default function Signup() {
                 </motion.div>
                 {role === 'student' && (
                   <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.42 }}>
-                    <span className="mb-1.5 block text-sm font-medium text-slate-300">Year of study</span>
+                    <span className="mb-1.5 block text-sm font-medium text-zinc-300">Year of study</span>
                     <div className="grid grid-cols-4 gap-2 rounded-2xl border border-white/20 bg-white/10 p-1.5 backdrop-blur-xl">
                       {[1, 2, 3, 4].map((y) => {
                         const active = year === y;
@@ -341,8 +341,8 @@ export default function Signup() {
                             onClick={() => setYear(y)}
                             className={`rounded-xl px-2 py-2.5 text-sm font-semibold transition-colors ${
                               active
-                                ? 'bg-gradient-to-r from-violet-600 to-cyan-500 text-white shadow-glow'
-                                : 'text-slate-300 hover:text-white'
+                                ? 'bg-white text-black shadow-glow'
+                                : 'text-zinc-300 hover:text-white'
                             }`}
                           >
                             Year {y}
@@ -389,7 +389,7 @@ export default function Signup() {
                   <button
                     type="button"
                     onClick={() => { setStep('details'); setCode(''); setError(''); }}
-                    className="w-full text-center text-sm text-slate-400 hover:text-slate-300"
+                    className="w-full text-center text-sm text-zinc-400 hover:text-zinc-300"
                   >
                     Use a different email
                   </button>
@@ -434,9 +434,9 @@ export default function Signup() {
               </form>
             )}
 
-            <p className="mt-6 text-center text-sm text-slate-400">
+            <p className="mt-6 text-center text-sm text-zinc-400">
               Already have an account?{' '}
-              <Link to="/login" className="font-semibold text-cyan-300 hover:text-cyan-200">
+              <Link to="/login" className="font-semibold text-zinc-200 hover:text-zinc-200">
                 Sign in
               </Link>
             </p>

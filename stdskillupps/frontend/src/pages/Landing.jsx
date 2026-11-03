@@ -37,18 +37,18 @@ export default function Landing() {
             className="text-5xl font-extrabold leading-[1.1] tracking-tight text-white sm:text-7xl"
           >
             Turn your{' '}
-            <span className="bg-gradient-to-r from-pink-500 via-amber-400 via-lime-300 to-cyan-400 to-violet-500 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-white via-zinc-300 to-zinc-500 bg-clip-text text-transparent">
               coding grind
             </span>{' '}
             into a<br className="hidden sm:block" /> placement{' '}
-            <span className="bg-gradient-to-r from-pink-500 via-amber-400 via-lime-300 to-cyan-400 to-violet-500 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-white via-zinc-300 to-zinc-500 bg-clip-text text-transparent">
               offer
             </span>
           </motion.h1>
 
           <motion.p
             variants={fadeUp}
-            className="mx-auto mt-6 max-w-2xl text-base text-slate-300 sm:text-lg"
+            className="mx-auto mt-6 max-w-2xl text-base text-zinc-300 sm:text-lg"
           >
             Master DSA, track progress, and land your dream placement with guided prep, real-time analytics, and 2000+ company questions.
           </motion.p>
@@ -70,7 +70,7 @@ export default function Landing() {
                 >
                   <button
                     onClick={() => setShowAuth(true)}
-                    className="relative w-64 rounded-full bg-gradient-to-r from-violet-600 via-purple-500 to-cyan-400 px-8 py-4 text-lg font-bold text-white shadow-[0_0_40px_rgba(139,92,246,0.5)] transition hover:shadow-[0_0_60px_rgba(139,92,246,0.7)] sm:w-72"
+                    className="relative w-64 rounded-full bg-white px-8 py-4 text-lg font-bold text-black shadow-[0_0_40px_rgba(255,255,255,0.5)] transition hover:shadow-[0_0_60px_rgba(255,255,255,0.7)] sm:w-72"
                   >
                     <span className="relative z-10">Get Started</span>
                     <span className="pointer-events-none absolute inset-0 overflow-hidden rounded-full">
@@ -91,11 +91,11 @@ export default function Landing() {
                   className="flex w-full max-w-md flex-col items-center gap-4 rounded-3xl border border-white/15 bg-gradient-to-br from-white/10 via-white/[0.06] to-white/[0.02] p-8 shadow-2xl backdrop-blur-xl"
                 >
                   {/* Project title + Welcome — shown at the top of the auth view */}
-                  <h1 className="bg-gradient-to-r from-pink-500 via-amber-400 via-lime-300 to-cyan-400 to-violet-500 bg-clip-text text-center text-4xl font-extrabold tracking-tight text-transparent sm:text-5xl">
+                  <h1 className="bg-gradient-to-r from-white via-zinc-300 to-zinc-500 bg-clip-text text-center text-4xl font-extrabold tracking-tight text-transparent sm:text-5xl">
                     stdskillupps
                   </h1>
                   <h2 className="text-2xl font-bold text-white">Welcome</h2>
-                  <p className="text-sm text-slate-300">Choose an option to continue</p>
+                  <p className="text-sm text-zinc-300">Choose an option to continue</p>
                   <motion.button
                     initial={{ scale: 0.5, rotateX: -30, opacity: 0 }}
                     animate={{ scale: 1, rotateX: 0, opacity: 1 }}
@@ -112,7 +112,7 @@ export default function Landing() {
                     transition={{ type: 'spring', stiffness: 200, damping: 16, delay: 0.2 }}
                     onClick={handleSignUp}
                     style={{ transformStyle: 'preserve-3d' }}
-                    className="w-full rounded-2xl bg-gradient-to-r from-violet-600 via-purple-500 to-cyan-400 px-6 py-3.5 text-base font-bold text-white shadow-[0_0_30px_rgba(139,92,246,0.4)] transition hover:shadow-[0_0_45px_rgba(139,92,246,0.6)]"
+                    className="w-full rounded-2xl bg-white px-6 py-3.5 text-base font-bold text-black shadow-[0_0_30px_rgba(255,255,255,0.4)] transition hover:shadow-[0_0_45px_rgba(255,255,255,0.6)]"
                   >
                     Sign Up
                   </motion.button>
@@ -121,7 +121,7 @@ export default function Landing() {
                     animate={{ scale: 1, opacity: 1 }}
                     transition={{ type: 'spring', stiffness: 200, damping: 16, delay: 0.3 }}
                     onClick={() => setShowAuth(false)}
-                    className="mt-1 text-sm font-medium text-slate-400 transition hover:text-white"
+                    className="mt-1 text-sm font-medium text-zinc-400 transition hover:text-white"
                   >
                     ← Back
                   </motion.button>

@@ -144,8 +144,8 @@ export default function Onboarding() {
                 onClick={() => setYear(y)}
                 className={`relative rounded-2xl border px-4 py-6 text-center transition-colors ${
                   active
-                    ? 'border-transparent bg-gradient-to-br from-violet-600 to-cyan-500 text-white shadow-glow'
-                    : 'border-white/20 bg-white/10 text-slate-200 hover:bg-white/15'
+                    ? 'border-transparent bg-white text-black shadow-glow'
+                    : 'border-white/20 bg-white/10 text-zinc-200 hover:bg-white/15'
                 }`}
               >
                 <div className="text-2xl font-extrabold">Year {y}</div>
@@ -154,7 +154,7 @@ export default function Onboarding() {
                   <motion.span
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
-                    className="absolute -right-2 -top-2 flex h-7 w-7 items-center justify-center rounded-full bg-white text-sm text-violet-700 shadow"
+                    className="absolute -right-2 -top-2 flex h-7 w-7 items-center justify-center rounded-full border border-white bg-black text-sm text-white shadow"
                   >
                     ✓
                   </motion.span>
@@ -181,8 +181,8 @@ export default function Onboarding() {
                 onClick={() => setField(f)}
                 className={`rounded-full border px-5 py-2.5 text-sm font-semibold transition-colors ${
                   active
-                    ? 'border-transparent bg-gradient-to-r from-violet-600 to-cyan-500 text-white shadow-glow'
-                    : 'border-white/20 bg-white/10 text-slate-200 hover:bg-white/15'
+                    ? 'border-transparent bg-white text-black shadow-glow'
+                    : 'border-white/20 bg-white/10 text-zinc-200 hover:bg-white/15'
                 }`}
               >
                 {f}
@@ -214,7 +214,7 @@ export default function Onboarding() {
           >
             🔗 Not signed in? Open leetcode.com to sign in first ↗
           </motion.a>
-          <p className="mt-2 text-xs text-slate-400">
+          <p className="mt-2 text-xs text-zinc-400">
             Sign in there, then come back and enter your username above.
           </p>
         </div>
@@ -240,7 +240,7 @@ export default function Onboarding() {
             name="campustrack_score"
             type="number"
           />
-          <p className="text-xs text-slate-400">
+          <p className="text-xs text-zinc-400">
             Enter your latest campus-track score yourself — we'll verify it later. No auto-sync here.
           </p>
           <motion.a
@@ -253,7 +253,7 @@ export default function Onboarding() {
           >
             🔗 Not signed in? Open campustrack.in to sign in first ↗
           </motion.a>
-          <p className="text-xs text-slate-400">
+          <p className="text-xs text-zinc-400">
             Sign in there, then come back and enter your username above.
           </p>
         </div>
@@ -274,13 +274,13 @@ export default function Onboarding() {
         >
           {/* Progress bar */}
           <div className="mb-8">
-            <div className="mb-2 flex items-center justify-between text-xs font-medium text-slate-300">
+            <div className="mb-2 flex items-center justify-between text-xs font-medium text-zinc-300">
               <span>Step {step + 1} of {totalSteps}</span>
               <span>{Math.round(((step + 1) / totalSteps) * 100)}%</span>
             </div>
             <div className="h-2 overflow-hidden rounded-full bg-white/10">
               <motion.div
-                className="h-full rounded-full bg-gradient-to-r from-violet-500 via-indigo-500 to-cyan-400"
+                className="h-full rounded-full bg-white"
                 animate={{ width: `${((step + 1) / totalSteps) * 100}%` }}
                 transition={{ type: 'spring', stiffness: 120, damping: 20 }}
               />
@@ -298,13 +298,13 @@ export default function Onboarding() {
               transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
             >
               <h1 className="text-2xl font-extrabold text-white">{current.title}</h1>
-              <p className="mb-6 mt-1 text-sm text-slate-300">{current.subtitle}</p>
+              <p className="mb-6 mt-1 text-sm text-zinc-300">{current.subtitle}</p>
               {current.body}
             </motion.div>
           </AnimatePresence>
 
           {error && (
-            <div className="mt-4 rounded-xl border border-rose-400/40 bg-rose-500/15 px-4 py-3 text-sm text-rose-200">
+            <div className="mt-4 rounded-xl border border-white/40 bg-white/15 px-4 py-3 text-sm text-zinc-200">
               {error}
             </div>
           )}

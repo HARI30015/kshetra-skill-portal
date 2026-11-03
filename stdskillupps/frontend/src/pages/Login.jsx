@@ -74,7 +74,7 @@ export default function Login() {
             transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
             whileHover={{ rotateX: 2, rotateY: -2, scale: 1.01 }}
             className="glass-3d p-8 preserve-3d"
-            style={{ transformStyle: 'preserve-3d', boxShadow: '0 30px 80px rgba(0,0,0,0.5), 0 0 60px rgba(139,92,246,0.15)' }}
+            style={{ transformStyle: 'preserve-3d', boxShadow: '0 30px 80px rgba(0,0,0,0.5), 0 0 60px rgba(255,255,255,0.15)' }}
           >
             <div style={{ transform: 'translateZ(40px)' }}>
             <motion.div
@@ -82,8 +82,8 @@ export default function Login() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.15 }}
             >
-              <h1 className="text-2xl font-extrabold text-white" style={{ textShadow: '0 4px 20px rgba(139,92,246,0.4)' }}>Welcome back 👋</h1>
-              <p className="mt-1 text-sm text-slate-300">
+              <h1 className="text-2xl font-extrabold text-white" style={{ textShadow: '0 4px 20px rgba(255,255,255,0.4)' }}>Welcome back 👋</h1>
+              <p className="mt-1 text-sm text-zinc-300">
                 Sign in with your email and password.
               </p>
             </motion.div>
@@ -96,7 +96,7 @@ export default function Login() {
                   exit={{ opacity: 0, height: 0 }}
                   className="overflow-hidden"
                 >
-                  <div className="mt-4 rounded-xl border border-cyan-400/40 bg-cyan-500/15 px-4 py-3 text-sm text-cyan-200">
+                  <div className="mt-4 rounded-xl border border-white/40 bg-white/15 px-4 py-3 text-sm text-zinc-200">
                     {notice}
                   </div>
                 </motion.div>
@@ -145,7 +145,7 @@ export default function Login() {
                     exit={{ opacity: 0, height: 0 }}
                     className="overflow-hidden"
                   >
-                    <div className="rounded-xl border border-rose-400/40 bg-rose-500/15 px-4 py-3 text-sm text-rose-200">
+                    <div className="rounded-xl border border-white/40 bg-white/15 px-4 py-3 text-sm text-zinc-200">
                       {error}
                     </div>
                   </motion.div>
@@ -167,9 +167,9 @@ export default function Login() {
               </motion.div>
             </form>
 
-            <p className="mt-6 text-center text-sm text-slate-400">
+            <p className="mt-6 text-center text-sm text-zinc-400">
               New here?{' '}
-              <Link to="/signup" className="font-semibold text-cyan-300 hover:text-cyan-200">
+              <Link to="/signup" className="font-semibold text-zinc-200 hover:text-zinc-200">
                 Create an account
               </Link>
             </p>

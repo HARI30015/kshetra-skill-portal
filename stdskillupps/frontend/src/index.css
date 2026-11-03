@@ -18,18 +18,18 @@
   }
 
   body {
-    @apply bg-ink-950 text-slate-100 font-sans antialiased;
+    @apply bg-black text-zinc-100 font-sans antialiased;
     background-image:
-      radial-gradient(1200px 800px at 10% -10%, rgba(139, 92, 246, 0.22), transparent 60%),
-      radial-gradient(1000px 700px at 90% 10%, rgba(34, 211, 238, 0.14), transparent 60%),
-      radial-gradient(900px 900px at 50% 110%, rgba(217, 70, 239, 0.12), transparent 60%);
+      radial-gradient(1200px 800px at 10% -10%, rgba(255, 255, 255, 0.05), transparent 60%),
+      radial-gradient(1000px 700px at 90% 10%, rgba(255, 255, 255, 0.035), transparent 60%),
+      radial-gradient(900px 900px at 50% 110%, rgba(255, 255, 255, 0.04), transparent 60%);
     background-attachment: fixed;
     min-height: 100vh;
   }
 
   ::selection {
-    background: rgba(139, 92, 246, 0.45);
-    color: #fff;
+    background: rgba(255, 255, 255, 0.85);
+    color: #000;
   }
 
   /* Custom scrollbar */
@@ -38,20 +38,20 @@
     height: 10px;
   }
   ::-webkit-scrollbar-track {
-    background: rgba(11, 16, 38, 0.6);
+    background: rgba(10, 10, 10, 0.9);
   }
   ::-webkit-scrollbar-thumb {
-    background: linear-gradient(180deg, rgba(139, 92, 246, 0.7), rgba(34, 211, 238, 0.7));
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.55), rgba(161, 161, 170, 0.55));
     border-radius: 9999px;
-    border: 2px solid rgba(11, 16, 38, 0.6);
+    border: 2px solid rgba(10, 10, 10, 0.9);
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(180deg, rgba(139, 92, 246, 1), rgba(34, 211, 238, 1));
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(212, 212, 216, 0.9));
   }
 
   * {
     scrollbar-width: thin;
-    scrollbar-color: rgba(139, 92, 246, 0.6) rgba(11, 16, 38, 0.6);
+    scrollbar-color: rgba(255, 255, 255, 0.5) rgba(10, 10, 10, 0.9);
   }
 }
 
@@ -68,16 +68,16 @@
 
 @layer utilities {
   .glass {
-    @apply bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl shadow-glass;
+    @apply bg-black/60 backdrop-blur-xl border border-white/25 rounded-2xl shadow-glass;
   }
 
   .glass-strong {
-    @apply bg-white/[0.14] backdrop-blur-2xl border border-white/25 rounded-3xl shadow-glass;
+    @apply bg-black/70 backdrop-blur-2xl border border-white/30 rounded-3xl shadow-glass;
   }
 
   .text-gradient {
     @apply bg-clip-text text-transparent;
-    background-image: linear-gradient(90deg, #a78bfa, #22d3ee, #e879f9, #a78bfa);
+    background-image: linear-gradient(90deg, #ffffff, #a1a1aa, #ffffff, #d4d4d8, #ffffff);
     background-size: 200% auto;
     animation: std-gradient 8s ease infinite;
   }

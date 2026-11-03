@@ -53,7 +53,7 @@ export default function Placements() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.15 }}
-          className="mt-2 text-sm text-slate-300"
+          className="mt-2 text-sm text-zinc-300"
         >
           Find drives hiring for your stack and target field.
         </motion.p>
@@ -66,14 +66,14 @@ export default function Placements() {
           className="glass mt-6 p-5"
         >
           <div className="relative">
-            <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
+            <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400">
               🔍
             </span>
             <input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search by company, role, or skill…"
-              className="w-full rounded-xl border border-white/20 bg-white/10 py-3 pl-11 pr-4 text-white placeholder-slate-400 backdrop-blur-xl outline-none transition focus:border-cyan-400"
+              className="w-full rounded-xl border border-white/20 bg-white/10 py-3 pl-11 pr-4 text-white placeholder-zinc-400 backdrop-blur-xl outline-none transition focus:border-white"
             />
           </div>
           <div className="mt-4 flex flex-wrap gap-2">
@@ -87,8 +87,8 @@ export default function Placements() {
                   onClick={() => setField(f)}
                   className={`rounded-full border px-4 py-1.5 text-xs font-semibold transition-colors ${
                     active
-                      ? 'border-transparent bg-gradient-to-r from-violet-600 to-cyan-500 text-white shadow-glow'
-                      : 'border-white/20 bg-white/10 text-slate-300 hover:bg-white/15'
+                      ? 'border-transparent bg-white text-black shadow-glow'
+                      : 'border-white/20 bg-white/10 text-zinc-300 hover:bg-white/15'
                   }`}
                 >
                   {f}
@@ -105,7 +105,7 @@ export default function Placements() {
           <GlassCard delay={0.1} className="mt-6 text-center">
             <p className="text-3xl">🔭</p>
             <p className="mt-2 font-semibold text-white">No drives found</p>
-            <p className="mt-1 text-sm text-slate-400">Try a different search or field filter.</p>
+            <p className="mt-1 text-sm text-zinc-400">Try a different search or field filter.</p>
           </GlassCard>
         ) : (
           <motion.div layout className="mt-6 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
@@ -124,16 +124,16 @@ export default function Placements() {
                   <div className="flex items-start justify-between gap-2">
                     <div>
                       <h3 className="text-lg font-bold text-white">{p.company}</h3>
-                      <p className="text-sm text-slate-300">{p.role}</p>
+                      <p className="text-sm text-zinc-300">{p.role}</p>
                     </div>
                     {p.package_lpa && (
-                      <span className="shrink-0 rounded-full bg-gradient-to-r from-violet-600 to-cyan-500 px-3 py-1 text-xs font-bold text-white shadow-glow">
+                      <span className="shrink-0 rounded-full bg-white px-3 py-1 text-xs font-bold text-black shadow-glow">
                         {p.package_lpa} LPA
                       </span>
                     )}
                   </div>
 
-                  <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs text-slate-400">
+                  <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs text-zinc-400">
                     {p.job_field && <span>🎯 {p.job_field}</span>}
                     {p.location && <span>📍 {p.location}</span>}
                     {p.drive_date && <span>📅 {p.drive_date}</span>}
@@ -141,10 +141,10 @@ export default function Placements() {
 
                   {p.languages?.length > 0 && (
                     <div className="mt-3">
-                      <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wider text-slate-400">Languages</p>
+                      <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wider text-zinc-400">Languages</p>
                       <div className="flex flex-wrap gap-1.5">
                         {p.languages.map((l) => (
-                          <span key={l} className="rounded-full bg-cyan-500/15 px-2.5 py-1 text-[11px] font-semibold text-cyan-200">
+                          <span key={l} className="rounded-full bg-white/15 px-2.5 py-1 text-[11px] font-semibold text-zinc-200">
                             {l}
                           </span>
                         ))}
@@ -154,10 +154,10 @@ export default function Placements() {
 
                   {p.skills?.length > 0 && (
                     <div className="mt-3">
-                      <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wider text-slate-400">Skills</p>
+                      <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wider text-zinc-400">Skills</p>
                       <div className="flex flex-wrap gap-1.5">
                         {p.skills.map((s) => (
-                          <span key={s} className="rounded-full border border-white/15 bg-white/10 px-2.5 py-1 text-[11px] font-medium text-slate-200">
+                          <span key={s} className="rounded-full border border-white/15 bg-white/10 px-2.5 py-1 text-[11px] font-medium text-zinc-200">
                             {s}
                           </span>
                         ))}

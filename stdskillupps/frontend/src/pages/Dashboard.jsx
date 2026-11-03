@@ -160,7 +160,7 @@ function Spinner({ size = 20 }) {
   return (
     <span
       aria-hidden="true"
-      className="inline-block animate-spin rounded-full border-2 border-white/20 border-t-cyan-300"
+      className="inline-block animate-spin rounded-full border-2 border-white/20 border-t-white"
       style={{ width: size, height: size }}
     />
   );
@@ -168,9 +168,9 @@ function Spinner({ size = 20 }) {
 
 function TapButton({ children, onClick, loading, disabled, variant = 'primary', type = 'button', className = '' }) {
   const styles = {
-    primary: 'bg-gradient-to-r from-violet-600 to-cyan-500 text-white shadow-glow',
+    primary: 'bg-white text-black shadow-glow',
     secondary: 'border border-white/20 bg-white/10 text-white hover:bg-white/15',
-    ghost: 'text-cyan-300 hover:text-cyan-200',
+    ghost: 'text-zinc-200 hover:text-zinc-200',
   };
   return (
     <motion.button
@@ -196,9 +196,9 @@ function CardLoading({ label, waking, compact }) {
   return (
     <div className={`flex flex-col items-center gap-3 text-center ${compact ? 'mt-3 py-2' : 'mt-8 py-6'}`}>
       <Spinner />
-      <p className="text-sm text-slate-300">{label}</p>
+      <p className="text-sm text-zinc-300">{label}</p>
       {(slow || waking) && (
-        <p className="max-w-xs text-xs text-slate-400">
+        <p className="max-w-xs text-xs text-zinc-400">
           Our free server naps when idle and can take up to a minute to wake. You can keep using the rest of the page.
         </p>
       )}
@@ -208,8 +208,8 @@ function CardLoading({ label, waking, compact }) {
 
 function CardError({ message, onRetry, busy, compact }) {
   return (
-    <div className={`rounded-2xl border border-rose-400/30 bg-rose-500/10 p-4 text-center ${compact ? 'mt-3' : 'mt-6'}`}>
-      <p className="text-sm text-rose-200">{message}</p>
+    <div className={`rounded-2xl border border-white/30 bg-white/10 p-4 text-center ${compact ? 'mt-3' : 'mt-6'}`}>
+      <p className="text-sm text-zinc-200">{message}</p>
       <TapButton variant="secondary" onClick={onRetry} loading={busy} className="mt-3">
         ↻ Retry
       </TapButton>
@@ -244,7 +244,7 @@ function BookmarkletLink({ code }) {
       ref={ref}
       href="#"
       onClick={(e) => e.preventDefault()}
-      className="mt-3 inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-violet-500 to-cyan-400 px-4 py-2 text-sm font-bold text-white shadow-glow"
+      className="mt-3 inline-flex items-center gap-1.5 rounded-xl bg-white px-4 py-2 text-sm font-bold text-black shadow-glow"
     >
       🔖 Sync to stdskillupps
     </a>
@@ -305,10 +305,10 @@ function ProfileWait({ onRetry, onLogout, loggingOut }) {
         <GlassCard delay={0.1} className="mt-6">
           <div className="flex flex-col items-center gap-3 py-4 text-center">
             <Spinner />
-            <p className="text-sm text-slate-300">Loading your profile…</p>
+            <p className="text-sm text-zinc-300">Loading your profile…</p>
             {slow && (
               <>
-                <p className="max-w-sm text-xs text-slate-400">
+                <p className="max-w-sm text-xs text-zinc-400">
                   This is taking longer than usual — our free server may be waking up. Try again, or log out and back in.
                 </p>
                 <div className="flex gap-3">
@@ -506,9 +506,9 @@ export default function Dashboard() {
   const r = plan.data;
   const bookmarklet = ct.data?.bookmarklet;
   const diffBuckets = [
-    { label: 'Easy', value: s?.easy_solved || 0, color: 'from-emerald-500 to-green-400' },
-    { label: 'Medium', value: s?.medium_solved || 0, color: 'from-amber-500 to-yellow-400' },
-    { label: 'Hard', value: s?.hard_solved || 0, color: 'from-rose-500 to-red-400' },
+    { label: 'Easy', value: s?.easy_solved || 0, color: 'from-zinc-300 to-white' },
+    { label: 'Medium', value: s?.medium_solved || 0, color: 'from-zinc-400 to-zinc-200' },
+    { label: 'Hard', value: s?.hard_solved || 0, color: 'from-zinc-500 to-zinc-300' },
   ];
   const maxSolved = Math.max(s?.total_solved || 0, 1);
   const langStats = s?.language_stats || {};
@@ -718,13 +718,13 @@ export default function Dashboard() {
           >
             <AnimatedCounter value={s.total_solved} />
           </motion.div>
-          <p className="mt-1 text-xs font-medium uppercase tracking-widest text-slate-400">Total solved</p>
+          <p className="mt-1 text-xs font-medium uppercase tracking-widest text-zinc-400">Total solved</p>
         </div>
         <div className="mt-6 space-y-4">
           {diffBuckets.map((b, i) => (
             <div key={b.label}>
               <div className="mb-1.5 flex justify-between text-sm">
-                <span className="font-medium text-slate-300">{b.label}</span>
+                <span className="font-medium text-zinc-300">{b.label}</span>
                 <span className="font-bold text-white">
                   <AnimatedCounter value={b.value} />
                 </span>
@@ -742,7 +742,7 @@ export default function Dashboard() {
         </div>
         {Object.keys(langStats).length > 0 && (
           <div className="mt-6">
-            <p className="mb-3 text-sm font-semibold text-slate-300">Languages used</p>
+            <p className="mb-3 text-sm font-semibold text-zinc-300">Languages used</p>
             <div className="flex flex-wrap gap-2">
               {Object.entries(langStats).map(([lang, count]) => (
                 <span
@@ -755,9 +755,9 @@ export default function Dashboard() {
             </div>
           </div>
         )}
-        {syncError && <p className="mt-4 text-center text-xs text-rose-300">{syncError}</p>}
+        {syncError && <p className="mt-4 text-center text-xs text-zinc-200">{syncError}</p>}
         {s.synced_at && (
-          <p className="mt-4 text-right text-xs text-slate-500">
+          <p className="mt-4 text-right text-xs text-zinc-500">
             Last synced: {new Date(s.synced_at).toLocaleString()}
           </p>
         )}
@@ -766,7 +766,7 @@ export default function Dashboard() {
   } else if (!username) {
     statsBody = (
       <div className="mt-6 rounded-2xl border border-dashed border-white/20 bg-white/5 p-6 text-center">
-        <p className="text-sm text-slate-300">Add your LeetCode username to see your solved counts here.</p>
+        <p className="text-sm text-zinc-300">Add your LeetCode username to see your solved counts here.</p>
         <TapButton onClick={openLeetCodeAdd} className="mt-3">
           ➕ Add username
         </TapButton>
@@ -796,15 +796,15 @@ export default function Dashboard() {
   } else {
     planBody = (
       <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
-        {planError && <p className="mt-4 text-xs text-rose-300">{planError}</p>}
+        {planError && <p className="mt-4 text-xs text-zinc-200">{planError}</p>}
         {r.recommended_languages?.length > 0 && (
           <div className="mt-5">
-            <p className="mb-2.5 text-sm font-semibold text-slate-300">Recommended languages</p>
+            <p className="mb-2.5 text-sm font-semibold text-zinc-300">Recommended languages</p>
             <div className="flex flex-wrap gap-2">
               {r.recommended_languages.map((lang) => (
                 <span
                   key={lang}
-                  className="rounded-full bg-gradient-to-r from-violet-600 to-cyan-500 px-4 py-1.5 text-xs font-bold text-white shadow-glow"
+                  className="rounded-full bg-white px-4 py-1.5 text-xs font-bold text-black shadow-glow"
                 >
                   {lang}
                 </span>
@@ -814,14 +814,14 @@ export default function Dashboard() {
         )}
         {r.focus_areas?.length > 0 && (
           <div className="mt-5">
-            <p className="mb-2.5 text-sm font-semibold text-slate-300">Focus areas</p>
+            <p className="mb-2.5 text-sm font-semibold text-zinc-300">Focus areas</p>
             <ul className="space-y-2">
               {r.focus_areas.map((area, i) => (
                 <li
                   key={i}
-                  className="flex items-start gap-2.5 rounded-xl bg-white/5 px-4 py-2.5 text-sm text-slate-200"
+                  className="flex items-start gap-2.5 rounded-xl bg-white/5 px-4 py-2.5 text-sm text-zinc-200"
                 >
-                  <span className="mt-0.5 text-cyan-300">▸</span> {area}
+                  <span className="mt-0.5 text-zinc-200">▸</span> {area}
                 </li>
               ))}
             </ul>
@@ -829,15 +829,15 @@ export default function Dashboard() {
         )}
         {scheduleText && (
           <div className="mt-5 rounded-2xl border border-white/15 bg-white/5 p-5">
-            <p className="mb-3 text-sm font-semibold text-slate-300">📅 Your exact schedule</p>
+            <p className="mb-3 text-sm font-semibold text-zinc-300">📅 Your exact schedule</p>
             <div className={`relative space-y-3 ${scheduleLong && !scheduleOpen ? 'max-h-60 overflow-hidden' : ''}`}>
               {scheduleParas.map((p, i) => (
-                <p key={i} className="whitespace-pre-line text-sm leading-relaxed text-slate-200">
+                <p key={i} className="whitespace-pre-line text-sm leading-relaxed text-zinc-200">
                   {p}
                 </p>
               ))}
               {scheduleLong && !scheduleOpen && (
-                <div className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-slate-900/80 to-transparent" />
+                <div className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-zinc-900/80 to-transparent" />
               )}
             </div>
             {scheduleLong && (
@@ -868,22 +868,22 @@ export default function Dashboard() {
           {/* Profile */}
           <GlassCard delay={0.05} className="lg:col-span-1">
             <div className="flex items-center gap-4">
-              <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-600 to-cyan-500 text-2xl font-black text-white shadow-glow">
+              <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-white text-2xl font-black text-black shadow-glow">
                 {(profile.full_name || 'S')[0].toUpperCase()}
               </div>
               <div className="min-w-0">
                 <h2 className="truncate text-xl font-bold text-white">{profile.full_name}</h2>
-                <p className="truncate text-sm text-slate-400">{profile.email}</p>
+                <p className="truncate text-sm text-zinc-400">{profile.email}</p>
               </div>
             </div>
 
             <div className="mt-5 space-y-3 text-sm">
               <div className="flex items-center justify-between rounded-xl bg-white/5 px-4 py-2.5">
-                <span className="text-slate-300">🎓 Year</span>
+                <span className="text-zinc-300">🎓 Year</span>
                 <span className="font-semibold text-white">Year {year}</span>
               </div>
               <div className="flex items-center justify-between rounded-xl bg-white/5 px-4 py-2.5">
-                <span className="text-slate-300">🎯 Target field</span>
+                <span className="text-zinc-300">🎯 Target field</span>
                 <span className="font-semibold text-white">{field || '—'}</span>
               </div>
             </div>
@@ -901,7 +901,7 @@ export default function Dashboard() {
               <EditPanel onSubmit={saveProfile} onCancel={() => setEditing(null)} saving={saving}>
                 <AnimatedInput label="Full name" value={form.full_name} onChange={setField('full_name')} required />
                 <label className="block">
-                  <span className="mb-1.5 block text-sm font-medium text-slate-300">Year of study</span>
+                  <span className="mb-1.5 block text-sm font-medium text-zinc-300">Year of study</span>
                   <select
                     value={form.year_of_study}
                     onChange={setField('year_of_study')}
@@ -928,8 +928,8 @@ export default function Dashboard() {
                       onClick={() => setForm((x) => ({ ...x, target_job_field: f }))}
                       className={`touch-manipulation rounded-full border px-3 py-1 text-xs font-semibold ${
                         form.target_job_field === f
-                          ? 'border-cyan-400/60 bg-cyan-500/20 text-cyan-100'
-                          : 'border-white/20 bg-white/10 text-slate-300'
+                          ? 'border-white/60 bg-white/20 text-zinc-200'
+                          : 'border-white/20 bg-white/10 text-zinc-300'
                       }`}
                     >
                       {f}
@@ -939,11 +939,11 @@ export default function Dashboard() {
               </EditPanel>
             )}
 
-            <div className="mt-5 rounded-2xl border border-cyan-400/30 bg-cyan-500/10 p-4 text-center">
+            <div className="mt-5 rounded-2xl border border-white/30 bg-white/10 p-4 text-center">
               <p className="text-xl font-extrabold text-white">
                 {yearsLeft === 0 ? 'It’s placement season 🔥' : `${yearsLeft} year${yearsLeft > 1 ? 's' : ''} left`}
               </p>
-              <p className="mt-1 text-xs text-slate-300">until placements — make every week count.</p>
+              <p className="mt-1 text-xs text-zinc-300">until placements — make every week count.</p>
             </div>
           </GlassCard>
 
@@ -957,13 +957,13 @@ export default function Dashboard() {
             </div>
 
             <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-2 text-sm">
-              <span className="text-slate-400">Username</span>
+              <span className="text-zinc-400">Username</span>
               {username ? (
                 <a
                   href={`https://leetcode.com/u/${encodeURIComponent(username)}`}
                   target="_blank"
                   rel="noreferrer"
-                  className="font-semibold text-cyan-300 underline decoration-cyan-300/40 underline-offset-2 hover:text-cyan-200"
+                  className="font-semibold text-zinc-200 underline decoration-white/40 underline-offset-2 hover:text-zinc-200"
                 >
                   @{username} ↗
                 </a>
@@ -978,7 +978,7 @@ export default function Dashboard() {
                   href={LEETCODE_URL}
                   target="_blank"
                   rel="noreferrer"
-                  className="text-xs font-semibold text-slate-300 underline underline-offset-2"
+                  className="text-xs font-semibold text-zinc-300 underline underline-offset-2"
                 >
                   Open leetcode.com ↗
                 </a>
@@ -994,12 +994,12 @@ export default function Dashboard() {
                   placeholder="your-leetcode-username"
                 />
                 {!username && (
-                  <p className="text-xs text-slate-300">
+                  <p className="text-xs text-zinc-300">
                     Log in to LeetCode in the tab that just opened, then come back, type your LeetCode username
                     (the name in leetcode.com/u/…) and Save.
                   </p>
                 )}
-                <p className="text-xs text-slate-400">Saving fetches your fresh score right away.</p>
+                <p className="text-xs text-zinc-400">Saving fetches your fresh score right away.</p>
               </EditPanel>
             )}
 
@@ -1013,13 +1013,13 @@ export default function Dashboard() {
             <h2 className="text-lg font-bold text-white">🏫 CampusTrack</h2>
 
             <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-2 text-sm">
-              <span className="text-slate-400">Username</span>
+              <span className="text-zinc-400">Username</span>
               {ctUsername ? (
                 <a
                   href={CT_LOGIN_URL}
                   target="_blank"
                   rel="noreferrer"
-                  className="font-semibold text-cyan-300 underline decoration-cyan-300/40 underline-offset-2 hover:text-cyan-200"
+                  className="font-semibold text-zinc-200 underline decoration-white/40 underline-offset-2 hover:text-zinc-200"
                 >
                   @{ctUsername} ↗
                 </a>
@@ -1035,7 +1035,7 @@ export default function Dashboard() {
                 href={CAMPUSTRACK_URL}
                 target="_blank"
                 rel="noreferrer"
-                className="mt-2 inline-block text-xs font-semibold text-slate-300 underline underline-offset-2"
+                className="mt-2 inline-block text-xs font-semibold text-zinc-300 underline underline-offset-2"
               >
                 Open CampusTrack ↗
               </a>
@@ -1043,7 +1043,7 @@ export default function Dashboard() {
 
             <div className="mt-4 rounded-2xl bg-white/5 px-4 py-3 text-center">
               <p className="text-3xl font-extrabold text-white">{ctScore ?? '—'}</p>
-              <p className="mt-1 text-xs uppercase tracking-widest text-slate-400">CampusTrack score</p>
+              <p className="mt-1 text-xs uppercase tracking-widest text-zinc-400">CampusTrack score</p>
             </div>
 
             {editing === 'ct' && (
@@ -1065,7 +1065,7 @@ export default function Dashboard() {
 
             <div className="mt-5 border-t border-white/10 pt-4">
               <p className="text-sm font-semibold text-white">🔄 Sync your real CampusTrack score</p>
-              <p className="mt-1 text-xs leading-relaxed text-slate-400">
+              <p className="mt-1 text-xs leading-relaxed text-zinc-400">
                 CampusTrack has no public link, so the sync runs in your own browser: drag the button below to your
                 bookmarks bar, then open CampusTrack, log in, open your Profile page there, and click the bookmark.
                 Your real score lands here by itself.
@@ -1078,7 +1078,7 @@ export default function Dashboard() {
                     readOnly
                     value={bookmarklet}
                     onFocus={(e) => e.target.select()}
-                    className="mt-3 h-16 w-full rounded-lg border border-white/10 bg-black/30 p-2 text-[10px] text-slate-300"
+                    className="mt-3 h-16 w-full rounded-lg border border-white/10 bg-black/30 p-2 text-[10px] text-zinc-300"
                   />
                   <div className="mt-2 flex flex-wrap gap-2">
                     <TapButton variant="secondary" onClick={copyBookmarklet}>
@@ -1088,7 +1088,7 @@ export default function Dashboard() {
                       ↻ I’ve synced — refresh score
                     </TapButton>
                   </div>
-                  <p className="mt-2 text-[11px] text-slate-500">
+                  <p className="mt-2 text-[11px] text-zinc-500">
                     If dragging fails: copy the code above, add a new bookmark in your browser, and paste the code as
                     its URL.
                   </p>
@@ -1114,15 +1114,15 @@ export default function Dashboard() {
               </TapButton>
             </div>
 
-            <div className="mt-4 rounded-2xl border border-violet-400/30 bg-violet-500/10 p-4">
+            <div className="mt-4 rounded-2xl border border-white/30 bg-white/10 p-4">
               <p className="text-sm font-bold text-white">{guide.title}</p>
-              <p className="mt-1 text-xs leading-relaxed text-slate-300">{guide.text}</p>
+              <p className="mt-1 text-xs leading-relaxed text-zinc-300">{guide.text}</p>
             </div>
 
             {planBody}
 
             <div className="mt-6">
-              <p className="mb-2.5 text-sm font-semibold text-slate-300">
+              <p className="mb-2.5 text-sm font-semibold text-zinc-300">
                 📚 Core languages for <span className="text-gradient">{field || 'SWE'}</span>
               </p>
               <div className="grid gap-3 sm:grid-cols-3">
@@ -1132,11 +1132,11 @@ export default function Dashboard() {
                     href={RESOURCE_LINKS[lang] || 'https://developer.mozilla.org/'}
                     target="_blank"
                     rel="noreferrer"
-                    className="group rounded-2xl border border-white/20 bg-white/10 p-4 transition-colors hover:border-cyan-400/40"
+                    className="group rounded-2xl border border-white/20 bg-white/10 p-4 transition-colors hover:border-white/40"
                   >
                     <div className="text-xl">💡</div>
                     <p className="mt-1 font-bold text-white">{lang}</p>
-                    <p className="mt-1 text-xs text-slate-400 group-hover:text-cyan-300">Open official docs ↗</p>
+                    <p className="mt-1 text-xs text-zinc-400 group-hover:text-zinc-200">Open official docs ↗</p>
                   </a>
                 ))}
               </div>
@@ -1154,7 +1154,7 @@ export default function Dashboard() {
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 16 }}
-              className="max-w-md rounded-2xl border border-cyan-400/30 bg-slate-900/90 px-4 py-3 text-center text-sm font-medium text-cyan-200 shadow-lg"
+              className="max-w-md rounded-2xl border border-white/30 bg-zinc-900/90 px-4 py-3 text-center text-sm font-medium text-zinc-200 shadow-lg"
             >
               {toastMsg}
             </motion.div>

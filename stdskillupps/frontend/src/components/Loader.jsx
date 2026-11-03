@@ -6,12 +6,12 @@ export default function Loader({ label = 'Loading…' }) {
     <div className="flex min-h-[40vh] flex-col items-center justify-center gap-5">
       <div className="relative h-16 w-16">
         <motion.div
-          className="absolute inset-0 rounded-full border-[3px] border-transparent border-t-violet-500 border-r-cyan-400"
+          className="absolute inset-0 rounded-full border-[3px] border-transparent border-t-white border-r-white"
           animate={{ rotate: 360 }}
           transition={{ repeat: Infinity, duration: 0.9, ease: 'linear' }}
         />
         <motion.div
-          className="absolute inset-2 rounded-full border-[3px] border-transparent border-b-fuchsia-500 border-l-violet-400"
+          className="absolute inset-2 rounded-full border-[3px] border-transparent border-b-white border-l-white"
           animate={{ rotate: -360 }}
           transition={{ repeat: Infinity, duration: 1.4, ease: 'linear' }}
         />
@@ -19,7 +19,7 @@ export default function Loader({ label = 'Loading…' }) {
       <motion.p
         animate={{ opacity: [0.4, 1, 0.4] }}
         transition={{ repeat: Infinity, duration: 1.6 }}
-        className="text-sm font-medium text-slate-300"
+        className="text-sm font-medium text-zinc-300"
       >
         {label}
       </motion.p>

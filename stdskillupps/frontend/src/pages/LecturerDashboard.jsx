@@ -49,7 +49,7 @@ function Modal({ onClose, children, title }) {
           <motion.button
             whileHover={{ rotate: 90, scale: 1.1 }}
             onClick={onClose}
-            className="rounded-lg p-1.5 text-slate-300 hover:bg-white/10"
+            className="rounded-lg p-1.5 text-zinc-300 hover:bg-white/10"
             aria-label="Close"
           >
             ✕
@@ -236,10 +236,10 @@ export default function LecturerDashboard() {
 
   const statusColor = (status) => {
     switch ((status || '').toLowerCase()) {
-      case 'placed': return 'bg-emerald-500/20 text-emerald-200 border-emerald-400/30';
-      case 'active': return 'bg-cyan-500/20 text-cyan-200 border-cyan-400/30';
-      case 'inactive': return 'bg-slate-500/20 text-slate-300 border-slate-400/30';
-      default: return 'bg-violet-500/20 text-violet-200 border-violet-400/30';
+      case 'placed': return 'bg-white text-black border-white';
+      case 'active': return 'bg-white/15 text-white border-white/40';
+      case 'inactive': return 'bg-transparent text-zinc-400 border-white/15';
+      default: return 'bg-white/5 text-zinc-300 border-white/20';
     }
   };
 
@@ -252,7 +252,7 @@ export default function LecturerDashboard() {
               initial={{ opacity: 0, y: -16 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -16 }}
-              className="glass mb-6 border-cyan-400/30 p-4 text-center text-sm font-medium text-cyan-200"
+              className="glass mb-6 border-white/30 p-4 text-center text-sm font-medium text-zinc-200"
             >
               {notice}
             </motion.div>
@@ -278,18 +278,18 @@ export default function LecturerDashboard() {
               value={studentQuery}
               onChange={(e) => setStudentQuery(e.target.value)}
               placeholder="Search students…"
-              className="w-full max-w-xs rounded-xl border border-white/20 bg-white/10 px-4 py-2.5 text-sm text-white placeholder-slate-400 backdrop-blur-xl outline-none focus:border-violet-400"
+              className="w-full max-w-xs rounded-xl border border-white/20 bg-white/10 px-4 py-2.5 text-sm text-white placeholder-zinc-400 backdrop-blur-xl outline-none focus:border-white"
             />
           </div>
           {studentsLoading ? (
             <Loader label="Loading students…" />
           ) : filteredStudents.length === 0 ? (
-            <p className="p-6 pt-2 text-sm text-slate-400">No students found.</p>
+            <p className="p-6 pt-2 text-sm text-zinc-400">No students found.</p>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full min-w-[980px] text-left text-sm">
                 <thead>
-                  <tr className="border-y border-white/10 text-xs uppercase tracking-wider text-slate-400">
+                  <tr className="border-y border-white/10 text-xs uppercase tracking-wider text-zinc-400">
                     {['Name', 'Email', 'Year', 'Target field', 'LeetCode', 'CampusTrack', 'LeetCode solved', 'Status', ''].map((h) => (
                       <th key={h} className="px-6 py-3 font-semibold">{h}</th>
                     ))}
@@ -306,21 +306,21 @@ export default function LecturerDashboard() {
                         className="border-b border-white/5 transition-colors hover:bg-white/5"
                       >
                         <td className="px-6 py-3.5 font-semibold text-white">{s.full_name}</td>
-                        <td className="px-6 py-3.5 text-slate-300">{s.email}</td>
-                        <td className="px-6 py-3.5 text-slate-300">{s.year_of_study ? `Y${s.year_of_study}` : '—'}</td>
-                        <td className="px-6 py-3.5 text-slate-300">{s.target_job_field || '—'}</td>
+                        <td className="px-6 py-3.5 text-zinc-300">{s.email}</td>
+                        <td className="px-6 py-3.5 text-zinc-300">{s.year_of_study ? `Y${s.year_of_study}` : '—'}</td>
+                        <td className="px-6 py-3.5 text-zinc-300">{s.target_job_field || '—'}</td>
                         <td className="px-6 py-3.5">
                           {s.leetcode_username ? (
                             <a
                               href={`https://leetcode.com/u/${s.leetcode_username}`}
                               target="_blank"
                               rel="noreferrer"
-                              className="font-semibold text-cyan-300 underline decoration-cyan-300/40 underline-offset-2 hover:text-cyan-200"
+                              className="font-semibold text-zinc-200 underline decoration-white/40 underline-offset-2 hover:text-zinc-200"
                             >
                               @{s.leetcode_username} ↗
                             </a>
                           ) : (
-                            <span className="text-slate-400">—</span>
+                            <span className="text-zinc-400">—</span>
                           )}
                         </td>
                         <td className="px-6 py-3.5">
@@ -329,16 +329,16 @@ export default function LecturerDashboard() {
                               href={CAMPUSTRACK_URL}
                               target="_blank"
                               rel="noreferrer"
-                              className="font-semibold text-cyan-300 underline decoration-cyan-300/40 underline-offset-2 hover:text-cyan-200"
+                              className="font-semibold text-zinc-200 underline decoration-white/40 underline-offset-2 hover:text-zinc-200"
                             >
                               @{s.campus_track_username} ↗
                             </a>
                           ) : (
-                            <span className="text-slate-400">—</span>
+                            <span className="text-zinc-400">—</span>
                           )}
                         </td>
                         <td className="px-6 py-3.5">
-                          <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-bold text-cyan-200">
+                          <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-bold text-zinc-200">
                             {s.leetcode_total_solved ?? s.total_solved ?? '—'}
                           </span>
                         </td>
@@ -377,7 +377,7 @@ export default function LecturerDashboard() {
           {placementsLoading ? (
             <Loader label="Loading placements…" />
           ) : placements.length === 0 ? (
-            <p className="mt-4 text-sm text-slate-400">No placements yet. Add your first drive above.</p>
+            <p className="mt-4 text-sm text-zinc-400">No placements yet. Add your first drive above.</p>
           ) : (
             <div className="mt-5 grid gap-4 md:grid-cols-2">
               {placements.map((p, i) => (
@@ -391,8 +391,8 @@ export default function LecturerDashboard() {
                   <div className="flex items-start justify-between gap-3">
                     <div>
                       <p className="font-bold text-white">{p.company}</p>
-                      <p className="text-sm text-slate-300">{p.role}</p>
-                      <p className="mt-1 text-xs text-slate-400">
+                      <p className="text-sm text-zinc-300">{p.role}</p>
+                      <p className="mt-1 text-xs text-zinc-400">
                         {[p.job_field, p.package_lpa ? `${p.package_lpa} LPA` : null, p.location, p.drive_date]
                           .filter(Boolean)
                           .join(' · ')}
@@ -411,7 +411,7 @@ export default function LecturerDashboard() {
                         whileHover={{ scale: 1.08 }}
                         whileTap={{ scale: 0.92 }}
                         onClick={() => setDeleteId(p.id)}
-                        className="rounded-lg border border-rose-400/40 bg-rose-500/10 px-3 py-1.5 text-xs font-semibold text-rose-200 hover:bg-rose-500/20"
+                        className="rounded-lg border border-white/40 bg-white/10 px-3 py-1.5 text-xs font-semibold text-zinc-200 hover:bg-white/20"
                       >
                         Delete
                       </motion.button>
@@ -420,7 +420,7 @@ export default function LecturerDashboard() {
                   {(p.languages?.length > 0) && (
                     <div className="mt-3 flex flex-wrap gap-1.5">
                       {p.languages.map((l) => (
-                        <span key={l} className="rounded-full bg-cyan-500/15 px-2.5 py-0.5 text-[11px] font-semibold text-cyan-200">
+                        <span key={l} className="rounded-full bg-white/15 px-2.5 py-0.5 text-[11px] font-semibold text-zinc-200">
                           {l}
                         </span>
                       ))}
@@ -440,7 +440,7 @@ export default function LecturerDashboard() {
                 <AnimatedInput label="Full name" value={editStudent.full_name} onChange={(e) => setEditStudent({ ...editStudent, full_name: e.target.value })} required />
                 <div className="grid grid-cols-2 gap-4">
                   <label className="block">
-                    <span className="mb-1.5 block text-sm font-medium text-slate-300">Year</span>
+                    <span className="mb-1.5 block text-sm font-medium text-zinc-300">Year</span>
                     <select
                       value={editStudent.year_of_study}
                       onChange={(e) => setEditStudent({ ...editStudent, year_of_study: e.target.value })}
@@ -450,7 +450,7 @@ export default function LecturerDashboard() {
                     </select>
                   </label>
                   <label className="block">
-                    <span className="mb-1.5 block text-sm font-medium text-slate-300">Status</span>
+                    <span className="mb-1.5 block text-sm font-medium text-zinc-300">Status</span>
                     <select
                       value={editStudent.status}
                       onChange={(e) => setEditStudent({ ...editStudent, status: e.target.value })}
@@ -508,7 +508,7 @@ export default function LecturerDashboard() {
         <AnimatePresence>
           {deleteId && (
             <Modal onClose={() => setDeleteId(null)} title="Delete placement?">
-              <p className="text-sm text-slate-300">This will permanently remove this placement drive. This can't be undone.</p>
+              <p className="text-sm text-zinc-300">This will permanently remove this placement drive. This can't be undone.</p>
               <div className="mt-6 flex gap-3">
                 <AnimatedButton variant="secondary" onClick={() => setDeleteId(null)} className="flex-1">Cancel</AnimatedButton>
                 <AnimatedButton variant="danger" onClick={confirmDelete} className="flex-1">Delete</AnimatedButton>
