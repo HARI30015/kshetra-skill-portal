@@ -250,7 +250,7 @@ export default function Signup() {
             animate={{ opacity: 1, y: 0, rotateX: 0, scale: 1, z: 0 }}
             transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
             whileHover={{ rotateX: 2, rotateY: -2, scale: 1.01 }}
-            className="glass-3d p-8 preserve-3d"
+            className="glass-3d rounded-[2rem] p-8 preserve-3d"
             style={{ transformStyle: 'preserve-3d', boxShadow: '0 30px 80px rgba(0,0,0,0.5), 0 0 60px rgba(255,255,255,0.15)' }}
           >
             <div style={{ transform: 'translateZ(40px)' }}>

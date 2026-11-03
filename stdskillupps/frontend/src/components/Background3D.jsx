@@ -1,11 +1,16 @@
-import React, { useEffect, useMemo } from 'react';
-import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
+import React, { useMemo, useState } from 'react';
+import { motion, useReducedMotion } from 'framer-motion';
+// The reference galaxy photo, converted to a monochrome square centred on the
+// galaxy core. It is embedded as a data URI in src/assets/galaxy.js (same image
+// bytes) because the GitHub connector only pushes text files, not binary images.
+import { galaxyUrl } from '../assets/galaxy';
 
 // BLACK + WHITE GALAXY background — the single background system for every
 // page (mounted once in App.jsx). Monochrome only, CSS gradients/transforms
 // only: no images, no blur() filters (every gradient fades to transparent
 // by itself), transform/opacity animation only, will-change on animated
-// layers, a lighter set on phones, no mousemove listener on touch devices.
+// layers, a lighter set on phones. NOTHING here follows the mouse any more
+// (no mousemove listener, no parallax): only automatic animation.
 // Everything is pointer-events: none at z-0 behind the page content.
 //
 // ── CHOOSE YOUR BACKGROUND ─────────────────────────────────────────────
@@ -98,7 +103,7 @@ function Wisp({ w }) {
 
 // Tilted spiral galaxy: concentric masked conic "arms", each twisted a little
 // more than the last (reads as a swirl), turning very slowly, plus a core glow.
-function Spiral({ s, lite }) {
+function Spiral({ s, lite, reduced }) {
   const arms = `conic-gradient(from 0deg, ${W(0)} 0deg, ${W(0.3)} 38deg, ${W(0)} 100deg, ${W(0)} 180deg, ${W(0.3)} 218deg, ${W(0)} 280deg, ${W(0)} 360deg)`;
   const mask = 'radial-gradient(circle, #000 4%, rgba(0,0,0,0.6) 36%, transparent 68%)';
   const rings = lite ? [0, 1, 2] : [0, 1, 2, 3, 4];
@@ -110,7 +115,7 @@ function Spiral({ s, lite }) {
       <motion.div
         className="absolute inset-0"
         style={{ willChange: 'transform' }}
-        animate={{ rotate: 360 }}
+        animate={reduced ? undefined : { rotate: 360 }}
         transition={{ duration: s.d, repeat: Infinity, ease: 'linear' }}
       >
         {rings.map((i) => (
@@ -139,40 +144,55 @@ function Spiral({ s, lite }) {
   );
 }
 
+// The big, clearly visible spiral galaxy (the user's reference photo, made
+// grayscale so it stays black/white). The soft circular mask sits on the
+// ROTATING element itself, so no square corners ever show while it turns.
+// One full turn takes about 180 s (CSS keyframes, transform only); the
+// rotation is paused for prefers-reduced-motion in premium.css.
+const GALAXY_MASK =
+  'radial-gradient(circle closest-side, #000 42%, rgba(0,0,0,0.5) 66%, transparent 92%)';
+
+function PhotoGalaxy({ lite, onFail }) {
+  const size = lite ? 'max(130vw, 130vh)' : 'max(105vw, 105vh)';
+  return (
+    <div
+      className="absolute inset-0 flex items-center justify-center"
+      style={{ transform: lite ? undefined : 'translate(14vw, -3vh)' }}
+    >
+      <div
+        className="std-galaxy-rot"
+        style={{
+          width: size,
+          height: size,
+          flexShrink: 0,
+          WebkitMaskImage: GALAXY_MASK,
+          maskImage: GALAXY_MASK,
+        }}
+      >
+        <img
+          src={galaxyUrl}
+          alt=""
+          draggable={false}
+          decoding="async"
+          onError={onFail}
+          className="block h-full w-full select-none"
+          style={{ opacity: 0.74 }}
+        />
+      </div>
+    </div>
+  );
+}
+
 export default function Background3D() {
-  const mouseX = useMotionValue(0);
-  const mouseY = useMotionValue(0);
-  const springX = useSpring(mouseX, { stiffness: 50, damping: 20 });
-  const springY = useSpring(mouseY, { stiffness: 50, damping: 20 });
-  // Parallax: every layer shifts opposite the cursor (stars least, swirls most).
-  const starsX = useTransform(springX, (v) => -v * 12);
-  const starsY = useTransform(springY, (v) => -v * 12);
-  const orbsX = useTransform(springX, (v) => -v * 20);
-  const orbsY = useTransform(springY, (v) => -v * 20);
-  const swirlX = useTransform(springX, (v) => -v * 34);
-  const swirlY = useTransform(springY, (v) => -v * 34);
-
-  const handleMouseMove = (e) => {
-    mouseX.set(e.clientX / window.innerWidth - 0.5);
-    mouseY.set(e.clientY / window.innerHeight - 0.5);
-  };
-
-  useEffect(() => {
-    // Touch devices have no mouse — skip the listener entirely.
-    if (typeof window !== 'undefined' && window.matchMedia?.('(pointer: coarse)').matches) {
-      return undefined;
-    }
-    window.addEventListener('mousemove', handleMouseMove, { passive: true });
-    return () => window.removeEventListener('mousemove', handleMouseMove);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   const lite = useMemo(
     () =>
       typeof window !== 'undefined' &&
       (window.matchMedia?.('(pointer: coarse)').matches || window.innerWidth < 768),
     []
   );
+  const reduced = useReducedMotion();
+  // If the photo ever fails to load, fall back to the CSS-drawn spiral.
+  const [photoOk, setPhotoOk] = useState(true);
 
   const theme = useMemo(() => pickTheme(), []);
   const cfg = THEMES[theme] || THEMES[DEFAULT_BG_THEME];
@@ -222,18 +242,33 @@ export default function Background3D() {
 
   const orbs = lite ? cfg.orbs.slice(0, Math.max(2, Math.ceil(cfg.orbs.length / 2))) : cfg.orbs;
   const wisps = lite ? cfg.wisps.slice(0, 1) : cfg.wisps;
-  const spirals = lite ? cfg.spirals.slice(0, 1) : cfg.spirals;
+  // The photo galaxy replaces the CSS spirals; they only come back as a fallback.
+  const fallbackSpirals = cfg.spirals.length
+    ? cfg.spirals
+    : [{ size: 1100, l: '18%', t: '-10%', tilt: -18, d: 180 }];
+  const spirals = photoOk ? [] : lite ? fallbackSpirals.slice(0, 1) : fallbackSpirals;
   const streaks = Array.from({ length: lite ? Math.min(1, cfg.streaks) : cfg.streaks }, (_, i) => i);
 
   return (
     <div
       className="pointer-events-none fixed inset-0 z-0 overflow-hidden bg-black"
       aria-hidden="true"
-      onMouseMove={handleMouseMove}
     >
+      {/* The big rotating spiral galaxy (bottom layer) */}
+      {photoOk && <PhotoGalaxy lite={lite} onFail={() => setPhotoOk(false)} />}
+
+      {/* Soft dark scrim behind the page's centre so headings stay readable
+          over the bright galaxy (a plain gradient, no blur filter). */}
+      {photoOk && (
+        <div
+          className="absolute inset-0"
+          style={{ background: 'radial-gradient(ellipse 60% 46% at 50% 44%, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.2) 55%, rgba(0,0,0,0) 100%)' }}
+        />
+      )}
+
       {/* Milky Way band (gradients fade out by themselves) */}
       {cfg.band && (
-        <motion.div className="absolute inset-0" style={{ x: swirlX, y: swirlY, willChange: 'transform' }}>
+        <div className="absolute inset-0">
           <motion.div
             className="absolute"
             style={{
@@ -250,11 +285,11 @@ export default function Background3D() {
               background: `radial-gradient(ellipse at 50% 50%, ${W(0.16)} 0%, ${W(0.06)} 45%, ${W(0)} 72%)`,
             }}
           />
-        </motion.div>
+        </div>
       )}
 
       {/* Soft glowing white orbs */}
-      <motion.div className="absolute inset-0" style={{ x: orbsX, y: orbsY, willChange: 'transform' }}>
+      <div className="absolute inset-0">
         {orbs.map((o, i) => <Orb key={`orb-${i}`} o={o} />)}
         {clusterGlows.map((g, i) => (
           <div
@@ -266,16 +301,16 @@ export default function Background3D() {
             }}
           />
         ))}
-      </motion.div>
+      </div>
 
-      {/* Galaxy swirls: wisps and spirals */}
-      <motion.div className="absolute inset-0" style={{ x: swirlX, y: swirlY, willChange: 'transform' }}>
+      {/* Galaxy swirls: wisps (and the CSS spirals if the photo is unavailable) */}
+      <div className="absolute inset-0">
         {wisps.map((w, i) => <Wisp key={`wisp-${i}`} w={w} />)}
-        {spirals.map((s, i) => <Spiral key={`spiral-${i}`} s={s} lite={lite} />)}
-      </motion.div>
+        {spirals.map((s, i) => <Spiral key={`spiral-${i}`} s={s} lite={lite} reduced={reduced} />)}
+      </div>
 
       {/* Tiny twinkling white stars (CSS keyframes: compositor-only opacity) */}
-      <motion.div className="absolute inset-0" style={{ x: starsX, y: starsY, willChange: 'transform' }}>
+      <div className="absolute inset-0">
         {stars.map((s, i) => (
           <span
             key={i}
@@ -289,7 +324,7 @@ export default function Background3D() {
             }}
           />
         ))}
-      </motion.div>
+      </div>
 
       {/* Slow white shining light streaks */}
       {streaks.map((i) => (

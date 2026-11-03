@@ -74,3 +74,16 @@
 @media (prefers-reduced-motion: reduce) {
   .std-star { animation: none !important; }
 }
+
+/* Rotating photo galaxy (Background3D): one full turn in ~180 s, transform
+   only (compositor), paused for users who prefer reduced motion. */
+@keyframes std-galaxy-spin {
+  to { transform: rotate(360deg); }
+}
+.std-galaxy-rot {
+  animation: std-galaxy-spin 180s linear infinite;
+  will-change: transform;
+}
+@media (prefers-reduced-motion: reduce) {
+  .std-galaxy-rot { animation: none !important; }
+}
