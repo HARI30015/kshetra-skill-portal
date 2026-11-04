@@ -48,18 +48,21 @@ export default function Navbar() {
         <div className="mx-auto max-w-7xl px-4 pt-4">
           <nav className="glass flex items-center justify-between px-4 py-3 sm:px-6">
             <Link to="/" className="flex items-center gap-2">
-              {/* Logo: a small white spiral galaxy with a spark of skill (a
-                  four-point star) on a black tile. Inline SVG, white only. */}
+              {/* Logo: a thin white rocket on a curved orbit with two tiny stars,
+                  on a black tile. Inline SVG, white only. */}
               <motion.div
                 className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/70 bg-black shadow-glow"
               >
-                <svg viewBox="0 0 32 32" width="28" height="28" fill="none" aria-hidden="true">
-                  <g stroke="#fff" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M17.9 17.1 L17.8 17.7 L17.4 18.4 L16.8 19.0 L16.0 19.5 L15.0 19.6 L13.9 19.5 L12.8 19.0 L11.8 18.2 L11.1 17.1 L10.7 15.7 L10.6 14.2 L11.0 12.7 L11.9 11.2 L13.2 10.0 L14.8 9.2 L16.7 8.8 L18.7 9.0 L20.7 9.7 L22.4 10.9 L23.8 12.7 L24.7 14.9 L25.0 17.3 L24.6 19.8 L23.6 22.1 L21.9 24.2 L19.6 25.7 L16.9 26.6 L14.0 26.8" />
-                    <path d="M14.1 14.9 L14.2 14.3 L14.6 13.6 L15.2 13.0 L16.0 12.5 L17.0 12.4 L18.1 12.5 L19.2 13.0 L20.2 13.8 L20.9 14.9 L21.3 16.3 L21.4 17.8 L21.0 19.3 L20.1 20.8 L18.8 22.0 L17.2 22.8 L15.3 23.2 L13.3 23.0 L11.3 22.3 L9.6 21.1 L8.2 19.3 L7.3 17.1 L7.0 14.7 L7.4 12.2 L8.4 9.9 L10.1 7.8 L12.4 6.3 L15.1 5.4 L18.0 5.2" strokeOpacity="0.65" />
+                <svg viewBox="0 0 48 48" width="28" height="28" fill="none" stroke="#fff" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M 9 37 C 10 22 20 10 30 11 C 37 12 40 22 38 37" strokeWidth="1.5" />
+                  <g transform="rotate(45 24 24)">
+                    <path d="M 24 5 C 27 11 28.5 17 28.5 23 C 28.5 27 26.5 30 24 31.5 C 21.5 30 19.5 27 19.5 23 C 19.5 17 21 11 24 5 Z" />
+                    <path d="M 24 10 L 24 27" strokeWidth="1.1" />
+                    <path d="M 20.5 25 L 13.5 30.5 Q 17.5 29.5 20.5 27.5 Z" />
+                    <path d="M 27.5 25 L 34.5 30.5 Q 30.5 29.5 27.5 27.5 Z" />
                   </g>
-                  <circle cx="16" cy="16" r="2.4" fill="#fff" />
-                  <path d="M27 2.2l.9 2.3 2.3.9-2.3.9-.9 2.3-.9-2.3-2.3-.9 2.3-.9z" fill="#fff" />
+                  <path d="M 10 7.5 L 10.9 10.1 L 13.5 11 L 10.9 11.9 L 10 14.5 L 9.1 11.9 L 6.5 11 L 9.1 10.1 Z" fill="#fff" stroke="none" />
+                  <path d="M 38 34.5 L 38.9 37.1 L 41.5 38 L 38.9 38.9 L 38 41.5 L 37.1 38.9 L 34.5 38 L 37.1 37.1 Z" fill="#fff" stroke="none" />
                 </svg>
               </motion.div>
               <span className="text-lg font-extrabold tracking-tight text-white">
