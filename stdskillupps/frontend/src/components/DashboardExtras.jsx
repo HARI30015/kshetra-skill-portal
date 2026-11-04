@@ -40,7 +40,7 @@ export function ProgressRing({ value, max, size = 56, stroke = 5, children }) {
           style={{ transition: 'stroke-dashoffset 0.9s cubic-bezier(0.22, 1, 0.36, 1)' }}
         />
       </svg>
-      <div className="absolute inset-0 flex items-center justify-center text-[11px] font-bold text-white">{children}</div>
+      <div className="pointer-events-none absolute inset-0 flex items-center justify-center text-[11px] font-bold text-white">{children}</div>
     </div>
   );
 }

@@ -39,6 +39,16 @@ export default function Navbar() {
 
   return (
     <>
+      {/* Mobile menu backdrop: while the menu is open, a tap anywhere outside
+          it closes it instead of being swallowed by the menu panel. It is a
+          sibling of the header (z-30 < the header's z-40), fully transparent. */}
+      {menuOpen && (
+        <div
+          className="fixed inset-0 z-30 md:hidden"
+          onClick={() => setMenuOpen(false)}
+          aria-hidden="true"
+        />
+      )}
       <motion.header
         initial={{ y: -70, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
