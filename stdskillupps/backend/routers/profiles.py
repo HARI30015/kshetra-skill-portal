@@ -59,6 +59,31 @@ def get_me(profile: dict = Depends(get_current_profile)):
     return profile_out(profile)
 
 
+@router.get("/me/login-history")
+def my_login_history(
+    user=Depends(get_current_user),
+    db: Client = Depends(get_supabase),
+):
+    """Read-only: the signed-in user's own sign-in timestamps, for the streak.
+    Returns only this user's rows. The frontend hides the streak when empty."""
+    resp = (
+        db.table("login_history")
+        .select("*")
+        .eq("user_id", user.id)
+        .limit(1000)
+        .execute()
+    )
+    stamps = []
+    for row in resp.data or []:
+        # login_history's timestamp column name is not fixed; first match wins.
+        for key in ("logged_in_at", "login_at", "created_at", "timestamp"):
+            if row.get(key):
+                stamps.append(str(row[key]))
+                break
+    stamps.sort(reverse=True)
+    return {"logins": stamps[:120]}
+
+
 @router.delete("/me/incomplete")
 def delete_my_incomplete_profile(
     user=Depends(get_current_user),

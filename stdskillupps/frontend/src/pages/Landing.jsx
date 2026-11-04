@@ -3,11 +3,83 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import PageWrapper from '../components/PageWrapper';
 
+// OWNER: put your real contact email between the quotes. While this is
+// empty, the footer shows a clearly marked placeholder instead.
+const CONTACT_EMAIL = '';
+
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.12 } } };
 const fadeUp = {
   hidden: { opacity: 0, y: 40 },
   show: { opacity: 1, y: 0, transition: { duration: 0.8, ease: [0.22, 1, 0.36, 1] } },
 };
+
+// Stylised, CSS-only mock of the dashboard. Generic labels only: no real
+// user data, no numbers, no demo accounts.
+function Bar({ w }) {
+  return (
+    <div className="h-1.5 overflow-hidden rounded-full bg-white/10">
+      <div className="h-full rounded-full bg-white/70" style={{ width: w }} />
+    </div>
+  );
+}
+
+function Line({ w }) {
+  return <div className="h-2 rounded-full bg-white/10" style={{ width: w }} />;
+}
+
+function DashboardPreview() {
+  return (
+    <div
+      role="img"
+      aria-label="Preview of the stdskillupps dashboard layout"
+      className="mx-auto w-full max-w-3xl overflow-hidden rounded-3xl border border-white/15 bg-white/[0.04] text-left shadow-2xl backdrop-blur-xl"
+    >
+      <div className="flex items-center gap-2 border-b border-white/10 px-4 py-3">
+        <span className="h-2.5 w-2.5 rounded-full bg-white/30" />
+        <span className="h-2.5 w-2.5 rounded-full bg-white/20" />
+        <span className="h-2.5 w-2.5 rounded-full bg-white/10" />
+        <span className="ml-3 h-2 w-32 rounded-full bg-white/15" />
+      </div>
+      <div className="grid gap-4 p-4 sm:grid-cols-3" aria-hidden="true">
+        <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+          <p className="text-xs font-semibold text-zinc-300">Your progress</p>
+          <div className="mt-4 space-y-3">
+            <Bar w="72%" />
+            <Bar w="48%" />
+            <Bar w="30%" />
+          </div>
+        </div>
+        <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+          <p className="text-xs font-semibold text-zinc-300">Recommended next step</p>
+          <div className="mt-4 space-y-2.5">
+            <Line w="100%" />
+            <Line w="80%" />
+            <span className="mt-2 inline-block rounded-full bg-white px-3 py-1 text-[11px] font-bold text-black">Start</span>
+          </div>
+        </div>
+        <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+          <p className="text-xs font-semibold text-zinc-300">Year roadmap</p>
+          <div className="mt-4 space-y-2.5">
+            {['Year 2', 'Year 3', 'Year 4'].map((y, i) => (
+              <div key={y} className="flex items-center gap-2">
+                <span className={`h-2.5 w-2.5 rounded-full ${i === 0 ? 'bg-white' : 'border border-white/40'}`} />
+                <span className="text-[11px] text-zinc-400">{y}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="rounded-2xl border border-white/10 bg-white/5 p-4 sm:col-span-3">
+          <p className="text-xs font-semibold text-zinc-300">Placements</p>
+          <div className="mt-4 grid gap-2.5 sm:grid-cols-3">
+            <Line w="90%" />
+            <Line w="70%" />
+            <Line w="80%" />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function Landing() {
   const [showAuth, setShowAuth] = useState(false);
@@ -23,8 +95,9 @@ export default function Landing() {
 
   return (
     <PageWrapper>
-      <div className="flex min-h-screen flex-col items-center justify-center px-4">
+      <div className="flex flex-col items-center px-4">
         {/* Hero — centered: headline + subtitle + Get Started */}
+        <div className="flex min-h-[90vh] w-full flex-col items-center justify-center">
         <motion.main
           variants={container}
           initial="hidden"
@@ -130,6 +203,46 @@ export default function Landing() {
             </AnimatePresence>
           </div>
         </motion.main>
+        </div>
+
+        {/* Preview of what is inside the app (below the hero) */}
+        <motion.section
+          initial={{ opacity: 0, y: 24 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.2 }}
+          transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+          className="w-full max-w-3xl pb-4 text-center"
+        >
+          <p className="mb-4 text-sm font-medium text-zinc-400">A look inside</p>
+          <DashboardPreview />
+        </motion.section>
+
+        {/* Footer: About + Contact */}
+        <footer className="mt-20 w-full max-w-5xl border-t border-white/10 py-10 text-left">
+          <div className="grid gap-8 md:grid-cols-2">
+            <div>
+              <h2 className="text-base font-bold text-white">About stdskillupps</h2>
+              <p className="mt-2 max-w-md text-sm leading-relaxed text-zinc-400">
+                stdskillupps is placement preparation for students. Link your LeetCode and CampusTrack profiles to track
+                progress in one place, follow year-wise guidance, and explore placement opportunities.
+              </p>
+            </div>
+            <div>
+              <h2 className="text-base font-bold text-white">Contact</h2>
+              {CONTACT_EMAIL ? (
+                <a
+                  href={`mailto:${CONTACT_EMAIL}`}
+                  className="mt-2 inline-block text-sm text-zinc-300 underline underline-offset-2 hover:text-white"
+                >
+                  {CONTACT_EMAIL}
+                </a>
+              ) : (
+                <p className="mt-2 text-sm text-zinc-400">[Contact email: to be added by the site owner]</p>
+              )}
+            </div>
+          </div>
+          <p className="mt-8 text-xs text-zinc-500">© {new Date().getFullYear()} stdskillupps</p>
+        </footer>
       </div>
     </PageWrapper>
   );

@@ -46,6 +46,9 @@ export const createProfile = (payload) => api.post('/profiles', payload).then((r
 export const getAllProfiles = () => api.get('/profiles').then((r) => r.data);
 export const updateProfile = (id, payload) => api.put(`/profiles/${id}`, payload).then((r) => r.data);
 
+// ---- Login history (read-only, signed-in user's own sign-ins; used for the streak) ----
+export const getMyLoginHistory = () => api.get('/profiles/me/login-history').then((r) => r.data);
+
 // ---- Stats ----
 export const syncStats = (profileId) => api.post(`/stats/sync/${profileId}`).then((r) => r.data);
 export const syncAllStats = () => api.post('/stats/sync-all').then((r) => r.data);

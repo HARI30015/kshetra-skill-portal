@@ -2,12 +2,13 @@ import React, { useState } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
+import Avatar from './Avatar';
 
 const linkBase =
   'rounded-lg px-4 py-2 text-sm font-medium transition-colors duration-200';
 
 export default function Navbar() {
-  const { isAuthenticated, role, logout } = useAuth();
+  const { isAuthenticated, role, logout, profile } = useAuth();
   const navigate = useNavigate();
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -107,27 +108,33 @@ export default function Navbar() {
                   </Link>
                 </>
               ) : (
-                <motion.button
-                  whileTap={{ scale: 0.98 }}
-                  transition={{ duration: 0.08 }}
-                  onClick={() => setConfirmOpen(true)}
-                  className="ml-1 rounded-lg border border-white/40 bg-white/10 px-4 py-2 text-sm font-semibold text-zinc-200 transition hover:bg-white/20"
-                >
-                  Logout
-                </motion.button>
+                <>
+                  <Avatar name={profile?.full_name} email={profile?.email} size={34} className="ml-2" />
+                  <motion.button
+                    whileTap={{ scale: 0.98 }}
+                    transition={{ duration: 0.08 }}
+                    onClick={() => setConfirmOpen(true)}
+                    className="ml-1 rounded-lg border border-white/40 bg-white/10 px-4 py-2 text-sm font-semibold text-zinc-200 transition hover:bg-white/20"
+                  >
+                    Logout
+                  </motion.button>
+                </>
               )}
             </div>
 
-            {/* Mobile menu toggle */}
-            <button
-              className="rounded-lg p-2 text-zinc-200 hover:bg-white/10 md:hidden"
-              onClick={() => setMenuOpen((v) => !v)}
-              aria-label="Toggle menu"
-            >
-              <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={menuOpen ? 'M6 18L18 6M6 6l12 12' : 'M4 6h16M4 12h16M4 18h16'} />
-              </svg>
-            </button>
+            {/* Mobile: avatar + menu toggle */}
+            <div className="flex items-center gap-2 md:hidden">
+              {isAuthenticated && <Avatar name={profile?.full_name} email={profile?.email} size={32} />}
+              <button
+                className="rounded-lg p-2 text-zinc-200 hover:bg-white/10"
+                onClick={() => setMenuOpen((v) => !v)}
+                aria-label="Toggle menu"
+              >
+                <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={menuOpen ? 'M6 18L18 6M6 6l12 12' : 'M4 6h16M4 12h16M4 18h16'} />
+                </svg>
+              </button>
+            </div>
           </nav>
 
           <AnimatePresence>

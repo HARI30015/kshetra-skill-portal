@@ -3,6 +3,14 @@ import { motion, AnimatePresence } from 'framer-motion';
 import PageWrapper from '../components/PageWrapper';
 import GlassCard from '../components/GlassCard';
 import AnimatedInput from '../components/AnimatedInput';
+import Avatar from '../components/Avatar';
+import {
+  MilestoneRing,
+  MilestoneBar,
+  AchievementsCard,
+  YearRoadmap,
+  computeStreak,
+} from '../components/DashboardExtras';
 import { useAuth } from '../context/AuthContext';
 import { LEETCODE_URL, CAMPUSTRACK_URL } from '../constants';
 import {
@@ -12,6 +20,7 @@ import {
   getRecommendation,
   updateProfile,
   getCtSyncKey,
+  getMyLoginHistory,
 } from '../api';
 
 /* ------------------------------------------------------------------ */
@@ -67,6 +76,14 @@ const CT_LOGIN_URL = 'https://vardhaman.campustrack.in/login';
 // INTERIM (for now): the LeetCode Add action directs to LeetCode's login
 // page first; the username panel still opens so the profile can be saved.
 const LEETCODE_LOGIN_URL = 'https://leetcode.com/accounts/login/';
+
+// Progress milestones (display only). LeetCode: solved-count targets.
+const LC_STEPS = [1, 10, 25, 50, 100, 150, 200, 300, 500, 750, 1000];
+// CampusTrack: the real maximum score is not known to the app. If you know it
+// (e.g. 1000), set CT_MAX to that number and the bar will show score / CT_MAX.
+// While it is null, the bar shows progress toward the next round milestone.
+const CT_MAX = null;
+const CT_STEPS = [50, 100, 250, 500, 1000, 2500, 5000, 10000];
 
 /* ------------------------------------------------------------------ */
 /* Helpers                                                             */
@@ -361,6 +378,9 @@ export default function Dashboard() {
   const stats = useResource(pid, () => getStats(pid), !!pid);
   const plan = useResource(pid, () => getRecommendation(pid), !!pid);
   const ct = useResource('ct-sync-key', () => getCtSyncKey(), true);
+  // Sign-in history for the streak. If the endpoint is missing or fails, the
+  // streak simply stays hidden (never faked).
+  const history = useResource('login-history', () => getMyLoginHistory(), !!pid);
   const { setData: setStatsData } = stats;
   const { setData: setPlanData } = plan;
 
@@ -505,6 +525,7 @@ export default function Dashboard() {
   const s = stats.data;
   const r = plan.data;
   const bookmarklet = ct.data?.bookmarklet;
+  const streakDays = history.status === 'ready' ? computeStreak(history.data) : 0;
   const diffBuckets = [
     { label: 'Easy', value: s?.easy_solved || 0, color: 'from-zinc-300 to-white' },
     { label: 'Medium', value: s?.medium_solved || 0, color: 'from-zinc-400 to-zinc-200' },
@@ -720,6 +741,7 @@ export default function Dashboard() {
           </motion.div>
           <p className="mt-1 text-xs font-medium uppercase tracking-widest text-zinc-400">Total solved</p>
         </div>
+        <MilestoneRing value={s.total_solved} steps={LC_STEPS} />
         <div className="mt-6 space-y-4">
           {diffBuckets.map((b, i) => (
             <div key={b.label}>
@@ -868,9 +890,7 @@ export default function Dashboard() {
           {/* Profile */}
           <GlassCard delay={0.05} className="lg:col-span-1">
             <div className="flex items-center gap-4">
-              <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-white text-2xl font-black text-black shadow-glow">
-                {(profile.full_name || 'S')[0].toUpperCase()}
-              </div>
+              <Avatar name={profile.full_name} email={profile.email} size={64} solid />
               <div className="min-w-0">
                 <h2 className="truncate text-xl font-bold text-white">{profile.full_name}</h2>
                 <p className="truncate text-sm text-zinc-400">{profile.email}</p>
@@ -1044,6 +1064,7 @@ export default function Dashboard() {
             <div className="mt-4 rounded-2xl bg-white/5 px-4 py-3 text-center">
               <p className="text-3xl font-extrabold text-white">{ctScore ?? '—'}</p>
               <p className="mt-1 text-xs uppercase tracking-widest text-zinc-400">CampusTrack score</p>
+              <MilestoneBar value={ctScore} steps={CT_STEPS} max={CT_MAX} />
             </div>
 
             {editing === 'ct' && (
@@ -1141,6 +1162,20 @@ export default function Dashboard() {
                 ))}
               </div>
             </div>
+          </GlassCard>
+        </div>
+
+        <div className="mt-6 grid gap-6 lg:grid-cols-3">
+          {/* Streak + badges (real data only) */}
+          <GlassCard delay={0.18} className="lg:col-span-1">
+            <h2 className="text-lg font-bold text-white">Achievements</h2>
+            <AchievementsCard stats={s} streakDays={streakDays} />
+          </GlassCard>
+
+          {/* Year roadmap (read-only) */}
+          <GlassCard delay={0.2} className="lg:col-span-2">
+            <h2 className="text-lg font-bold text-white">Your year roadmap</h2>
+            <YearRoadmap year={year} guides={YEAR_GUIDE} languages={r?.recommended_languages} />
           </GlassCard>
         </div>
       </main>
