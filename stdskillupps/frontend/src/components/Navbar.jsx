@@ -7,6 +7,27 @@ import Avatar from './Avatar';
 const linkBase =
   'rounded-lg px-4 py-2 text-sm font-medium transition-colors duration-200';
 
+// Warm a destination page's chunk on hover / focus / touch, before the tap.
+// Same module paths App.jsx lazy-loads, so the browser reuses the same chunks.
+// Fire-and-forget: never blocks navigation, never shows a loader.
+const PAGE_LOADERS = {
+  '/dashboard': () => import('../pages/Dashboard'),
+  '/placements': () => import('../pages/Placements'),
+  '/lecturer': () => import('../pages/LecturerDashboard'),
+  '/login': () => import('../pages/Login'),
+  '/signup': () => import('../pages/Signup'),
+};
+const prefetchProps = (to) => {
+  const run = () => {
+    try {
+      PAGE_LOADERS[to]?.().catch(() => {});
+    } catch {
+      /* prefetch is best-effort */
+    }
+  };
+  return { onMouseEnter: run, onFocus: run, onTouchStart: run };
+};
+
 export default function Navbar() {
   const { isAuthenticated, role, logout, profile } = useAuth();
   const navigate = useNavigate();
@@ -85,6 +106,7 @@ export default function Navbar() {
                 <NavLink
                   key={l.to}
                   to={l.to}
+                  {...prefetchProps(l.to)}
                   className={({ isActive }) =>
                     `${linkBase} ${
                       isActive
@@ -100,6 +122,7 @@ export default function Navbar() {
                 <>
                   <NavLink
                     to="/login"
+                    {...prefetchProps('/login')}
                     className={({ isActive }) =>
                       `${linkBase} ${
                         isActive
@@ -110,7 +133,7 @@ export default function Navbar() {
                   >
                     Sign in
                   </NavLink>
-                  <Link to="/signup">
+                  <Link to="/signup" {...prefetchProps('/signup')}>
                     <motion.span
                       whileTap={{ scale: 0.98 }}
                       transition={{ duration: 0.08 }}
@@ -162,6 +185,7 @@ export default function Navbar() {
                   <NavLink
                     key={l.to}
                     to={l.to}
+                    {...prefetchProps(l.to)}
                     onClick={() => setMenuOpen(false)}
                     className={({ isActive }) =>
                       `block rounded-lg px-4 py-2.5 text-sm font-medium ${
@@ -176,6 +200,7 @@ export default function Navbar() {
                   <>
                     <NavLink
                       to="/login"
+                      {...prefetchProps('/login')}
                       onClick={() => setMenuOpen(false)}
                       className="block rounded-lg px-4 py-2.5 text-sm font-medium text-zinc-300"
                     >
@@ -183,6 +208,7 @@ export default function Navbar() {
                     </NavLink>
                     <NavLink
                       to="/signup"
+                      {...prefetchProps('/signup')}
                       onClick={() => setMenuOpen(false)}
                       className="block rounded-lg bg-white px-4 py-2.5 text-sm font-semibold text-black"
                     >

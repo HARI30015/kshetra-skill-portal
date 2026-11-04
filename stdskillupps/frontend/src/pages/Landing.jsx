@@ -7,6 +7,15 @@ import PageWrapper from '../components/PageWrapper';
 // empty, the footer shows a clearly marked placeholder instead.
 const CONTACT_EMAIL = '';
 
+// Warm the Login/Signup chunks while the visitor is still looking at the hero,
+// so tapping through does not wait for a download. Same module paths App.jsx
+// lazy-loads, so the browser reuses the exact same chunks. Fire-and-forget:
+// never blocks the tap, never shows anything, errors are ignored.
+const prefetchAuthPages = () => {
+  import('./Login').catch(() => {});
+  import('./Signup').catch(() => {});
+};
+
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.12 } } };
 const fadeUp = {
   hidden: { opacity: 0, y: 40 },
@@ -143,6 +152,9 @@ export default function Landing() {
                 >
                   <button
                     onClick={() => setShowAuth(true)}
+                    onMouseEnter={prefetchAuthPages}
+                    onFocus={prefetchAuthPages}
+                    onTouchStart={prefetchAuthPages}
                     className="relative w-64 rounded-full bg-white px-8 py-4 text-lg font-bold text-black shadow-[0_0_40px_rgba(255,255,255,0.5)] transition hover:shadow-[0_0_60px_rgba(255,255,255,0.7)] sm:w-72"
                   >
                     <span className="relative z-10">Get Started</span>
@@ -211,14 +223,19 @@ export default function Landing() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.2 }}
           transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-          className="w-full max-w-3xl pb-4 text-center"
+          className="w-full max-w-3xl pb-12 text-center"
+          // Below the fold: skip layout/paint until it scrolls into view.
+          style={{ contentVisibility: 'auto', containIntrinsicSize: 'auto 600px' }}
         >
           <p className="mb-4 text-sm font-medium text-zinc-400">A look inside</p>
           <DashboardPreview />
         </motion.section>
 
         {/* Footer: About + Contact */}
-        <footer className="mt-20 w-full max-w-5xl border-t border-white/10 py-10 text-left">
+        <footer
+          className="mt-12 w-full max-w-5xl border-t border-white/10 py-10 text-left"
+          style={{ contentVisibility: 'auto', containIntrinsicSize: 'auto 300px' }}
+        >
           <div className="grid gap-8 md:grid-cols-2">
             <div>
               <h2 className="text-base font-bold text-white">About stdskillupps</h2>
