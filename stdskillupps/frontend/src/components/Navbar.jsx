@@ -7,6 +7,12 @@ import Avatar from './Avatar';
 const linkBase =
   'rounded-lg px-4 py-2 text-sm font-medium transition-colors duration-200';
 
+// Desktop tabs: same as linkBase but WITHOUT its rounding, so the active pill
+// (rounded-full) and the inactive tab (rounded-lg) each carry their own corner
+// radius. Two radius classes on one element would be decided by CSS order, and
+// Tailwind emits rounded-lg after rounded-full, so the pill would not be round.
+const linkShape = linkBase.replace('rounded-lg ', '');
+
 // Warm a destination page's chunk on hover / focus / touch, before the tap.
 // Same module paths App.jsx lazy-loads, so the browser reuses the same chunks.
 // Fire-and-forget: never blocks navigation, never shows a loader.
@@ -108,10 +114,10 @@ export default function Navbar() {
                   to={l.to}
                   {...prefetchProps(l.to)}
                   className={({ isActive }) =>
-                    `${linkBase} ${
+                    `${linkShape} ${
                       isActive
-                        ? 'bg-white/15 text-white'
-                        : 'text-zinc-300 hover:bg-white/10 hover:text-white'
+                        ? 'rounded-full bg-white font-semibold text-black'
+                        : 'rounded-lg text-zinc-300 hover:bg-white/10 hover:text-white'
                     }`
                   }
                 >
@@ -124,10 +130,10 @@ export default function Navbar() {
                     to="/login"
                     {...prefetchProps('/login')}
                     className={({ isActive }) =>
-                      `${linkBase} ${
+                      `${linkShape} ${
                         isActive
-                          ? 'bg-white/15 text-white'
-                          : 'text-zinc-300 hover:bg-white/10 hover:text-white'
+                          ? 'rounded-full bg-white font-semibold text-black'
+                          : 'rounded-lg text-zinc-300 hover:bg-white/10 hover:text-white'
                       }`
                     }
                   >
@@ -189,7 +195,7 @@ export default function Navbar() {
                     onClick={() => setMenuOpen(false)}
                     className={({ isActive }) =>
                       `block rounded-lg px-4 py-2.5 text-sm font-medium ${
-                        isActive ? 'bg-white/15 text-white' : 'text-zinc-300'
+                        isActive ? 'bg-white font-semibold text-black' : 'text-zinc-300'
                       }`
                     }
                   >
@@ -202,7 +208,11 @@ export default function Navbar() {
                       to="/login"
                       {...prefetchProps('/login')}
                       onClick={() => setMenuOpen(false)}
-                      className="block rounded-lg px-4 py-2.5 text-sm font-medium text-zinc-300"
+                      className={({ isActive }) =>
+                        `block rounded-lg px-4 py-2.5 text-sm font-medium ${
+                          isActive ? 'bg-white font-semibold text-black' : 'text-zinc-300'
+                        }`
+                      }
                     >
                       Sign in
                     </NavLink>
