@@ -87,3 +87,43 @@
 @media (prefers-reduced-motion: reduce) {
   .std-galaxy-rot { animation: none !important; }
 }
+
+/* ---- Vesper-style mint + violet living orb (LANDING only, Background3D) ----
+   Transform / opacity animation only. All of it is switched off for users who
+   prefer reduced motion, leaving a static mint/violet orb. */
+@keyframes std-orb-breathe {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.08); }
+}
+@keyframes std-vsw-spin {
+  to { transform: rotate(360deg); }
+}
+@keyframes std-vpart-spin {
+  to { transform: rotate(360deg); }
+}
+.std-orb-breathe {
+  animation: std-orb-breathe 7s ease-in-out infinite;
+  will-change: transform;
+}
+.std-vsw {
+  animation: std-vsw-spin 160s linear infinite;
+  will-change: transform;
+}
+.std-vpart {
+  animation: std-vpart-spin 320s linear infinite;
+  will-change: transform;
+}
+.std-vp {
+  animation-name: std-twinkle;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+  will-change: opacity;
+}
+@media (prefers-reduced-motion: reduce) {
+  .std-orb-breathe,
+  .std-vsw,
+  .std-vpart,
+  .std-vp {
+    animation: none !important;
+  }
+}
