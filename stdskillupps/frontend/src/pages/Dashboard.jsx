@@ -567,23 +567,21 @@ export default function Dashboard() {
     }, 50);
   };
 
-  // INTERIM: first-time LeetCode Add opens LeetCode's login page in a new
-  // tab AND opens the username panel, so the user can log in, return, type
-  // their username and save. Existing-username behaviour is unchanged.
+  // LeetCode Add: open the username panel on THIS site first (so the tap
+  // always visibly does something), then try the LeetCode login tab with a
+  // real user-gesture window.open. If a popup blocker stops the tab, the
+  // panel itself carries a real "Log in to LeetCode" link. While the panel
+  // is already open, tapping Add only brings it back into focus.
   const openLeetCodeAdd = () => {
-    // The login tab opens only on the first Add tap. While the panel is
-    // already open, tapping Add just brings the panel back into focus,
-    // so the user can type and save instead of looping on the login tab.
-    if (editing !== 'lc') {
-      const a = document.createElement('a');
-      a.href = LEETCODE_LOGIN_URL;
-      a.target = '_blank';
-      a.rel = 'noreferrer';
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-    }
+    const alreadyOpen = editing === 'lc';
     openEdit('lc');
+    if (!alreadyOpen) {
+      try {
+        window.open(LEETCODE_LOGIN_URL, '_blank', 'noopener,noreferrer');
+      } catch {
+        /* blocked: the panel shows the login link */
+      }
+    }
   };
 
   // Always send the full field set so a partial edit never wipes other fields.
@@ -1007,18 +1005,28 @@ export default function Dashboard() {
 
             {editing === 'lc' && (
               <EditPanel onSubmit={saveLeetCode} onCancel={() => setEditing(null)} saving={saving}>
+                {!username && (
+                  <div className="space-y-2">
+                    <a
+                      href={LEETCODE_LOGIN_URL}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex touch-manipulation items-center gap-1.5 rounded-xl border border-white/30 bg-white/10 px-4 py-2 text-sm font-semibold text-white hover:bg-white/15"
+                    >
+                      Log in to LeetCode ↗
+                    </a>
+                    <p className="text-xs text-zinc-300">
+                      Step 1: log in to LeetCode (a tab may have opened already — if not, tap here). Step 2: type your
+                      LeetCode username below and tap Save.
+                    </p>
+                  </div>
+                )}
                 <AnimatedInput
                   label="LeetCode username"
                   value={form.leetcode_username}
                   onChange={setField('leetcode_username')}
                   placeholder="your-leetcode-username"
                 />
-                {!username && (
-                  <p className="text-xs text-zinc-300">
-                    Log in to LeetCode in the tab that just opened, then come back, type your LeetCode username
-                    (the name in leetcode.com/u/…) and Save.
-                  </p>
-                )}
                 <p className="text-xs text-zinc-400">Saving fetches your fresh score right away.</p>
               </EditPanel>
             )}

@@ -2,21 +2,22 @@
 from __future__ import annotations
 
 # Core languages per job field — used as the foundation each year builds on.
+# TRAINED values (learned 2026-11-06 from the 15 live placements; counts are real demand).
 FIELD_CORE_LANGUAGES: dict[str, list[str]] = {
-    "SWE": ["C++", "Java", "Python"],
+    "SWE": ["Python", "Java", "C++"],
     "Data Science": ["Python", "SQL", "R"],
     "Frontend": ["JavaScript", "TypeScript"],
-    "Backend": ["Java", "Python", "Go", "SQL"],
-    "DevOps": ["Python", "Bash"],
-    "Mobile": ["Kotlin", "Swift"],
+    "Backend": ["Java", "SQL", "Go", "C++"],
+    "DevOps": ["Python", "Bash", "SQL"],
+    "Mobile": ["Kotlin", "Swift", "Java"],
 }
 
 FIELD_FOCUS_BASICS: dict[str, list[str]] = {
-    "SWE": ["DSA fundamentals", "Big-O notation", "OOP"],
-    "Data Science": ["Statistics", "SQL basics", "Python for data"],
-    "Frontend": ["HTML/CSS", "JavaScript basics", "Responsive design"],
-    "Backend": ["Databases", "REST APIs", "Linux basics"],
-    "DevOps": ["Linux", "Git", "Networking basics"],
+    "SWE": ["DSA fundamentals", "Big-O notation", "OOP", "System Design basics"],
+    "Data Science": ["Statistics", "SQL basics", "Python for data", "ML basics"],
+    "Frontend": ["HTML/CSS", "JavaScript basics", "Responsive design", "React basics"],
+    "Backend": ["Databases", "REST APIs", "Linux basics", "System Design basics"],
+    "DevOps": ["Linux", "Git", "Networking basics", "Docker basics"],
     "Mobile": ["One native platform", "OOP", "REST APIs"],
 }
 
