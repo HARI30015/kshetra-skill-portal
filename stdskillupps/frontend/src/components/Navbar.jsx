@@ -13,6 +13,17 @@ const linkBase =
 // Tailwind emits rounded-lg after rounded-full, so the pill would not be round.
 const linkShape = linkBase.replace('rounded-lg ', '');
 
+// Dark Neon Lens (2026-11-07, adapted from the me20.studio reel, option 2):
+// the ACTIVE tab sits inside a glowing white circular "lens" — a soft white
+// halo + a thin bright rim around the white pill. Monochrome only: the
+// reel's teal neon becomes white, and the glow is STATIC on the active tab
+// (never follows the mouse — the site's no-mouse-animation rule stands).
+// Desktop pill + mobile row share the same lens treatment.
+const lensActive =
+  'rounded-full bg-white font-semibold text-black shadow-[0_0_18px_4px_rgba(255,255,255,0.55),0_0_40px_12px_rgba(255,255,255,0.20)] ring-1 ring-white/80';
+const lensActiveMobile =
+  'rounded-full bg-white font-semibold text-black shadow-[0_0_16px_4px_rgba(255,255,255,0.45)] ring-1 ring-white/70';
+
 // Warm a destination page's chunk on hover / focus / touch, before the tap.
 // Same module paths App.jsx lazy-loads, so the browser reuses the same chunks.
 // Fire-and-forget: never blocks navigation, never shows a loader.
@@ -116,7 +127,7 @@ export default function Navbar() {
                   className={({ isActive }) =>
                     `${linkShape} ${
                       isActive
-                        ? 'rounded-full bg-white font-semibold text-black'
+                        ? lensActive
                         : 'rounded-lg text-zinc-300 hover:bg-white/10 hover:text-white'
                     }`
                   }
@@ -132,7 +143,7 @@ export default function Navbar() {
                     className={({ isActive }) =>
                       `${linkShape} ${
                         isActive
-                          ? 'rounded-full bg-white font-semibold text-black'
+                          ? lensActive
                           : 'rounded-lg text-zinc-300 hover:bg-white/10 hover:text-white'
                       }`
                     }
@@ -194,8 +205,8 @@ export default function Navbar() {
                     {...prefetchProps(l.to)}
                     onClick={() => setMenuOpen(false)}
                     className={({ isActive }) =>
-                      `block rounded-lg px-4 py-2.5 text-sm font-medium ${
-                        isActive ? 'bg-white font-semibold text-black' : 'text-zinc-300'
+                      `block px-4 py-2.5 text-sm font-medium ${
+                        isActive ? lensActiveMobile : 'rounded-lg text-zinc-300'
                       }`
                     }
                   >
@@ -209,8 +220,8 @@ export default function Navbar() {
                       {...prefetchProps('/login')}
                       onClick={() => setMenuOpen(false)}
                       className={({ isActive }) =>
-                        `block rounded-lg px-4 py-2.5 text-sm font-medium ${
-                          isActive ? 'bg-white font-semibold text-black' : 'text-zinc-300'
+                        `block px-4 py-2.5 text-sm font-medium ${
+                        isActive ? lensActiveMobile : 'rounded-lg text-zinc-300'
                         }`
                       }
                     >
