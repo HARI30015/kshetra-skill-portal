@@ -140,7 +140,7 @@ Additive columns beyond the original contract (driven by the frontend's needs):
 | Service | Config | Notes |
 |---------|--------|-------|
 | Vercel (frontend) | `vercel.json` (repo root) | Builds `frontend/` with Vite, SPA rewrite to `/index.html`. Set `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `VITE_API_URL` in Vercel env. |
-| Render (backend) | `render.yaml` (repo root) | Blueprint for a free Python web service: `uvicorn backend.main:app`, health check `/health`. Set `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_KEY`, `FRONTEND_URL` in the Render dashboard. |
+| Render (backend) | `render.yaml` (repo root) | Blueprint for a free Python web service: `cd backend && uvicorn main:app`, health check `/health`. Set `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_KEY`, `FRONTEND_URL` in the Render dashboard. |
 | Supabase | `supabase/schema.sql`, `supabase/seed.sql` | Run in the Supabase SQL editor (schema first, then seed). |
 | Replit | `.replit` + `start.sh` (repo root) | Runs backend on :8000 and Vite dev server on `$PORT`. Put Supabase keys in Replit Secrets. |
 | Postman | `postman/stdskillupps.postman_collection.json` | Import into Postman; set `{{base_url}}` and `{{jwt}}`. |
