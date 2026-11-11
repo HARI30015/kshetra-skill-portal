@@ -9,8 +9,7 @@ const CONTACT_EMAIL = '';
 
 // Warm the Login/Signup chunks while the visitor is still looking at the hero,
 // so tapping through does not wait for a download. Same module paths App.jsx
-// lazy-loads, so the browser reuses the exact same chunks. Fire-and-forget:
-// never blocks the tap, never shows anything, errors are ignored.
+// lazy-loads, so the browser reuses the exact same chunks.
 const prefetchAuthPages = () => {
   import('./Login').catch(() => {});
   import('./Signup').catch(() => {});
@@ -18,75 +17,28 @@ const prefetchAuthPages = () => {
 
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.12 } } };
 const fadeUp = {
-  hidden: { opacity: 0, y: 40 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.8, ease: [0.22, 1, 0.36, 1] } },
+  hidden: { opacity: 0, y: 28 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.65, ease: [0.22, 1, 0.36, 1] } },
 };
 
-// Stylised, CSS-only mock of the dashboard. Generic labels only: no real
-// user data, no numbers, no demo accounts.
-// Landing-only accents: mint #7CFFC4 / #5EEAD4, violet #8B5CF6 / #A78BFA, blue #60A5FA.
-function Bar({ w }) {
-  return (
-    <div className="h-1.5 overflow-hidden rounded-full bg-white/10">
-      <div className="h-full rounded-full bg-gradient-to-r from-[#7CFFC4] to-[#8B5CF6]" style={{ width: w }} />
-    </div>
-  );
-}
-
-function Line({ w }) {
-  return <div className="h-2 rounded-full bg-white/10" style={{ width: w }} />;
-}
-
-function DashboardPreview() {
+function RocketMark() {
   return (
     <div
+      className="mx-auto mb-7 flex h-24 w-24 items-center justify-center rounded-[2rem] border border-white/45 bg-white/[0.08] shadow-[0_0_48px_rgba(255,255,255,0.24),inset_0_1px_0_rgba(255,255,255,0.35)] backdrop-blur-2xl sm:h-28 sm:w-28"
+      aria-label="stdskillupps rocket logo"
       role="img"
-      aria-label="Preview of the stdskillupps dashboard layout"
-      className="mx-auto w-full max-w-3xl overflow-hidden rounded-3xl border border-[#8B5CF6]/30 bg-white/[0.04] text-left shadow-[0_0_60px_rgba(139,92,246,0.18)] backdrop-blur-xl"
     >
-      <div className="flex items-center gap-2 border-b border-[#A78BFA]/15 px-4 py-3">
-        <span className="h-2.5 w-2.5 rounded-full bg-[#7CFFC4]/70" />
-        <span className="h-2.5 w-2.5 rounded-full bg-[#A78BFA]/70" />
-        <span className="h-2.5 w-2.5 rounded-full bg-[#60A5FA]/70" />
-        <span className="ml-3 h-2 w-32 rounded-full bg-white/15" />
-      </div>
-      <div className="grid gap-4 p-4 sm:grid-cols-3" aria-hidden="true">
-        <div className="rounded-2xl border border-[#A78BFA]/15 bg-white/5 p-4">
-          <p className="text-xs font-semibold text-zinc-300">Your progress</p>
-          <div className="mt-4 space-y-3">
-            <Bar w="72%" />
-            <Bar w="48%" />
-            <Bar w="30%" />
-          </div>
-        </div>
-        <div className="rounded-2xl border border-[#A78BFA]/15 bg-white/5 p-4">
-          <p className="text-xs font-semibold text-zinc-300">Recommended next step</p>
-          <div className="mt-4 space-y-2.5">
-            <Line w="100%" />
-            <Line w="80%" />
-            <span className="mt-2 inline-block rounded-full bg-gradient-to-r from-[#7CFFC4] to-[#8B5CF6] px-3 py-1 text-[11px] font-bold text-black">Start</span>
-          </div>
-        </div>
-        <div className="rounded-2xl border border-[#A78BFA]/15 bg-white/5 p-4">
-          <p className="text-xs font-semibold text-zinc-300">Year roadmap</p>
-          <div className="mt-4 space-y-2.5">
-            {['Year 2', 'Year 3', 'Year 4'].map((y, i) => (
-              <div key={y} className="flex items-center gap-2">
-                <span className={`h-2.5 w-2.5 rounded-full ${i === 0 ? 'bg-[#7CFFC4]' : 'border border-[#A78BFA]/50'}`} />
-                <span className="text-[11px] text-zinc-400">{y}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-        <div className="rounded-2xl border border-[#A78BFA]/15 bg-white/5 p-4 sm:col-span-3">
-          <p className="text-xs font-semibold text-zinc-300">Placements</p>
-          <div className="mt-4 grid gap-2.5 sm:grid-cols-3">
-            <Line w="90%" />
-            <Line w="70%" />
-            <Line w="80%" />
-          </div>
-        </div>
-      </div>
+      <svg viewBox="0 0 48 48" width="68" height="68" fill="none" stroke="#fff" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <path d="M 9 37 C 10 22 20 10 30 11 C 37 12 40 22 38 37" strokeWidth="1.5" />
+        <g transform="rotate(45 24 24)">
+          <path d="M 24 5 C 27 11 28.5 17 28.5 23 C 28.5 27 26.5 30 24 31.5 C 21.5 30 19.5 27 19.5 23 C 19.5 17 21 11 24 5 Z" />
+          <path d="M 24 10 L 24 27" strokeWidth="1.1" />
+          <path d="M 20.5 25 L 13.5 30.5 Q 17.5 29.5 20.5 27.5 Z" />
+          <path d="M 27.5 25 L 34.5 30.5 Q 30.5 29.5 27.5 27.5 Z" />
+        </g>
+        <path d="M 10 7.5 L 10.9 10.1 L 13.5 11 L 10.9 11.9 L 10 14.5 L 9.1 11.9 L 6.5 11 L 9.1 10.1 Z" fill="#fff" stroke="none" />
+        <path d="M 38 34.5 L 38.9 37.1 L 41.5 38 L 38.9 38.9 L 38 41.5 L 37.1 38.9 L 34.5 38 L 37.1 37.1 Z" fill="#fff" stroke="none" />
+      </svg>
     </div>
   );
 }
@@ -95,153 +47,109 @@ export default function Landing() {
   const [showAuth, setShowAuth] = useState(false);
   const navigate = useNavigate();
 
-  const handleLogin = () => {
-    navigate('/login');
-  };
-
-  const handleSignUp = () => {
-    navigate('/signup');
-  };
-
   return (
     <PageWrapper>
       <div className="flex flex-col items-center px-4">
-        {/* Hero — centered: headline + subtitle + Get Started.
-            data-vesper-hero lets the background orb brighten while the
-            pointer rests here (Background3D reads it; it takes no clicks). */}
         <div data-vesper-hero className="flex min-h-[90vh] w-full flex-col items-center justify-center">
-        <motion.main
-          variants={container}
-          initial="hidden"
-          animate="show"
-          className="mx-auto max-w-5xl text-center"
-          style={{ perspective: 1000 }}
-        >
-          <motion.p
-            variants={fadeUp}
-            className="mb-5 text-xs font-semibold tracking-[0.3em] text-[#7CFFC4] sm:text-sm"
+          <motion.main
+            variants={container}
+            initial="hidden"
+            animate="show"
+            className="mx-auto max-w-5xl text-center"
           >
-            [ LIVING INTERFACE ]
-          </motion.p>
+            <motion.div variants={fadeUp}>
+              <RocketMark />
+            </motion.div>
 
-          <motion.h1
-            variants={fadeUp}
-            className="text-5xl font-extrabold leading-[1.1] tracking-tight text-white sm:text-7xl"
-          >
-            Turn your{' '}
-            <span className="bg-gradient-to-r from-white via-zinc-300 to-zinc-500 bg-clip-text text-transparent">
-              coding grind
-            </span>{' '}
-            into a<br className="hidden sm:block" /> placement{' '}
-            <span className="bg-gradient-to-r from-white via-zinc-300 to-zinc-500 bg-clip-text text-transparent">
-              offer
-            </span>
-          </motion.h1>
+            <motion.p variants={fadeUp} className="mb-5 text-xs font-semibold tracking-[0.3em] text-[#7CFFC4] sm:text-sm">
+              [ LIVING INTERFACE ]
+            </motion.p>
 
-          <motion.p
-            variants={fadeUp}
-            className="mx-auto mt-6 max-w-2xl text-base text-zinc-300 sm:text-lg"
-          >
-            Master DSA, track progress, and land your dream placement with guided prep, real-time analytics, and 2000+ company questions.
-          </motion.p>
+            <motion.h1 variants={fadeUp} className="text-5xl font-extrabold leading-[1.1] tracking-tight text-white sm:text-7xl">
+              Turn your{' '}
+              <span className="bg-gradient-to-r from-white via-zinc-300 to-zinc-500 bg-clip-text text-transparent">
+                coding grind
+              </span>{' '}
+              into a<br className="hidden sm:block" /> placement{' '}
+              <span className="bg-gradient-to-r from-white via-zinc-300 to-zinc-500 bg-clip-text text-transparent">
+                offer
+              </span>
+            </motion.h1>
 
-          {/* 3D zoom stage: Get Started <-> Login / Sign Up */}
-          <div
-            className="relative mt-9 flex flex-col items-center justify-center"
-            style={{ perspective: 1000, transformStyle: 'preserve-3d', minHeight: 120 }}
-          >
-            <AnimatePresence mode="wait">
-              {!showAuth ? (
-                <motion.div
-                  key="get-started"
-                  initial={{ opacity: 0, scale: 0.9, rotateX: 10 }}
-                  animate={{ opacity: 1, scale: 1, rotateX: 0 }}
-                  exit={{ opacity: 0, scale: 1.6, rotateX: 0, z: 200 }}
-                  transition={{ type: 'spring', stiffness: 120, damping: 18 }}
-                  style={{ transformStyle: 'preserve-3d' }}
-                >
-                  <button
-                    onClick={() => setShowAuth(true)}
-                    onMouseEnter={prefetchAuthPages}
-                    onFocus={prefetchAuthPages}
-                    onTouchStart={prefetchAuthPages}
-                    className="relative w-64 rounded-full bg-gradient-to-r from-[#7CFFC4] via-[#5EEAD4] to-[#8B5CF6] px-8 py-4 text-lg font-bold text-black shadow-[0_0_36px_rgba(124,255,196,0.45),0_0_64px_rgba(139,92,246,0.35)] transition hover:shadow-[0_0_48px_rgba(124,255,196,0.6),0_0_84px_rgba(139,92,246,0.5)] sm:w-72"
-                  >
-                    <span className="relative z-10">Get Started</span>
-                    <span className="pointer-events-none absolute inset-0 overflow-hidden rounded-full">
-                      <span className="absolute -top-1 left-1/4 h-2 w-2 rounded-full bg-white/80 blur-[1px]" />
-                      <span className="absolute top-2 right-1/3 h-1.5 w-1.5 rounded-full bg-white/60 blur-[1px]" />
-                      <span className="absolute bottom-2 left-1/2 h-1 w-1 rounded-full bg-white/70" />
-                    </span>
-                  </button>
-                </motion.div>
-              ) : (
-                <motion.div
-                  key="auth"
-                  initial={{ opacity: 0, scale: 0.5, rotateX: -30, z: -200 }}
-                  animate={{ opacity: 1, scale: 1, rotateX: 0, z: 0 }}
-                  exit={{ opacity: 0, scale: 0.5, rotateX: 30, z: -200 }}
-                  transition={{ type: 'spring', stiffness: 120, damping: 16 }}
-                  style={{ transformStyle: 'preserve-3d' }}
-                  className="flex w-full max-w-md flex-col items-center gap-4 rounded-3xl border border-[#7CFFC4]/25 bg-gradient-to-br from-white/10 via-white/[0.06] to-white/[0.02] p-8 shadow-[0_0_70px_rgba(139,92,246,0.28)] backdrop-blur-xl"
-                >
-                  {/* Project title + Welcome — shown at the top of the auth view */}
-                  <h1 className="bg-gradient-to-r from-white via-zinc-300 to-zinc-500 bg-clip-text text-center text-4xl font-extrabold tracking-tight text-transparent sm:text-5xl">
-                    stdskillupps
-                  </h1>
-                  <h2 className="text-2xl font-bold text-white">Welcome</h2>
-                  <p className="text-sm text-zinc-300">Choose an option to continue</p>
-                  <motion.button
-                    initial={{ scale: 0.5, rotateX: -30, opacity: 0 }}
-                    animate={{ scale: 1, rotateX: 0, opacity: 1 }}
-                    transition={{ type: 'spring', stiffness: 200, damping: 16, delay: 0.1 }}
-                    onClick={handleLogin}
+            <motion.p variants={fadeUp} className="mx-auto mt-6 max-w-2xl text-base text-zinc-300 sm:text-lg">
+              Master DSA, track progress, and land your dream placement with guided prep, real-time analytics, and 2000+ company questions.
+            </motion.p>
+            <motion.p variants={fadeUp} className="mx-auto mt-3 max-w-xl text-sm leading-relaxed text-zinc-400 sm:text-base">
+              stdskillupps keeps your coding progress, year-wise preparation plan, and real placement drives together in one place.
+            </motion.p>
+
+            <div
+              className="relative mt-9 flex min-h-[120px] flex-col items-center justify-center"
+              style={{ perspective: 1000, transformStyle: 'preserve-3d' }}
+            >
+              <AnimatePresence mode="wait">
+                {!showAuth ? (
+                  <motion.div
+                    key="get-started"
+                    initial={{ opacity: 0, scale: 0.9, rotateX: 10 }}
+                    animate={{ opacity: 1, scale: 1, rotateX: 0 }}
+                    exit={{ opacity: 0, scale: 1.35, rotateX: 0, z: 120 }}
+                    transition={{ type: 'spring', stiffness: 120, damping: 18 }}
                     style={{ transformStyle: 'preserve-3d' }}
-                    className="w-full rounded-2xl border border-[#A78BFA]/45 bg-white/5 px-6 py-3.5 text-base font-bold text-white backdrop-blur transition hover:bg-white/10"
                   >
-                    Login
-                  </motion.button>
-                  <motion.button
-                    initial={{ scale: 0.5, rotateX: -30, opacity: 0 }}
-                    animate={{ scale: 1, rotateX: 0, opacity: 1 }}
-                    transition={{ type: 'spring', stiffness: 200, damping: 16, delay: 0.2 }}
-                    onClick={handleSignUp}
+                    <button
+                      type="button"
+                      data-variant="primary"
+                      onClick={() => setShowAuth(true)}
+                      onMouseEnter={prefetchAuthPages}
+                      onFocus={prefetchAuthPages}
+                      onTouchStart={prefetchAuthPages}
+                      className="liquid-button w-64 rounded-full px-8 py-4 text-lg font-bold sm:w-72"
+                    >
+                      Get Started
+                    </button>
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    key="auth"
+                    initial={{ opacity: 0, scale: 0.62, rotateX: -18, z: -120 }}
+                    animate={{ opacity: 1, scale: 1, rotateX: 0, z: 0 }}
+                    exit={{ opacity: 0, scale: 0.8, rotateX: 12, z: -80 }}
+                    transition={{ type: 'spring', stiffness: 140, damping: 20 }}
                     style={{ transformStyle: 'preserve-3d' }}
-                    className="w-full rounded-2xl bg-white px-6 py-3.5 text-base font-bold text-black shadow-[0_0_30px_rgba(124,255,196,0.4)] transition hover:shadow-[0_0_45px_rgba(139,92,246,0.55)]"
+                    className="flex w-full max-w-md flex-col items-center gap-4 rounded-3xl border border-white/25 bg-slate-950/55 p-8 shadow-[0_0_70px_rgba(148,163,184,0.16)] backdrop-blur-2xl"
                   >
-                    Sign Up
-                  </motion.button>
-                  <motion.button
-                    initial={{ scale: 0.5, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    transition={{ type: 'spring', stiffness: 200, damping: 16, delay: 0.3 }}
-                    onClick={() => setShowAuth(false)}
-                    className="mt-1 text-sm font-medium text-zinc-400 transition hover:text-white"
-                  >
-                    ← Back
-                  </motion.button>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-        </motion.main>
+                    <h2 className="text-2xl font-bold text-white">Choose how to continue</h2>
+                    <button
+                      type="button"
+                      data-variant="secondary"
+                      onClick={() => navigate('/login')}
+                      className="liquid-button w-full rounded-2xl px-6 py-3.5 text-base font-bold text-white"
+                    >
+                      Login
+                    </button>
+                    <button
+                      type="button"
+                      data-variant="primary"
+                      onClick={() => navigate('/signup')}
+                      className="liquid-button w-full rounded-2xl px-6 py-3.5 text-base font-bold"
+                    >
+                      Sign Up
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setShowAuth(false)}
+                      className="mt-1 rounded-full px-4 py-2 text-sm font-medium text-zinc-400 transition-colors hover:text-white"
+                    >
+                      ← Back
+                    </button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          </motion.main>
         </div>
 
-        {/* Preview of what is inside the app (below the hero) */}
-        <motion.section
-          initial={{ opacity: 0, y: 24 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.2 }}
-          transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-          className="w-full max-w-3xl pb-12 text-center"
-          // Below the fold: skip layout/paint until it scrolls into view.
-          style={{ contentVisibility: 'auto', containIntrinsicSize: 'auto 600px' }}
-        >
-          <p className="mb-4 text-sm font-medium text-zinc-400">A look inside</p>
-          <DashboardPreview />
-        </motion.section>
-
-        {/* Footer: About + Contact */}
         <footer
           className="mt-12 w-full max-w-5xl border-t border-white/10 py-10 text-left"
           style={{ contentVisibility: 'auto', containIntrinsicSize: 'auto 300px' }}

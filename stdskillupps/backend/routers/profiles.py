@@ -1,4 +1,6 @@
 """Profile endpoints."""
+import re
+
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from supabase import Client
@@ -12,8 +14,21 @@ router = APIRouter(prefix="/profiles", tags=["profiles"])
 
 class ProfileCreate(BaseModel):
     full_name: str | None = None
-    role: str = "student"
     email: str | None = None
+
+
+def _valid_avatar_path(value: object) -> bool:
+    """Accept a relative storage object path, never a public URL."""
+    if not isinstance(value, str) or not value or len(value) > 1024:
+        return False
+    parts = value.split("/")
+    if len(parts) < 2:
+        return False
+    return all(
+        part not in (".", "..")
+        and re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._-]{0,254}", part) is not None
+        for part in parts
+    )
 
 
 @router.post("")
@@ -26,15 +41,24 @@ def create_profile(
 
     First-time users have no profile row yet, so this validates only the JWT.
     """
-    if body.role not in ("student", "lecturer"):
-        raise HTTPException(status_code=400, detail="role must be 'student' or 'lecturer'")
+    existing = db.table("profiles").select("*").eq("id", user.id).limit(1).execute()
+    if existing.data:
+        return profile_out(existing.data[0])
     # The JWT's email is authoritative: the frontend does not send
     # one, and writing null here silently wiped the email of profiles
     # that already had one (found by smoke test, 2026-10-23), which
     # broke the email-exists routing for those accounts.
-    row = {"id": user.id, "full_name": body.full_name, "role": body.role, "email": body.email or user.email}
-    resp = db.table("profiles").upsert(row, on_conflict="id").execute()
-    created = resp.data[0] if resp.data else row
+    row = {"id": user.id, "full_name": body.full_name, "role": "student", "email": body.email or user.email}
+    try:
+        resp = db.table("profiles").insert(row).execute()
+        created = resp.data[0] if resp.data else row
+    except Exception:
+        # A concurrent signup request may have inserted the row after the
+        # initial read. Return that row unchanged, including lecturer role.
+        existing = db.table("profiles").select("*").eq("id", user.id).limit(1).execute()
+        if not existing.data:
+            raise
+        created = existing.data[0]
     return profile_out(created)
 
 
@@ -129,6 +153,13 @@ def update_profile(
     updates = normalize_profile_update(body)
     if not updates:
         raise HTTPException(status_code=400, detail="Nothing to update")
+    if "avatar_path" in updates:
+        avatar_path = updates["avatar_path"]
+        if not _valid_avatar_path(avatar_path):
+            raise HTTPException(status_code=400, detail="avatar_path must be a relative storage object path")
+        if profile.get("role") != "lecturer" and profile_id == profile.get("id"):
+            if avatar_path.split("/", 1)[0] != str(profile_id):
+                raise HTTPException(status_code=400, detail="avatar_path must be inside your profile folder")
     # Real-or-fake check (owner's rule, 2026-10-22): a LeetCode
     # username is accepted only when LeetCode confirms the account
     # really exists. CampusTrack has no public API to check against,

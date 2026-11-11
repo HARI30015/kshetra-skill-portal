@@ -29,7 +29,6 @@ export default function Login() {
   const [error, setError] = useState('');
   const [noAccount, setNoAccount] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [shakeKey, setShakeKey] = useState(0);
   const [cooldown, setCooldown] = useState(0);
 
   const notice = location.state?.notice;
@@ -44,7 +43,6 @@ export default function Login() {
 
   const fail = (message) => {
     setError(message);
-    setShakeKey((k) => k + 1);
   };
 
   const goToDashboard = () => {
@@ -78,7 +76,6 @@ export default function Login() {
         }
       }
       setError(message);
-      setShakeKey((k) => k + 1);
     } finally {
       setLoading(false);
     }
@@ -219,23 +216,16 @@ export default function Login() {
 
   return (
     <PageWrapper>
-      <main className="flex min-h-screen items-center justify-center px-4 pt-24 perspective-2000">
+      <main className="flex min-h-screen items-center justify-center px-4 pb-10 pt-24">
         <motion.div
-          key={shakeKey}
-          animate={shakeKey ? { x: [0, -10, 10, -8, 8, -4, 4, 0] } : {}}
-          transition={{ duration: 0.5 }}
-          className="w-full max-w-md preserve-3d"
-          style={{ transformStyle: 'preserve-3d' }}
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.24, ease: 'easeOut' }}
+          className="w-full max-w-md"
         >
           <motion.div
-            initial={{ opacity: 0, y: 60, rotateX: -20, scale: 0.94, z: -100 }}
-            animate={{ opacity: 1, y: 0, rotateX: 0, scale: 1, z: 0 }}
-            transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-            whileHover={{ rotateX: 2, rotateY: -2, scale: 1.01 }}
-            className="glass-3d rounded-[2rem] p-8 preserve-3d"
-            style={{ transformStyle: 'preserve-3d', boxShadow: '0 30px 80px rgba(0,0,0,0.5), 0 0 60px rgba(255,255,255,0.15)' }}
+            className="glass-3d rounded-[2rem] p-6 sm:p-8"
           >
-            <div style={{ transform: 'translateZ(40px)' }}>
             <motion.div
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
@@ -346,13 +336,13 @@ export default function Login() {
               <form onSubmit={verifyCode} className="mt-6 space-y-5">
                 <AnimatedInput
                   label="6-digit code"
-                  type="text"
-                  name="otp"
                   value={code}
-                  onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                  placeholder="123456"
+                  onChange={(event) => setCode(event.target.value.replace(/\D/g, '').slice(0, 6))}
+                  inputMode="numeric"
                   autoComplete="one-time-code"
+                  maxLength={6}
                   required
+                  disabled={loading}
                 />
                 {errorBlock}
                 <AnimatedButton type="submit" loading={loading} className="w-full">
@@ -413,7 +403,6 @@ export default function Login() {
                 </Link>
               </p>
             )}
-            </div>
           </motion.div>
         </motion.div>
       </main>

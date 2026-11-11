@@ -82,10 +82,11 @@ export default function Placements() {
               return (
                 <motion.button
                   key={f}
-                  whileHover={{ scale: 1.06 }}
-                  whileTap={{ scale: 0.94 }}
+                  data-variant={active ? 'primary' : 'secondary'}
+                  whileTap={{ scale: 0.98 }}
+                  transition={{ duration: 0.08 }}
                   onClick={() => setField(f)}
-                  className={`rounded-full border px-4 py-1.5 text-xs font-semibold transition-colors ${
+                  className={`liquid-button rounded-full border px-4 py-1.5 text-xs font-semibold transition-colors ${
                     active
                       ? 'border-transparent bg-white text-black shadow-glow'
                       : 'border-white/20 bg-white/10 text-zinc-300 hover:bg-white/15'

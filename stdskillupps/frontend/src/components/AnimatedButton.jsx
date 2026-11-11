@@ -31,7 +31,8 @@ export default function AnimatedButton({ children, type = 'button', onClick, loa
       disabled={disabled || loading}
       whileTap={disabled || loading ? undefined : { scale: 0.98 }}
       transition={{ duration: 0.08 }}
-      className={`relative inline-flex touch-manipulation select-none items-center justify-center gap-2 overflow-hidden rounded-xl font-semibold transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-60 ${variants[variant]} ${sizes[size]} ${className}`}
+      data-variant={variant}
+      className={`liquid-button relative inline-flex touch-manipulation select-none items-center justify-center gap-2 overflow-hidden rounded-xl font-semibold transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-60 ${variants[variant]} ${sizes[size]} ${className}`}
     >
       {/* Top highlight for 3D depth (static, costs nothing) */}
       <div className="pointer-events-none absolute inset-x-0 top-0 h-1/2 rounded-t-xl bg-gradient-to-b from-white/10 to-transparent" />

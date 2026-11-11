@@ -106,7 +106,7 @@ export function AuthProvider({ children }) {
           const meta = user?.user_metadata || {};
           const p = await createProfile({
             full_name: meta.full_name || user?.email?.split('@')[0] || 'Student',
-            role: meta.role === 'lecturer' ? 'lecturer' : 'student',
+            role: 'student',
           });
           applyProfile(p);
           writeCachedProfile(userIdRef.current, p);
@@ -139,11 +139,11 @@ export function AuthProvider({ children }) {
 
   // Ensure a profile row exists for a freshly-signed-up user, then load it.
   const ensureProfile = useCallback(
-    async (fallbackName, fallbackRole) => {
+    async (fallbackName) => {
       const existing = await fetchProfile();
       if (existing) return existing;
       try {
-        const p = await createProfile({ full_name: fallbackName, role: fallbackRole });
+        const p = await createProfile({ full_name: fallbackName, role: 'student' });
         applyProfile(p);
         writeCachedProfile(userIdRef.current, p);
         return p;
@@ -156,9 +156,7 @@ export function AuthProvider({ children }) {
     [fetchProfile]
   );
 
-  const refreshProfile = useCallback(async () => {
-    await fetchProfile();
-  }, [fetchProfile]);
+  const refreshProfile = useCallback(async () => fetchProfile(), [fetchProfile]);
 
   const logout = useCallback(async () => {
     // Signing out mid-setup abandons a half-done profile — delete it so

@@ -27,6 +27,9 @@ postman/
 - **DB access**: backend uses the **service-role** key (RLS bypass) but enforces
   the same rules in code (`self_or_lecturer`, `require_lecturer`). Direct client
   access is additionally locked down by Row Level Security in `schema.sql`.
+- **Roles**: public registration always creates a student profile. The profile API
+  does not allow users to promote themselves to lecturer; assign staff roles only
+  through a trusted administrator process.
 
 ## Setup
 
@@ -34,8 +37,10 @@ postman/
 1. Create a project at https://supabase.com (note the project URL, anon key,
    service-role key).
 2. SQL Editor → run `supabase/schema.sql`.
-3. SQL Editor → run `supabase/seed.sql`.
-4. Enable Email (or any) auth provider for sign-up/sign-in.
+3. SQL Editor → run `supabase/migrations/20261110091800_profile_pictures_storage.sql`
+   to create the private profile-photo bucket and its owner/lecturer access policies.
+4. SQL Editor → run `supabase/seed.sql`.
+5. Enable Email (or any) auth provider for sign-up/sign-in.
 
 ### 2. Backend
 ```bash
@@ -116,13 +121,16 @@ places. The API speaks **both** directions:
 | `plan` (recommendations) | `plan_text` | recommendation |
 
 - `PUT /profiles/{id}` accepts either name for each field (plus `onboarded`).
+- It accepts `avatar_path` only as a relative private Storage object path; profile
+  photo uploads are limited to the signed-in owner's folder.
 - Profile, stats, and recommendation responses include **both** the canonical column
   name and the frontend alias.
 - `GET /profiles/me` returns **404** when the user has no profile row yet (the
   frontend treats this as "new user → run onboarding → POST /profiles").
 
 Additive columns beyond the original contract (driven by the frontend's needs):
-`profiles.onboarded` (boolean), `placements.package_lpa` (numeric),
+`profiles.onboarded` (boolean), `profiles.avatar_path` (private Storage object path),
+`placements.package_lpa` (numeric),
 `placements.location` (text), `placements.drive_date` (date). All nullable.
 
 ## External platforms

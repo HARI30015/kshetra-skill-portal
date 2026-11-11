@@ -139,10 +139,11 @@ export default function Onboarding() {
               <motion.button
                 key={y}
                 type="button"
+                data-variant={active ? 'primary' : 'secondary'}
                 whileTap={{ scale: 0.98 }}
                 transition={{ duration: 0.08 }}
                 onClick={() => setYear(y)}
-                className={`relative rounded-2xl border px-4 py-6 text-center transition-colors ${
+                className={`liquid-button relative rounded-2xl border px-4 py-6 text-center transition-colors ${
                   active
                     ? 'border-transparent bg-white text-black shadow-glow'
                     : 'border-white/20 bg-white/10 text-zinc-200 hover:bg-white/15'
@@ -176,10 +177,11 @@ export default function Onboarding() {
               <motion.button
                 key={f}
                 type="button"
+                data-variant={active ? 'primary' : 'secondary'}
                 whileTap={{ scale: 0.98 }}
                 transition={{ duration: 0.08 }}
                 onClick={() => setField(f)}
-                className={`rounded-full border px-5 py-2.5 text-sm font-semibold transition-colors ${
+                className={`liquid-button rounded-full border px-5 py-2.5 text-sm font-semibold transition-colors ${
                   active
                     ? 'border-transparent bg-white text-black shadow-glow'
                     : 'border-white/20 bg-white/10 text-zinc-200 hover:bg-white/15'
@@ -210,7 +212,7 @@ export default function Onboarding() {
             rel="noreferrer"
             whileTap={{ scale: 0.98 }}
             transition={{ duration: 0.08 }}
-            className="mt-4 inline-flex items-center gap-2 rounded-xl border border-white/20 bg-white/10 px-4 py-2.5 text-sm font-semibold text-white hover:bg-white/15"
+            className="liquid-button mt-4 inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold text-white"
           >
             🔗 Not signed in? Open leetcode.com to sign in first ↗
           </motion.a>
@@ -241,7 +243,7 @@ export default function Onboarding() {
             type="number"
           />
           <p className="text-xs text-zinc-400">
-            Enter your latest campus-track score yourself — we'll verify it later. No auto-sync here.
+            Enter your current score for now. After setup, your dashboard has a private browser bookmark to sync the real score from your CampusTrack profile.
           </p>
           <motion.a
             href={CAMPUSTRACK_URL}
@@ -249,7 +251,7 @@ export default function Onboarding() {
             rel="noreferrer"
             whileTap={{ scale: 0.98 }}
             transition={{ duration: 0.08 }}
-            className="inline-flex items-center gap-2 rounded-xl border border-white/20 bg-white/10 px-4 py-2.5 text-sm font-semibold text-white hover:bg-white/15"
+            className="liquid-button inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold text-white"
           >
             🔗 Not signed in? Open campustrack.in to sign in first ↗
           </motion.a>

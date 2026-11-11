@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import PageWrapper from '../components/PageWrapper';
@@ -8,162 +8,101 @@ import { supabase } from '../supabaseClient';
 import { useAuth } from '../context/AuthContext';
 import { updateProfile } from '../api';
 
-const ROLES = [
-  { value: 'student', label: 'Student', icon: '🎓' },
-  { value: 'lecturer', label: 'Lecturer', icon: '👩‍🏫' },
-];
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+const RESEND_SECONDS = 30;
 
 export default function Signup() {
   const navigate = useNavigate();
-  const { ensureProfile } = useAuth();
+  const { ensureProfile, refreshProfile } = useAuth();
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
-  const [role, setRole] = useState('student');
   const [year, setYear] = useState(null);
   const [code, setCode] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [step, setStep] = useState('details'); // 'details' | 'code' | 'password'
+  const [step, setStep] = useState('details');
   const [error, setError] = useState('');
-  const [accountExists, setAccountExists] = useState(false);
+  const [info, setInfo] = useState('');
   const [loading, setLoading] = useState(false);
-  const [shakeKey, setShakeKey] = useState(0);
+  const [resending, setResending] = useState(false);
+  const [cooldown, setCooldown] = useState(0);
 
-  // After the account is created, go DIRECTLY to the Login option
-  // (owner's flow, 2026-10-23 evening): the profile row is created
-  // first, while still signed in from verification, then we sign
-  // out and land on /login with a notice, so the user signs in with
-  // the password they just set. After sign-in the dashboard comes
-  // DIRECTLY (no setup questions) because the year + onboarded flag
-  // are saved AND verified here, before signing out.
-  // (Owner report, 2026-10-31: "after clicking create account the
-  // dashboard not working, the direct profile should come" — the
-  // old code saved year/onboarded in one best-effort attempt and
-  // swallowed the error, so when the sleeping backend missed it the
-  // profile stayed onboarded=false and login bounced to /onboarding
-  // instead of the dashboard. This version retries until the save is
-  // proven, and never signs out into an unsaved state.)
-  // NOTE: this calls supabase.auth.signOut() directly, NOT the
-  // AuthContext logout — that one deletes half-done profiles, and a
-  // brand-new profile must be kept.
-  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+  useEffect(() => {
+    if (cooldown <= 0) return undefined;
+    const timer = setTimeout(() => setCooldown((seconds) => seconds - 1), 1000);
+    return () => clearTimeout(timer);
+  }, [cooldown]);
 
-  const goToLogin = async () => {
-    // 1) The profile row must exist. ensureProfile already retries
-    // the fetch internally; retry the whole ensure once more in
-    // case the backend was still waking.
-    let created = null;
-    for (let attempt = 0; attempt < 2 && !created; attempt++) {
-      created = await ensureProfile(fullName, role);
-      if (!created && attempt < 1) await sleep(8000);
-    }
-    if (!created) {
-      // Never sign out into a broken state: the user stays signed
-      // in on the password step and can tap Create Account again
-      // once the server is awake. handleSetPassword shows this
-      // error on the password step.
-      throw new Error(
-        'Server is waking up — your profile could not be saved yet. Please tap Create Account again in a moment.'
-      );
-    }
-    // 2) Students: save the year picked in Sign Up and mark
-    // onboarded, RETRYING until the backend confirms it. This is
-    // the guarantee that makes the dashboard come directly after
-    // sign-in. Target field, LeetCode and CampusTrack are still
-    // set later from the dashboard cards / Edit profile.
-    if (role === 'student' && created?.id && year) {
-      let saved = false;
-      for (let attempt = 0; attempt < 5 && !saved; attempt++) {
-        try {
-          await updateProfile(created.id, { year_of_study: year, onboarded: true });
-          saved = true;
-        } catch {
-          if (attempt < 4) await sleep(8000);
-        }
-      }
-      // 3) Verify the save landed before signing out.
-      if (saved) {
-        try {
-          const fresh = await ensureProfile(fullName, role);
-          if (!fresh?.onboarded) saved = false;
-        } catch {
-          saved = false;
-        }
-      }
-      if (!saved) {
-        throw new Error(
-          'Server is waking up — your year could not be saved yet. Please tap Create Account again in a moment.'
-        );
-      }
-    }
-    await supabase.auth.signOut();
-    navigate('/login', {
-      replace: true,
-      state: { notice: 'Account created. Sign in to continue.' },
+  const sendVerificationCode = async () => {
+    const { error: otpError } = await supabase.auth.signInWithOtp({
+      email: email.trim(),
+      options: {
+        shouldCreateUser: true,
+        data: { full_name: fullName.trim(), role: 'student', year_of_study: year },
+      },
     });
+    if (otpError) throw otpError;
   };
 
-  // Step 1: send OTP to the new email.
-  // Deliberately NO backend call here — the code must go out instantly.
-  // (An earlier version checked "account exists" against the backend
-  // first; when the server was asleep that made sending the code take
-  // up to a minute. Existing accounts are caught after verification
-  // instead — see handleVerifyCode.)
-  const handleSendCode = async (e) => {
-    e.preventDefault();
+  const handleSendCode = async (event) => {
+    event.preventDefault();
     setError('');
-    setAccountExists(false);
-    if (role === 'student' && !year) {
+    setInfo('');
+    if (!year) {
       setError('Please select your year of study.');
-      setShakeKey((k) => k + 1);
       return;
     }
     setLoading(true);
     try {
-      const { error: otpError } = await supabase.auth.signInWithOtp({
-        email,
-        options: {
-          shouldCreateUser: true,
-          data: { full_name: fullName, role, year_of_study: year },
-        },
-      });
-      if (otpError) throw otpError;
+      await sendVerificationCode();
+      setCode('');
+      setCooldown(RESEND_SECONDS);
       setStep('code');
     } catch (err) {
       setError(err?.message || 'Could not send code. Check the email and try again.');
-      setShakeKey((k) => k + 1);
     } finally {
       setLoading(false);
     }
   };
 
-  // Step 2: verify OTP
-  const handleVerifyCode = async (e) => {
-    e.preventDefault();
+  const handleResendCode = async () => {
+    if (cooldown > 0 || loading || resending) return;
     setError('');
+    setInfo('');
+    setResending(true);
+    try {
+      await sendVerificationCode();
+      setCooldown(RESEND_SECONDS);
+      setInfo('A new verification code was sent.');
+    } catch (err) {
+      setError(err?.message || 'Could not resend the code. Please try again.');
+    } finally {
+      setResending(false);
+    }
+  };
+
+  const handleVerifyCode = async (event) => {
+    event.preventDefault();
+    setError('');
+    setInfo('');
+    if (!/^\d{6}$/.test(code)) {
+      setError('Enter the 6-digit code from your email.');
+      return;
+    }
     setLoading(true);
     try {
       const { error: verifyError } = await supabase.auth.verifyOtp({
-        email,
-        token: code.trim(),
+        email: email.trim(),
+        token: code,
         type: 'email',
       });
       if (verifyError) throw verifyError;
-      // Existing account? A brand-new account was created just now,
-      // when the code was sent; an existing one was created long
-      // before. This check runs entirely on Supabase (always on), so
-      // it's instant — no waiting on the backend. Existing users are
-      // routed to sign-in instead of overwriting their password here.
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+
+      // Existing accounts go to password login; verification remains mandatory
+      // for a new account and never resets an existing account's password.
+      const { data: { user } } = await supabase.auth.getUser();
       const createdAt = user?.created_at ? new Date(user.created_at).getTime() : Date.now();
       if (Date.now() - createdAt > 60 * 60 * 1000) {
-        // Mail already has an account (owner's rule, 2026-10-23):
-        // never create it again, and never strand the user on an
-        // error screen - redirect straight to Login. After sign-in
-        // the app continues with the usual next steps (the setup
-        // questions if they are pending, otherwise the dashboard).
         await supabase.auth.signOut();
         navigate('/login', {
           replace: true,
@@ -174,34 +113,68 @@ export default function Signup() {
       setStep('password');
     } catch (err) {
       setError(err?.message || 'Invalid code. Please try again.');
-      setShakeKey((k) => k + 1);
     } finally {
       setLoading(false);
     }
   };
 
-  // Step 3: set password for the verified account
-  const handleSetPassword = async (e) => {
-    e.preventDefault();
+  const createOnboardedProfile = async () => {
+    let created = null;
+    for (let attempt = 0; attempt < 2 && !created; attempt += 1) {
+      created = await ensureProfile(fullName.trim());
+      if (!created && attempt < 1) await sleep(8000);
+    }
+    if (!created?.id) {
+      throw new Error('The profile could not be saved yet. Please try Create Account again in a moment.');
+    }
+
+    let saved = false;
+    for (let attempt = 0; attempt < 5 && !saved; attempt += 1) {
+      try {
+        await updateProfile(created.id, { year_of_study: year, onboarded: true });
+        saved = true;
+      } catch (err) {
+        if (attempt === 4) throw err;
+        await sleep(8000);
+      }
+    }
+
+    // Refresh the auth context before navigating so the route guard sees the
+    // persisted onboarded state and does not send a new student to onboarding.
+    let fresh = null;
+    for (let attempt = 0; attempt < 4; attempt += 1) {
+      try {
+        fresh = await refreshProfile();
+        if (fresh?.onboarded) break;
+      } catch {
+        // Keep verifying the saved profile before moving on.
+      }
+      if (attempt < 3) await sleep(1500);
+    }
+    if (!fresh?.onboarded) {
+      throw new Error('Your account was created, but the profile is still syncing. Please try again in a moment.');
+    }
+  };
+
+  const handleSetPassword = async (event) => {
+    event.preventDefault();
     setError('');
     if (password.length < 6) {
       setError('Password must be at least 6 characters.');
-      setShakeKey((k) => k + 1);
       return;
     }
     if (password !== confirmPassword) {
       setError('Passwords do not match.');
-      setShakeKey((k) => k + 1);
       return;
     }
     setLoading(true);
     try {
       const { error: updateError } = await supabase.auth.updateUser({ password });
       if (updateError) throw updateError;
-      await goToLogin();
+      await createOnboardedProfile();
+      navigate('/dashboard', { replace: true });
     } catch (err) {
-      setError(err?.message || 'Could not set password. Please try again.');
-      setShakeKey((k) => k + 1);
+      setError(err?.response?.data?.detail || err?.message || 'Could not finish account setup. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -216,7 +189,7 @@ export default function Signup() {
           exit={{ opacity: 0, height: 0 }}
           className="overflow-hidden"
         >
-          <div className="rounded-xl border border-white/40 bg-white/15 px-4 py-3 text-sm text-zinc-200">
+          <div className="rounded-xl border border-sky-100/25 bg-sky-100/[0.08] px-4 py-3 text-sm text-slate-100">
             {error}
           </div>
         </motion.div>
@@ -224,224 +197,167 @@ export default function Signup() {
     </AnimatePresence>
   );
 
-  const stepTitle = {
-    details: 'Join stdskillupps 🚀',
-    code: 'Check your inbox 📩',
-    password: 'Set your password 🔐',
+  const renderInfo = () => (
+    <AnimatePresence>
+      {info && (
+        <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="text-sm text-sky-100">
+          {info}
+        </motion.p>
+      )}
+    </AnimatePresence>
+  );
+
+  const titles = {
+    details: ['Create your student account', 'Prepare with a plan that fits your year.'],
+    code: ['Verify your email', `Enter the 6-digit code sent to ${email.trim()}.`],
+    password: ['Set your password', 'This is the password you will use to sign in.'],
   };
-  const stepSubtitle = {
-    details: 'Your placement prep starts here.',
-    code: `We sent a 6-digit code to ${email}.`,
-    password: 'You’ll use this password to sign in from now on.',
-  };
+  const [title, subtitle] = titles[step];
+  const stepIndex = ['details', 'code', 'password'].indexOf(step);
 
   return (
     <PageWrapper>
-      <main className="flex min-h-screen items-center justify-center px-4 pt-24 pb-10 perspective-2000">
+      <main className="flex min-h-screen items-center justify-center px-4 pb-10 pt-24">
         <motion.div
-          key={shakeKey}
-          animate={shakeKey ? { x: [0, -10, 10, -8, 8, -4, 4, 0] } : {}}
-          transition={{ duration: 0.5 }}
-          className="w-full max-w-md preserve-3d"
-          style={{ transformStyle: 'preserve-3d' }}
+          key={step}
+          initial={{ opacity: 0, y: 14, scale: 0.985 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ duration: 0.22, ease: 'easeOut' }}
+          className="glass-3d w-full max-w-md rounded-[2rem] p-6 sm:p-8"
         >
-          <motion.div
-            initial={{ opacity: 0, y: 60, rotateX: -20, scale: 0.94, z: -100 }}
-            animate={{ opacity: 1, y: 0, rotateX: 0, scale: 1, z: 0 }}
-            transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-            whileHover={{ rotateX: 2, rotateY: -2, scale: 1.01 }}
-            className="glass-3d rounded-[2rem] p-8 preserve-3d"
-            style={{ transformStyle: 'preserve-3d', boxShadow: '0 30px 80px rgba(0,0,0,0.5), 0 0 60px rgba(255,255,255,0.15)' }}
-          >
-            <div style={{ transform: 'translateZ(40px)' }}>
-            <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
-              <h1 className="text-2xl font-extrabold text-white" style={{ textShadow: '0 4px 20px rgba(255,255,255,0.4)' }}>{stepTitle[step]}</h1>
-              <p className="mt-1 text-sm text-zinc-300">{stepSubtitle[step]}</p>
-            </motion.div>
+          <h1 className="text-2xl font-extrabold text-white">{title}</h1>
+          <p className="mt-1 text-sm text-zinc-300">{subtitle}</p>
 
-            {/* Step indicator */}
-            <div className="mt-4 flex items-center gap-2">
-              {['details', 'code', 'password'].map((s, i) => {
-                const idx = ['details', 'code', 'password'].indexOf(step);
-                return (
-                  <div
-                    key={s}
-                    className={`h-1.5 flex-1 rounded-full transition-colors ${
-                      i <= idx ? 'bg-white' : 'bg-white/10'
-                    }`}
-                  />
-                );
-              })}
-            </div>
+          <div className="mt-5 flex items-center gap-2" aria-label={`Step ${stepIndex + 1} of 3`}>
+            {['details', 'code', 'password'].map((name, index) => (
+              <div
+                key={name}
+                className={`h-1.5 flex-1 rounded-full ${index <= stepIndex ? 'bg-sky-100' : 'bg-white/10'}`}
+              />
+            ))}
+          </div>
 
-            {step === 'details' && (
-              <form onSubmit={handleSendCode} className="mt-6 space-y-5">
-                <motion.div initial={{ opacity: 0, x: -16 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.22 }}>
-                  <AnimatedInput
-                    label="Full name"
-                    name="full_name"
-                    value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
-                    placeholder="Ada Lovelace"
-                    autoComplete="name"
-                    required
-                  />
-                </motion.div>
-                <motion.div initial={{ opacity: 0, x: -16 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.3 }}>
-                  <AnimatedInput
-                    label="Email"
-                    type="email"
-                    name="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="you@college.edu"
-                    autoComplete="email"
-                    required
-                  />
-                </motion.div>
-                <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.38 }}>
-                  <span className="mb-1.5 block text-sm font-medium text-zinc-300">I am a…</span>
-                  <div className="relative grid grid-cols-2 gap-2 rounded-2xl border border-white/20 bg-white/10 p-1.5 backdrop-blur-xl">
-                    {ROLES.map((r) => {
-                      const active = role === r.value;
-                      return (
-                        <button
-                          key={r.value}
-                          type="button"
-                          onClick={() => setRole(r.value)}
-                          className={`relative z-10 rounded-xl px-4 py-2.5 text-sm font-semibold transition-colors ${
-                            active ? 'text-black' : 'text-zinc-300 hover:text-white'
-                          }`}
-                        >
-                          {active && (
-                            <motion.span
-                              layoutId="role-pill"
-                              transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-                              className="absolute inset-0 -z-10 rounded-xl bg-white shadow-glow"
-                            />
-                          )}
-                          <span className="relative z-10">
-                            {r.icon} {r.label}
-                          </span>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </motion.div>
-                {role === 'student' && (
-                  <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.42 }}>
-                    <span className="mb-1.5 block text-sm font-medium text-zinc-300">Year of study</span>
-                    <div className="grid grid-cols-4 gap-2 rounded-2xl border border-white/20 bg-white/10 p-1.5 backdrop-blur-xl">
-                      {[1, 2, 3, 4].map((y) => {
-                        const active = year === y;
-                        return (
-                          <button
-                            key={y}
-                            type="button"
-                            onClick={() => setYear(y)}
-                            className={`rounded-xl px-2 py-2.5 text-sm font-semibold transition-colors ${
-                              active
-                                ? 'bg-white text-black shadow-glow'
-                                : 'text-zinc-300 hover:text-white'
-                            }`}
-                          >
-                            Year {y}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </motion.div>
-                )}
-                {renderError()}
-                {accountExists && (
-                  <AnimatedButton variant="primary" size="sm" onClick={() => navigate('/login')} className="w-full">
-                    Sign In instead →
-                  </AnimatedButton>
-                )}
-                <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.46 }}>
-                  <AnimatedButton type="submit" loading={loading} className="w-full">
-                    {loading ? 'Sending code…' : 'Send Verification Code'}
-                  </AnimatedButton>
-                </motion.div>
-              </form>
-            )}
+          {step === 'details' && (
+            <form onSubmit={handleSendCode} className="mt-6 space-y-5">
+              <AnimatedInput
+                label="Full name"
+                name="full_name"
+                value={fullName}
+                onChange={(event) => setFullName(event.target.value)}
+                placeholder="Your name"
+                autoComplete="name"
+                required
+              />
+              <AnimatedInput
+                label="Email"
+                type="email"
+                name="email"
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+                placeholder="you@college.edu"
+                autoComplete="email"
+                required
+              />
+              <fieldset>
+                <legend className="mb-2 block text-sm font-medium text-zinc-200">Year of study</legend>
+                <div className="grid grid-cols-4 gap-2 rounded-2xl border border-white/20 bg-white/[0.06] p-1.5 backdrop-blur-xl">
+                  {[1, 2, 3, 4].map((yearOption) => (
+                    <button
+                      key={yearOption}
+                      type="button"
+                      aria-pressed={year === yearOption}
+                      onClick={() => setYear(yearOption)}
+                      data-variant={year === yearOption ? 'primary' : 'secondary'}
+                      className={`liquid-button rounded-xl px-2 py-2.5 text-sm font-semibold ${
+                        year === yearOption ? 'text-slate-950' : 'text-zinc-300'
+                      }`}
+                    >
+                      Year {yearOption}
+                    </button>
+                  ))}
+                </div>
+              </fieldset>
+              {renderError()}
+              <AnimatedButton type="submit" loading={loading} className="w-full">
+                {loading ? 'Sending code…' : 'Send verification code'}
+              </AnimatedButton>
+            </form>
+          )}
 
-            {step === 'code' && (
-              <form onSubmit={handleVerifyCode} className="mt-6 space-y-5">
-                <motion.div initial={{ opacity: 0, x: -16 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.25 }}>
-                  <AnimatedInput
-                    label="6-digit code"
-                    type="text"
-                    name="code"
-                    value={code}
-                    onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                    placeholder="123456"
-                    autoComplete="one-time-code"
-                    inputMode="numeric"
-                    required
-                  />
-                </motion.div>
-                {renderError()}
-                <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }} className="space-y-3">
-                  <AnimatedButton type="submit" loading={loading} className="w-full">
-                    {loading ? 'Verifying…' : 'Verify Code'}
-                  </AnimatedButton>
-                  <button
-                    type="button"
-                    onClick={() => { setStep('details'); setCode(''); setError(''); }}
-                    className="w-full text-center text-sm text-zinc-400 hover:text-zinc-300"
-                  >
-                    Use a different email
-                  </button>
-                </motion.div>
-              </form>
-            )}
+          {step === 'code' && (
+            <form onSubmit={handleVerifyCode} className="mt-6 space-y-5">
+              <AnimatedInput
+                label="6-digit code"
+                value={code}
+                onChange={(event) => setCode(event.target.value.replace(/\D/g, '').slice(0, 6))}
+                inputMode="numeric"
+                autoComplete="one-time-code"
+                maxLength={6}
+                required
+                disabled={loading || resending}
+              />
+              {renderError()}
+              {renderInfo()}
+              <AnimatedButton type="submit" loading={loading} className="w-full">
+                {loading ? 'Verifying…' : 'Verify code'}
+              </AnimatedButton>
+              <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-sm">
+                <button
+                  type="button"
+                  disabled={cooldown > 0 || loading || resending}
+                  onClick={handleResendCode}
+                  className="rounded-full px-2 py-1 font-semibold text-sky-100 underline underline-offset-4 transition-colors hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {resending ? 'Sending…' : cooldown > 0 ? `Resend in ${cooldown}s` : 'Resend code'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setStep('details'); setCode(''); setError(''); setInfo(''); }}
+                  className="rounded-full px-2 py-1 text-zinc-300 underline underline-offset-4 transition-colors hover:text-white"
+                >
+                  Use a different email
+                </button>
+              </div>
+            </form>
+          )}
 
-            {step === 'password' && (
-              <form onSubmit={handleSetPassword} className="mt-6 space-y-5">
-                <motion.div initial={{ opacity: 0, x: -16 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.25 }}>
-                  <AnimatedInput
-                    label="Create password"
-                    type="password"
-                    name="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Min. 6 characters"
-                    autoComplete="new-password"
-                    showPasswordToggle
-                    required
-                  />
-                </motion.div>
-                <motion.div initial={{ opacity: 0, x: -16 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.33 }}>
-                  <AnimatedInput
-                    label="Confirm password"
-                    type="password"
-                    name="confirmPassword"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    placeholder="Repeat your password"
-                    autoComplete="new-password"
-                    showPasswordToggle
-                    required
-                  />
-                </motion.div>
-                {renderError()}
-                <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
-                  <AnimatedButton type="submit" loading={loading} className="w-full">
-                    {loading ? 'Creating account…' : 'Create Account'}
-                  </AnimatedButton>
-                </motion.div>
-              </form>
-            )}
+          {step === 'password' && (
+            <form onSubmit={handleSetPassword} className="mt-6 space-y-5">
+              <AnimatedInput
+                label="Create password"
+                type="password"
+                name="password"
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+                placeholder="At least 6 characters"
+                autoComplete="new-password"
+                showPasswordToggle
+                required
+              />
+              <AnimatedInput
+                label="Confirm password"
+                type="password"
+                name="confirmPassword"
+                value={confirmPassword}
+                onChange={(event) => setConfirmPassword(event.target.value)}
+                placeholder="Enter it again"
+                autoComplete="new-password"
+                showPasswordToggle
+                required
+              />
+              {renderError()}
+              <AnimatedButton type="submit" loading={loading} className="w-full">
+                {loading ? 'Creating your profile…' : 'Create account'}
+              </AnimatedButton>
+            </form>
+          )}
 
-            <p className="mt-6 text-center text-sm text-zinc-400">
-              Already have an account?{' '}
-              <Link to="/login" className="font-semibold text-zinc-200 hover:text-zinc-200">
-                Sign in
-              </Link>
-            </p>
-            </div>
-          </motion.div>
+          <p className="mt-6 text-center text-sm text-zinc-400">
+            Already have an account?{' '}
+            <Link to="/login" className="font-semibold text-zinc-200 underline underline-offset-4 hover:text-white">
+              Sign in
+            </Link>
+          </p>
         </motion.div>
       </main>
     </PageWrapper>

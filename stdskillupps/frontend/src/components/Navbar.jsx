@@ -152,9 +152,10 @@ export default function Navbar() {
                   </NavLink>
                   <Link to="/signup" {...prefetchProps('/signup')}>
                     <motion.span
+                      data-variant="primary"
                       whileTap={{ scale: 0.98 }}
                       transition={{ duration: 0.08 }}
-                      className="ml-1 inline-block rounded-lg bg-white px-4 py-2 text-sm font-semibold text-black shadow-glow"
+                      className="liquid-button ml-1 inline-block rounded-lg px-4 py-2 text-sm font-semibold text-black"
                     >
                       Get started
                     </motion.span>
@@ -162,12 +163,13 @@ export default function Navbar() {
                 </>
               ) : (
                 <>
-                  <Avatar name={profile?.full_name} email={profile?.email} size={34} className="ml-2" />
+                  <Avatar name={profile?.full_name} email={profile?.email} avatarPath={profile?.avatar_path} size={34} className="ml-2" />
                   <motion.button
+                    data-variant="secondary"
                     whileTap={{ scale: 0.98 }}
                     transition={{ duration: 0.08 }}
                     onClick={() => setConfirmOpen(true)}
-                    className="ml-1 rounded-lg border border-white/40 bg-white/10 px-4 py-2 text-sm font-semibold text-zinc-200 transition hover:bg-white/20"
+                    className="liquid-button ml-1 rounded-lg px-4 py-2 text-sm font-semibold text-zinc-200 transition"
                   >
                     Logout
                   </motion.button>
@@ -177,9 +179,10 @@ export default function Navbar() {
 
             {/* Mobile: avatar + menu toggle */}
             <div className="flex items-center gap-2 md:hidden">
-              {isAuthenticated && <Avatar name={profile?.full_name} email={profile?.email} size={32} />}
+              {isAuthenticated && <Avatar name={profile?.full_name} email={profile?.email} avatarPath={profile?.avatar_path} size={32} />}
               <button
-                className="rounded-lg p-2 text-zinc-200 hover:bg-white/10"
+                data-variant="ghost"
+                className="liquid-button rounded-lg p-2 text-zinc-200 hover:bg-white/10"
                 onClick={() => setMenuOpen((v) => !v)}
                 aria-label="Toggle menu"
               >
@@ -231,18 +234,20 @@ export default function Navbar() {
                       to="/signup"
                       {...prefetchProps('/signup')}
                       onClick={() => setMenuOpen(false)}
-                      className="block rounded-lg bg-white px-4 py-2.5 text-sm font-semibold text-black"
+                      data-variant="primary"
+                      className="liquid-button block rounded-lg px-4 py-2.5 text-sm font-semibold text-black"
                     >
                       Get started
                     </NavLink>
                   </>
                 ) : (
                   <button
+                    data-variant="ghost"
                     onClick={() => {
                       setMenuOpen(false);
                       setConfirmOpen(true);
                     }}
-                    className="block w-full rounded-lg px-4 py-2.5 text-left text-sm font-medium text-zinc-200"
+                    className="liquid-button block w-full rounded-lg px-4 py-2.5 text-left text-sm font-medium text-zinc-200"
                   >
                     Logout
                   </button>
@@ -300,18 +305,20 @@ export default function Navbar() {
                   </p>
                   <div className="mt-6 flex gap-3">
                     <motion.button
+                      data-variant="secondary"
                       whileTap={{ scale: 0.98 }}
                       transition={{ duration: 0.08 }}
                       onClick={() => setConfirmOpen(false)}
-                      className="flex-1 rounded-xl border border-white/20 bg-white/10 px-4 py-2.5 text-sm font-semibold text-white"
+                      className="liquid-button flex-1 rounded-xl px-4 py-2.5 text-sm font-semibold text-white"
                     >
                       Stay
                     </motion.button>
                     <motion.button
+                      data-variant="primary"
                       whileTap={{ scale: 0.98 }}
                       transition={{ duration: 0.08 }}
                       onClick={handleLogout}
-                      className="flex-1 rounded-xl bg-white px-4 py-2.5 text-sm font-semibold text-black"
+                      className="liquid-button flex-1 rounded-xl px-4 py-2.5 text-sm font-semibold text-black"
                     >
                       Log out
                     </motion.button>

@@ -34,6 +34,7 @@ CREATE TABLE IF NOT EXISTS public.profiles (
   role text NOT NULL CHECK (role IN ('student', 'lecturer')),
   full_name text,
   email text,
+  avatar_path text,
   year int CHECK (year BETWEEN 1 AND 4),
   target_field text,
   leetcode_username text,
@@ -42,6 +43,9 @@ CREATE TABLE IF NOT EXISTS public.profiles (
   onboarded boolean DEFAULT false,
   created_at timestamptz DEFAULT now()
 );
+
+ALTER TABLE public.profiles
+  ADD COLUMN IF NOT EXISTS avatar_path text;
 
 CREATE TABLE IF NOT EXISTS public.placements (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),

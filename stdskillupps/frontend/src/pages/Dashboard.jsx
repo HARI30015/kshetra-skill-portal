@@ -4,6 +4,8 @@ import PageWrapper from '../components/PageWrapper';
 import GlassCard from '../components/GlassCard';
 import AnimatedInput from '../components/AnimatedInput';
 import Avatar from '../components/Avatar';
+import DashboardTabs from '../components/DashboardTabs';
+import { supabase } from '../supabaseClient';
 import {
   MilestoneRing,
   MilestoneBar,
@@ -194,9 +196,10 @@ function TapButton({ children, onClick, loading, disabled, variant = 'primary', 
       type={type}
       onClick={onClick}
       disabled={disabled || loading}
+      data-variant={variant}
       whileTap={{ scale: 0.98 }}
       transition={{ duration: 0.08 }}
-      className={`inline-flex touch-manipulation select-none items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-60 ${styles[variant]} ${className}`}
+      className={`liquid-button inline-flex touch-manipulation select-none items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-60 ${styles[variant]} ${className}`}
     >
       {loading && <Spinner size={14} />}
       {children}
@@ -394,6 +397,11 @@ export default function Dashboard() {
   const [saving, setSaving] = useState(false);
   const [refreshingCt, setRefreshingCt] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
+  const [avatarBusy, setAvatarBusy] = useState(false);
+  const [passwordOpen, setPasswordOpen] = useState(false);
+  const [passwordForm, setPasswordForm] = useState({ password: '', confirm: '' });
+  const [passwordBusy, setPasswordBusy] = useState(false);
+  const avatarInputRef = useRef(null);
   const bmRef = useRef(null);
   const autoSyncKey = useRef('');
   const autoPlanKey = useRef('');
@@ -690,6 +698,71 @@ export default function Dashboard() {
     }
   };
 
+  const handleAvatarUpload = async (event) => {
+    const file = event.target.files?.[0];
+    event.target.value = '';
+    if (!file || !pid) return;
+    const allowedTypes = new Set(['image/jpeg', 'image/png', 'image/webp']);
+    if (!allowedTypes.has(file.type)) {
+      toast('Choose a PNG, JPG, or WebP image.');
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      toast('Profile photos must be 2 MB or smaller.');
+      return;
+    }
+
+    const objectPath = `${pid}/${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+    setAvatarBusy(true);
+    try {
+      const { error: uploadError } = await supabase.storage
+        .from('profile-pictures')
+        .upload(objectPath, file, { contentType: file.type, cacheControl: '3600', upsert: false });
+      if (uploadError) throw uploadError;
+
+      try {
+        await updateProfile(pid, { avatar_path: objectPath });
+      } catch (saveError) {
+        await supabase.storage.from('profile-pictures').remove([objectPath]);
+        throw saveError;
+      }
+
+      if (profile.avatar_path) {
+        await supabase.storage.from('profile-pictures').remove([profile.avatar_path]);
+      }
+      await safeRefresh();
+      toast('Profile photo updated.');
+    } catch (err) {
+      toast(err?.response?.data?.detail || err?.message || 'Could not update the profile photo.', 4500);
+    } finally {
+      setAvatarBusy(false);
+    }
+  };
+
+  const handlePasswordChange = async (event) => {
+    event.preventDefault();
+    if (passwordForm.password.length < 6) {
+      toast('Password must be at least 6 characters.');
+      return;
+    }
+    if (passwordForm.password !== passwordForm.confirm) {
+      toast('Passwords do not match.');
+      return;
+    }
+    setPasswordBusy(true);
+    try {
+      const { error: passwordError } = await supabase.auth.updateUser({ password: passwordForm.password });
+      if (passwordError) throw passwordError;
+      setPasswordForm({ password: '', confirm: '' });
+      setPasswordOpen(false);
+      toast('Password updated.');
+    } catch (err) {
+      toast(err?.message || 'Could not update the password.', 4500);
+    } finally {
+      setPasswordBusy(false);
+    }
+  };
+
   const refreshCtScore = async () => {
     setRefreshingCt(true);
     await safeRefresh();
@@ -786,10 +859,7 @@ export default function Dashboard() {
   } else if (!username) {
     statsBody = (
       <div className="mt-6 rounded-2xl border border-dashed border-white/20 bg-white/5 p-6 text-center">
-        <p className="text-sm text-zinc-300">Add your LeetCode username to see your solved counts here.</p>
-        <TapButton onClick={openLeetCodeAdd} className="mt-3">
-          ➕ Add username
-        </TapButton>
+        <p className="text-sm text-zinc-300">LeetCode is not linked yet. Add your username in the actions panel to see your real solved counts here.</p>
       </div>
     );
   } else if (syncError) {
@@ -884,258 +954,335 @@ export default function Dashboard() {
           Hey, {firstName} 👋 <span className="text-gradient">let’s get you placed</span>
         </motion.h1>
 
-        <div className="mt-8 grid gap-6 lg:grid-cols-3">
-          {/* Profile */}
-          <GlassCard delay={0.05} className="lg:col-span-1">
-            <div className="flex items-center gap-4">
-              <Avatar name={profile.full_name} email={profile.email} size={64} solid />
-              <div className="min-w-0">
-                <h2 className="truncate text-xl font-bold text-white">{profile.full_name}</h2>
-                <p className="truncate text-sm text-zinc-400">{profile.email}</p>
-              </div>
-            </div>
+        <DashboardTabs
+          label="Student dashboard sections"
+          items={[
+            { id: 'student-profile', label: 'Profile & settings' },
+            { id: 'student-progress', label: 'Coding progress' },
+            { id: 'student-plan', label: 'My plan' },
+            { id: 'student-growth', label: 'Achievements' },
+          ]}
+        />
 
-            <div className="mt-5 space-y-3 text-sm">
-              <div className="flex items-center justify-between rounded-xl bg-white/5 px-4 py-2.5">
-                <span className="text-zinc-300">🎓 Year</span>
-                <span className="font-semibold text-white">Year {year}</span>
-              </div>
-              <div className="flex items-center justify-between rounded-xl bg-white/5 px-4 py-2.5">
-                <span className="text-zinc-300">🎯 Target field</span>
-                <span className="font-semibold text-white">{field || '—'}</span>
-              </div>
-            </div>
-
-            <div className="mt-4 flex flex-wrap gap-3">
-              <TapButton variant="secondary" onClick={() => openEdit('profile')}>
-                ✏️ Edit profile
-              </TapButton>
-              <TapButton variant="secondary" onClick={handleLogout} loading={loggingOut}>
-                Log out
-              </TapButton>
-            </div>
-
-            {editing === 'profile' && (
-              <EditPanel onSubmit={saveProfile} onCancel={() => setEditing(null)} saving={saving}>
-                <AnimatedInput label="Full name" value={form.full_name} onChange={setField('full_name')} required />
-                <label className="block">
-                  <span className="mb-1.5 block text-sm font-medium text-zinc-300">Year of study</span>
-                  <select
-                    value={form.year_of_study}
-                    onChange={setField('year_of_study')}
-                    className="w-full rounded-xl border border-white/20 bg-white/10 px-4 py-3 text-white outline-none [&>option]:bg-ink-900"
-                  >
-                    {[1, 2, 3, 4].map((y) => (
-                      <option key={y} value={y}>
-                        Year {y}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-                <AnimatedInput
-                  label="Target job field"
-                  value={form.target_job_field}
-                  onChange={setField('target_job_field')}
-                  placeholder="SWE, Data Science, Frontend…"
-                />
-                <div className="flex flex-wrap gap-2">
-                  {Object.keys(FIELD_RESOURCES).map((f) => (
-                    <button
-                      key={f}
-                      type="button"
-                      onClick={() => setForm((x) => ({ ...x, target_job_field: f }))}
-                      className={`touch-manipulation rounded-full border px-3 py-1 text-xs font-semibold ${
-                        form.target_job_field === f
-                          ? 'border-white/60 bg-white/20 text-zinc-200'
-                          : 'border-white/20 bg-white/10 text-zinc-300'
-                      }`}
-                    >
-                      {f}
-                    </button>
-                  ))}
-                </div>
-              </EditPanel>
-            )}
-
-            <div className="mt-5 rounded-2xl border border-white/30 bg-white/10 p-4 text-center">
-              <p className="text-xl font-extrabold text-white">
-                {yearsLeft === 0 ? 'It’s placement season 🔥' : `${yearsLeft} year${yearsLeft > 1 ? 's' : ''} left`}
-              </p>
-              <p className="mt-1 text-xs text-zinc-300">until placements — make every week count.</p>
-            </div>
-          </GlassCard>
-
-          {/* LeetCode */}
-          <GlassCard delay={0.1} className="lg:col-span-2">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <h2 className="text-lg font-bold text-white">📊 LeetCode</h2>
-              <TapButton onClick={() => (username ? doSync() : openLeetCodeAdd())} loading={syncBusy}>
-                {syncBusy ? 'Syncing…' : '🔄 Sync'}
-              </TapButton>
-            </div>
-
-            <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-2 text-sm">
-              <span className="text-zinc-400">Username</span>
-              {username ? (
-                <a
-                  href={`https://leetcode.com/u/${encodeURIComponent(username)}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="font-semibold text-zinc-200 underline decoration-white/40 underline-offset-2 hover:text-zinc-200"
-                >
-                  @{username} ↗
-                </a>
-              ) : (
-                <span className="font-semibold text-white">—</span>
-              )}
-              <TapButton variant="ghost" onClick={() => (username ? openEdit('lc') : openLeetCodeAdd())} className="px-1 py-1">
-                ✏️ {username ? 'Change' : 'Add'}
-              </TapButton>
-              {!username && (
-                <a
-                  href={LEETCODE_URL}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="text-xs font-semibold text-zinc-300 underline underline-offset-2"
-                >
-                  Open leetcode.com ↗
-                </a>
-              )}
-            </div>
-
-            {editing === 'lc' && (
-              <EditPanel onSubmit={saveLeetCode} onCancel={() => setEditing(null)} saving={saving}>
-                {!username && (
-                  <div className="space-y-2">
-                    <a
-                      href={LEETCODE_LOGIN_URL}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="inline-flex touch-manipulation items-center gap-1.5 rounded-xl border border-white/30 bg-white/10 px-4 py-2 text-sm font-semibold text-white hover:bg-white/15"
-                    >
-                      Log in to LeetCode ↗
-                    </a>
-                    <p className="text-xs text-zinc-300">
-                      Step 1: log in to LeetCode (a tab may have opened already — if not, tap here). Step 2: type your
-                      LeetCode username below and tap Save.
-                    </p>
+        <section id="student-profile" className="mt-6 scroll-mt-32">
+          <GlassCard delay={0.05}>
+            <div className="grid gap-7 lg:grid-cols-[minmax(0,1.15fr)_minmax(280px,0.85fr)]">
+              <div>
+                <div className="flex flex-wrap items-center gap-4">
+                  <Avatar name={profile.full_name} email={profile.email} avatarPath={profile.avatar_path} size={68} solid />
+                  <div className="min-w-0 flex-1">
+                    <h2 className="truncate text-xl font-bold text-white">{profile.full_name}</h2>
+                    <p className="truncate text-sm text-zinc-400">{profile.email}</p>
+                    <p className="mt-1 text-xs font-medium uppercase tracking-[0.18em] text-sky-100/75">Student profile</p>
                   </div>
-                )}
-                <AnimatedInput
-                  label="LeetCode username"
-                  value={form.leetcode_username}
-                  onChange={setField('leetcode_username')}
-                  placeholder="your-leetcode-username"
-                />
-                <p className="text-xs text-zinc-400">Saving fetches your fresh score right away.</p>
-              </EditPanel>
-            )}
-
-            {statsBody}
-          </GlassCard>
-        </div>
-
-        <div className="mt-6 grid gap-6 lg:grid-cols-3">
-          {/* CampusTrack */}
-          <GlassCard delay={0.12} className="lg:col-span-1">
-            <h2 className="text-lg font-bold text-white">🏫 CampusTrack</h2>
-
-            <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-2 text-sm">
-              <span className="text-zinc-400">Username</span>
-              {ctUsername ? (
-                <a
-                  href={CT_LOGIN_URL}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="font-semibold text-zinc-200 underline decoration-white/40 underline-offset-2 hover:text-zinc-200"
-                >
-                  @{ctUsername} ↗
-                </a>
-              ) : (
-                <span className="font-semibold text-white">—</span>
-              )}
-              <TapButton variant="ghost" onClick={() => openEdit('ct')} className="px-1 py-1">
-                ✏️ Edit
-              </TapButton>
-            </div>
-            {!ctUsername && (
-              <a
-                href={CAMPUSTRACK_URL}
-                target="_blank"
-                rel="noreferrer"
-                className="mt-2 inline-block text-xs font-semibold text-zinc-300 underline underline-offset-2"
-              >
-                Open CampusTrack ↗
-              </a>
-            )}
-
-            <div className="mt-4 rounded-2xl bg-white/5 px-4 py-3 text-center">
-              <p className="text-3xl font-extrabold text-white">{ctScore ?? '—'}</p>
-              <p className="mt-1 text-xs uppercase tracking-widest text-zinc-400">CampusTrack score</p>
-              <MilestoneBar value={ctScore} steps={CT_STEPS} max={CT_MAX} />
-            </div>
-
-            {editing === 'ct' && (
-              <EditPanel onSubmit={saveCampus} onCancel={() => setEditing(null)} saving={saving}>
-                <AnimatedInput
-                  label="CampusTrack username"
-                  value={form.campus_track_username}
-                  onChange={setField('campus_track_username')}
-                />
-                <AnimatedInput
-                  label="CampusTrack score"
-                  value={form.campustrack_score}
-                  onChange={setField('campustrack_score')}
-                  type="number"
-                  placeholder="e.g. 85"
-                />
-              </EditPanel>
-            )}
-
-            <div className="mt-5 border-t border-white/10 pt-4">
-              <p className="text-sm font-semibold text-white">🔄 Sync your real CampusTrack score</p>
-              <p className="mt-1 text-xs leading-relaxed text-zinc-400">
-                CampusTrack has no public link, so the sync runs in your own browser: drag the button below to your
-                bookmarks bar, then open CampusTrack, log in, open your Profile page there, and click the bookmark.
-                Your real score lands here by itself.
-              </p>
-              {bookmarklet ? (
-                <>
-                  <BookmarkletLink code={bookmarklet} />
-                  <textarea
-                    ref={bmRef}
-                    readOnly
-                    value={bookmarklet}
-                    onFocus={(e) => e.target.select()}
-                    className="mt-3 h-16 w-full rounded-lg border border-white/10 bg-black/30 p-2 text-[10px] text-zinc-300"
+                  <input
+                    ref={avatarInputRef}
+                    type="file"
+                    accept="image/png,image/jpeg,image/webp"
+                    className="sr-only"
+                    onChange={handleAvatarUpload}
+                    aria-label="Choose a profile photo"
                   />
-                  <div className="mt-2 flex flex-wrap gap-2">
-                    <TapButton variant="secondary" onClick={copyBookmarklet}>
-                      📋 Copy code
-                    </TapButton>
-                    <TapButton variant="secondary" onClick={refreshCtScore} loading={refreshingCt}>
-                      ↻ I’ve synced — refresh score
-                    </TapButton>
+                  <TapButton variant="secondary" onClick={() => avatarInputRef.current?.click()} loading={avatarBusy}>
+                    {avatarBusy ? 'Saving photo…' : 'Change photo'}
+                  </TapButton>
+                </div>
+                <p className="mt-2 text-xs text-zinc-400">PNG, JPG, or WebP · up to 2 MB · used only as your profile photo</p>
+
+                <div className="mt-5 grid gap-3 text-sm sm:grid-cols-2">
+                  <div className="rounded-2xl border border-white/10 bg-white/[0.06] px-4 py-3">
+                    <span className="block text-xs uppercase tracking-wider text-zinc-400">Year of study</span>
+                    <span className="mt-1 block font-semibold text-white">Year {year}</span>
                   </div>
-                  <p className="mt-2 text-[11px] text-zinc-500">
-                    If dragging fails: copy the code above, add a new bookmark in your browser, and paste the code as
-                    its URL.
+                  <div className="rounded-2xl border border-white/10 bg-white/[0.06] px-4 py-3">
+                    <span className="block text-xs uppercase tracking-wider text-zinc-400">Target field</span>
+                    <span className="mt-1 block font-semibold text-white">{field || 'Not set'}</span>
+                  </div>
+                </div>
+
+                <div className="mt-4 flex flex-wrap gap-3">
+                  <TapButton variant="secondary" onClick={() => openEdit('profile')}>Edit details</TapButton>
+                  <TapButton variant="secondary" onClick={() => setPasswordOpen((open) => !open)}>
+                    {passwordOpen ? 'Close password settings' : 'Change password'}
+                  </TapButton>
+                  <TapButton variant="ghost" onClick={handleLogout} loading={loggingOut}>Log out</TapButton>
+                </div>
+
+                {editing === 'profile' && (
+                  <EditPanel onSubmit={saveProfile} onCancel={() => setEditing(null)} saving={saving}>
+                    <AnimatedInput label="Full name" value={form.full_name} onChange={setField('full_name')} required />
+                    <label className="block">
+                      <span className="mb-1.5 block text-sm font-medium text-zinc-300">Year of study</span>
+                      <select
+                        value={form.year_of_study}
+                        onChange={setField('year_of_study')}
+                        className="w-full rounded-xl border border-white/20 bg-white/10 px-4 py-3 text-white outline-none [&>option]:bg-ink-900"
+                      >
+                        {[1, 2, 3, 4].map((y) => <option key={y} value={y}>Year {y}</option>)}
+                      </select>
+                    </label>
+                    <AnimatedInput
+                      label="Target job field"
+                      value={form.target_job_field}
+                      onChange={setField('target_job_field')}
+                      placeholder="SWE, Data Science, Frontend…"
+                    />
+                    <div className="flex flex-wrap gap-2">
+                      {Object.keys(FIELD_RESOURCES).map((f) => (
+                        <button
+                          key={f}
+                          type="button"
+                          data-variant={form.target_job_field === f ? 'primary' : 'secondary'}
+                          onClick={() => setForm((x) => ({ ...x, target_job_field: f }))}
+                          className={`liquid-button touch-manipulation rounded-full px-3 py-1 text-xs font-semibold ${form.target_job_field === f ? 'text-slate-950' : 'text-zinc-300'}`}
+                        >
+                          {f}
+                        </button>
+                      ))}
+                    </div>
+                  </EditPanel>
+                )}
+
+                {passwordOpen && (
+                  <form onSubmit={handlePasswordChange} className="mt-4 space-y-3 rounded-2xl border border-white/15 bg-white/[0.05] p-4">
+                    <h3 className="text-sm font-semibold text-white">Account password</h3>
+                    <AnimatedInput
+                      label="New password"
+                      type="password"
+                      value={passwordForm.password}
+                      onChange={(event) => setPasswordForm((current) => ({ ...current, password: event.target.value }))}
+                      autoComplete="new-password"
+                      placeholder="At least 6 characters"
+                      showPasswordToggle
+                      required
+                    />
+                    <AnimatedInput
+                      label="Confirm new password"
+                      type="password"
+                      value={passwordForm.confirm}
+                      onChange={(event) => setPasswordForm((current) => ({ ...current, confirm: event.target.value }))}
+                      autoComplete="new-password"
+                      placeholder="Enter it again"
+                      showPasswordToggle
+                      required
+                    />
+                    <TapButton type="submit" loading={passwordBusy}>
+                      {passwordBusy ? 'Updating…' : 'Save new password'}
+                    </TapButton>
+                  </form>
+                )}
+
+                <div className="mt-5 rounded-2xl border border-sky-100/20 bg-sky-100/[0.06] p-4">
+                  <p className="text-xl font-extrabold text-white">
+                    {yearsLeft === 0 ? 'It’s placement season' : `${yearsLeft} year${yearsLeft > 1 ? 's' : ''} left`}
                   </p>
-                </>
-              ) : ct.status === 'loading' ? (
-                <CardLoading compact label="Loading your personal sync bookmark…" waking={ct.waking} />
-              ) : (
-                <CardError
-                  compact
-                  message={ct.status === 'error' ? ct.error : 'Your sync bookmark isn’t available yet.'}
-                  onRetry={ct.reload}
-                />
-              )}
+                  <p className="mt-1 text-xs text-zinc-300">until placements — make every week count.</p>
+                </div>
+              </div>
+
+              <aside className="rounded-3xl border border-white/15 bg-white/[0.045] p-5">
+                <h3 className="text-lg font-bold text-white">Connected coding profiles</h3>
+                <p className="mt-1 text-sm text-zinc-400">Edit your handles here; stats and sync tools are below.</p>
+                <div className="mt-4 space-y-3">
+                  <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/[0.05] p-4">
+                    <div>
+                      <p className="text-xs uppercase tracking-wider text-zinc-400">LeetCode</p>
+                      <p className="mt-1 font-semibold text-white">{username ? `@${username}` : 'Not linked yet'}</p>
+                    </div>
+                    <TapButton variant="secondary" onClick={() => openEdit('lc')}>{username ? 'Edit' : 'Add'}</TapButton>
+                  </div>
+                  <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/[0.05] p-4">
+                    <div>
+                      <p className="text-xs uppercase tracking-wider text-zinc-400">CampusTrack</p>
+                      <p className="mt-1 font-semibold text-white">{ctUsername ? `@${ctUsername}` : 'Not linked yet'}</p>
+                    </div>
+                    <TapButton variant="secondary" onClick={() => openEdit('ct')}>{ctUsername ? 'Edit' : 'Add'}</TapButton>
+                  </div>
+                </div>
+                <p className="mt-4 text-xs leading-relaxed text-zinc-400">
+                  Your profile picture is stored privately. Coding usernames remain editable from this profile panel.
+                </p>
+              </aside>
             </div>
           </GlassCard>
+        </section>
 
+        <section id="student-progress" className="mt-6 grid scroll-mt-32 gap-6 lg:grid-cols-2">
+          {/* LeetCode */}
+          <GlassCard delay={0.1}>
+            <div className="grid gap-6 md:grid-cols-[minmax(0,1.2fr)_minmax(220px,0.8fr)]">
+              <div>
+                <h2 className="text-lg font-bold text-white">LeetCode activity</h2>
+                <div className="mt-4 rounded-2xl border border-white/10 bg-white/[0.045] px-4 py-3 text-sm">
+                  <span className="text-zinc-400">Username</span>
+                  <div className="mt-1">
+                    {username ? (
+                      <a
+                        href={`https://leetcode.com/u/${encodeURIComponent(username)}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="font-semibold text-white underline decoration-sky-100/40 underline-offset-2"
+                      >
+                        @{username} ↗
+                      </a>
+                    ) : <span className="font-semibold text-zinc-300">Not linked yet</span>}
+                  </div>
+                </div>
+                {statsBody}
+              </div>
+
+              <aside className="h-fit rounded-2xl border border-white/15 bg-white/[0.045] p-4">
+                <h3 className="text-sm font-semibold text-white">Actions</h3>
+                <div className="mt-3 flex flex-col gap-2.5">
+                  <TapButton variant="secondary" onClick={() => (username ? openEdit('lc') : openLeetCodeAdd())}>
+                    {username ? 'Change username' : 'Add username'}
+                  </TapButton>
+                  <TapButton onClick={() => doSync()} loading={syncBusy} disabled={!username}>
+                    {syncBusy ? 'Syncing…' : username ? 'Sync LeetCode stats' : 'Add username to sync'}
+                  </TapButton>
+                </div>
+                {!username && (
+                  <a
+                    href={LEETCODE_URL}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="mt-3 inline-block text-xs font-semibold text-sky-100 underline underline-offset-2"
+                  >
+                    Open leetcode.com ↗
+                  </a>
+                )}
+                {editing === 'lc' && (
+                  <EditPanel onSubmit={saveLeetCode} onCancel={() => setEditing(null)} saving={saving}>
+                    {!username && (
+                      <div className="space-y-2">
+                        <a
+                          href={LEETCODE_LOGIN_URL}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-flex touch-manipulation items-center gap-1.5 rounded-xl border border-white/30 bg-white/10 px-4 py-2 text-sm font-semibold text-white hover:bg-white/15"
+                        >
+                          Log in to LeetCode ↗
+                        </a>
+                        <p className="text-xs text-zinc-300">Log in to LeetCode, then enter your username below.</p>
+                      </div>
+                    )}
+                    <AnimatedInput
+                      label="LeetCode username"
+                      value={form.leetcode_username}
+                      onChange={setField('leetcode_username')}
+                      placeholder="your-leetcode-username"
+                    />
+                    <p className="text-xs text-zinc-400">Saving fetches your fresh score.</p>
+                  </EditPanel>
+                )}
+              </aside>
+            </div>
+          </GlassCard>
+          {/* CampusTrack */}
+          <GlassCard delay={0.12}>
+            <div className="grid gap-6 md:grid-cols-[minmax(0,1.05fr)_minmax(250px,0.95fr)]">
+              <div>
+                <h2 className="text-lg font-bold text-white">CampusTrack progress</h2>
+                <div className="mt-4 rounded-2xl border border-white/10 bg-white/[0.045] px-4 py-3 text-sm">
+                  <span className="text-zinc-400">Username</span>
+                  <div className="mt-1">
+                    {ctUsername ? (
+                      <a
+                        href={CT_LOGIN_URL}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="font-semibold text-white underline decoration-sky-100/40 underline-offset-2"
+                      >
+                        @{ctUsername} ↗
+                      </a>
+                    ) : <span className="font-semibold text-zinc-300">Not linked yet</span>}
+                  </div>
+                </div>
+                {!ctUsername && (
+                  <a
+                    href={CAMPUSTRACK_URL}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="mt-3 inline-block text-xs font-semibold text-sky-100 underline underline-offset-2"
+                  >
+                    Open CampusTrack ↗
+                  </a>
+                )}
+                <div className="mt-4 rounded-2xl border border-white/10 bg-white/[0.05] px-4 py-5 text-center">
+                  <p className="text-3xl font-extrabold text-white">{ctScore ?? '—'}</p>
+                  <p className="mt-1 text-xs uppercase tracking-widest text-zinc-400">CampusTrack score</p>
+                  <MilestoneBar value={ctScore} steps={CT_STEPS} max={CT_MAX} />
+                </div>
+              </div>
+
+              <aside className="rounded-2xl border border-white/15 bg-white/[0.045] p-4">
+                <div className="flex items-center justify-between gap-3">
+                  <h3 className="text-sm font-semibold text-white">Actions</h3>
+                  <TapButton variant="secondary" onClick={() => openEdit('ct')}>
+                    {ctUsername ? 'Edit profile' : 'Add profile'}
+                  </TapButton>
+                </div>
+
+                {editing === 'ct' && (
+                  <EditPanel onSubmit={saveCampus} onCancel={() => setEditing(null)} saving={saving}>
+                    <AnimatedInput
+                      label="CampusTrack username"
+                      value={form.campus_track_username}
+                      onChange={setField('campus_track_username')}
+                    />
+                    <AnimatedInput
+                      label="CampusTrack score"
+                      value={form.campustrack_score}
+                      onChange={setField('campustrack_score')}
+                      type="number"
+                      placeholder="e.g. 85"
+                    />
+                  </EditPanel>
+                )}
+
+                <div className="mt-4 border-t border-white/10 pt-4">
+                  <p className="text-sm font-semibold text-white">Sync your CampusTrack score</p>
+                  <p className="mt-1 text-xs leading-relaxed text-zinc-400">
+                    CampusTrack has no public API, so the sync runs in your browser. Add the bookmark below, open CampusTrack, sign in, visit your Profile page, and click the bookmark.
+                  </p>
+                  {bookmarklet ? (
+                    <>
+                      <BookmarkletLink code={bookmarklet} />
+                      <textarea
+                        ref={bmRef}
+                        readOnly
+                        value={bookmarklet}
+                        onFocus={(e) => e.target.select()}
+                        className="mt-3 h-16 w-full rounded-lg border border-white/10 bg-black/30 p-2 text-[10px] text-zinc-300"
+                      />
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        <TapButton variant="secondary" onClick={copyBookmarklet}>Copy bookmark code</TapButton>
+                        <TapButton variant="secondary" onClick={refreshCtScore} loading={refreshingCt}>
+                          {refreshingCt ? 'Refreshing…' : 'Refresh score'}
+                        </TapButton>
+                      </div>
+                      <p className="mt-2 text-[11px] text-zinc-500">
+                        If dragging fails, copy the code and paste it as the URL of a new browser bookmark.
+                      </p>
+                    </>
+                  ) : ct.status === 'loading' ? (
+                    <CardLoading compact label="Loading your personal sync bookmark…" waking={ct.waking} />
+                  ) : (
+                    <CardError
+                      compact
+                      message={ct.status === 'error' ? ct.error : 'Your sync bookmark is not available yet.'}
+                      onRetry={ct.reload}
+                    />
+                  )}
+                </div>
+          </aside>
+        </div>
+      </GlassCard>
+          </section>
+
+          <section id="student-plan" className="mt-6 scroll-mt-32">
           {/* My plan */}
-          <GlassCard delay={0.15} className="lg:col-span-2">
+          <GlassCard delay={0.15}>
             <div className="flex flex-wrap items-center justify-between gap-3">
               <h2 className="text-lg font-bold text-white">🧠 My plan</h2>
               <TapButton onClick={() => doGenerate()} loading={planBusy}>
@@ -1169,11 +1316,11 @@ export default function Dashboard() {
                   </a>
                 ))}
               </div>
-            </div>
-          </GlassCard>
-        </div>
+          </div>
+        </GlassCard>
+          </section>
 
-        <div className="mt-6 grid gap-6 lg:grid-cols-3">
+        <section id="student-growth" className="mt-6 grid scroll-mt-32 gap-6 lg:grid-cols-3">
           {/* Streak + badges (real data only) */}
           <GlassCard delay={0.18} className="lg:col-span-1">
             <h2 className="text-lg font-bold text-white">Achievements</h2>
@@ -1185,7 +1332,7 @@ export default function Dashboard() {
             <h2 className="text-lg font-bold text-white">Your year roadmap</h2>
             <YearRoadmap year={year} guides={YEAR_GUIDE} languages={r?.recommended_languages} />
           </GlassCard>
-        </div>
+        </section>
       </main>
 
       {/* Toast: never intercepts taps */}
