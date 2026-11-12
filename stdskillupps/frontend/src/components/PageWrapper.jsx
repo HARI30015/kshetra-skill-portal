@@ -1,4 +1,3 @@
-import React from 'react';
 import { motion } from 'framer-motion';
 
 // One background system only: <Background3D /> (mounted once in App.jsx)

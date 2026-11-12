@@ -1,4 +1,3 @@
-import React from 'react';
 import { motion } from 'framer-motion';
 
 // Light, normal-feel button (owner's rule, 2026-10-23, re-affirmed

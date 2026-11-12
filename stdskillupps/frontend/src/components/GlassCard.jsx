@@ -1,4 +1,3 @@
-import React from 'react';
 import { motion } from 'framer-motion';
 
 // Nothing in this card follows the mouse any more (no tilt, no cursor-follow
