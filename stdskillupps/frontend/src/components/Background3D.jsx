@@ -9,7 +9,7 @@ import { galaxyUrl } from '../assets/galaxy';
 
 // BACKGROUND SYSTEM — mounted once in App.jsx behind every page.
 //
-//  • LANDING ("/"): the Vesper-style mint + violet living orb.
+//  • LANDING ("/"): a stars-only animated field (twinkling stars + shooting stars).
 //  • STUDENT + LECTURER DASHBOARDS: an aurora gradient bubble scene (violet /
 //    sky / pink / mint glass bubbles, continuously drifting), honoring
 //    reduced-motion preferences.
@@ -621,11 +621,101 @@ function VesperBackground() {
   );
 }
 
-// Landing keeps the mint/violet orb; both dashboards use the aurora gradient
+function LandingStarfield() {
+  const lite = useMemo(isLiteDevice, []);
+  const reduced = useReducedMotion();
+  const stars = useMemo(() => {
+    let seed = 117;
+    const random = () => {
+      seed = (seed * 9301 + 49297) % 233280;
+      return seed / 233280;
+    };
+    const modes = ['twinkle', 'float', 'drift', 'sway'];
+    const count = lite ? 54 : 132;
+    return Array.from({ length: count }, (_, index) => {
+      const size = random() > 0.94 ? 2 + random() * 1.1 : 0.7 + random() * 1.2;
+      const dx = Math.round(random() * 72 - 36);
+      return {
+        id: index,
+        left: random() * 100,
+        top: random() * 100,
+        size,
+        alpha: (0.32 + random() * 0.62).toFixed(2),
+        color: ['#ffffff', '#cfe9ff', '#d8d2ff', '#d4f5e2'][Math.floor(random() * 4)],
+        mode: modes[Math.floor(random() * modes.length)],
+        dx: `${dx}px`,
+        backDx: `${Math.round(dx * -0.6)}px`,
+        dy: `${Math.round(18 + random() * 82)}px`,
+        duration: `${Math.round(18 + random() * 52)}s`,
+        delay: `${Math.round(random() * -56)}s`,
+      };
+    });
+  }, [lite]);
+  const shootingStars = useMemo(() => {
+    const count = lite ? 2 : 4;
+    let seed = 319;
+    const random = () => {
+      seed = (seed * 9301 + 49297) % 233280;
+      return seed / 233280;
+    };
+    return Array.from({ length: count }, (_, id) => ({
+      id,
+      left: `${8 + random() * 82}%`,
+      top: `${4 + random() * 68}%`,
+      duration: `${7 + random() * 7}s`,
+      delay: `${random() * -14}s`,
+      dx: `${130 + random() * 190}px`,
+      dy: `${90 + random() * 150}px`,
+    }));
+  }, [lite]);
+
+  return (
+    <div className={`landing-starfield${reduced ? ' landing-starfield--reduced' : ''}`} aria-hidden="true">
+      <div className="landing-starfield__field">
+        {stars.map((star) => (
+          <span
+            key={star.id}
+            className={`landing-star landing-star--${star.mode}`}
+            style={{
+              left: `${star.left}%`,
+              top: `${star.top}%`,
+              width: star.size,
+              height: star.size,
+              color: star.color,
+              backgroundColor: star.color,
+              '--star-alpha': star.alpha,
+              '--star-dx': star.dx,
+              '--star-back-dx': star.backDx,
+              '--star-dy': `-${star.dy}`,
+              animationDuration: star.duration,
+              animationDelay: star.delay,
+            }}
+          />
+        ))}
+        {shootingStars.map((star) => (
+          <span
+            key={`shooting-${star.id}`}
+            className="landing-shooting-star"
+            style={{
+              left: star.left,
+              top: star.top,
+              '--shoot-dx': star.dx,
+              '--shoot-dy': star.dy,
+              animationDuration: star.duration,
+              animationDelay: star.delay,
+            }}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// Landing uses a stars-only animated field; both dashboards use the aurora gradient
 // bubble scene; auth and other pages retain the monochrome galaxy.
 export default function Background3D() {
   const { pathname } = useLocation();
-  if (pathname === '/') return <VesperBackground />;
+  if (pathname === '/') return <LandingStarfield />;
   if (pathname === '/dashboard' || pathname === '/lecturer') return <DashboardBackground />;
   return <MonoBackground />;
 }

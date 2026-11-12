@@ -350,3 +350,72 @@ button:not([data-no-motion]):focus-visible {
   .auroraglass__glow,
   .auroraglass__bubble { animation: none !important; }
 }
+
+/* Landing page: stars only, with several independent motion patterns. */
+.landing-starfield {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  background: #020307;
+}
+.landing-starfield__field {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+.landing-star {
+  position: absolute;
+  display: block;
+  border-radius: 50%;
+  opacity: var(--star-alpha);
+  box-shadow: 0 0 5px currentColor;
+  will-change: transform, opacity;
+}
+.landing-star--twinkle { animation-name: landing-star-twinkle; animation-timing-function: ease-in-out; animation-iteration-count: infinite; }
+.landing-star--float { animation-name: landing-star-float; animation-timing-function: ease-in-out; animation-iteration-count: infinite; }
+.landing-star--drift { animation-name: landing-star-drift; animation-timing-function: ease-in-out; animation-iteration-count: infinite; }
+.landing-star--sway { animation-name: landing-star-sway; animation-timing-function: ease-in-out; animation-iteration-count: infinite; }
+.landing-shooting-star {
+  position: absolute;
+  display: block;
+  width: 118px;
+  height: 1.5px;
+  border-radius: 999px;
+  opacity: 0;
+  transform-origin: left center;
+  background: linear-gradient(90deg, transparent, rgba(188,218,255,0.12) 22%, rgba(223,239,255,0.92) 100%);
+  box-shadow: 0 0 7px rgba(191,220,255,0.58);
+  animation-name: landing-shooting-star;
+  animation-timing-function: ease-out;
+  animation-iteration-count: infinite;
+  will-change: transform, opacity;
+}
+@keyframes landing-star-twinkle {
+  0%, 100% { opacity: 0.12; transform: scale(0.72); }
+  50% { opacity: var(--star-alpha); transform: scale(1.25); }
+}
+@keyframes landing-star-float {
+  0%, 100% { opacity: 0.32; transform: translate3d(0, 0, 0); }
+  50% { opacity: var(--star-alpha); transform: translate3d(var(--star-dx), var(--star-dy), 0); }
+}
+@keyframes landing-star-drift {
+  0%, 100% { opacity: 0.36; transform: translate3d(0, 0, 0) scale(0.9); }
+  50% { opacity: var(--star-alpha); transform: translate3d(var(--star-dx), 7px, 0) scale(1.12); }
+}
+@keyframes landing-star-sway {
+  0%, 100% { opacity: 0.28; transform: translate3d(0, 0, 0); }
+  30% { opacity: var(--star-alpha); transform: translate3d(var(--star-dx), -5px, 0); }
+  70% { opacity: 0.56; transform: translate3d(var(--star-back-dx), 6px, 0); }
+}
+@keyframes landing-shooting-star {
+  0%, 82% { opacity: 0; transform: translate3d(0, 0, 0) rotate(31deg) scaleX(0.12); }
+  86% { opacity: 0.88; transform: translate3d(0, 0, 0) rotate(31deg) scaleX(1); }
+  100% { opacity: 0; transform: translate3d(var(--shoot-dx), var(--shoot-dy), 0) rotate(31deg) scaleX(0.24); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .landing-star,
+  .landing-shooting-star { animation: none !important; }
+  .landing-shooting-star { opacity: 0; }
+}
