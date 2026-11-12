@@ -15,11 +15,6 @@
 @keyframes std-spin-slow {
   to { transform: rotate(360deg); }
 }
-@keyframes std-orb-drift {
-  0%, 100% { transform: translate(0, 0) scale(1); }
-  33% { transform: translate(30px, -40px) scale(1.1); }
-  66% { transform: translate(-20px, 20px) scale(0.95); }
-}
 @keyframes std-particle-float {
   0% { transform: translateY(0) translateX(0) scale(1); opacity: 0; }
   10% { opacity: 1; }
@@ -29,7 +24,6 @@
 .animate-float { animation: std-float 6s ease-in-out infinite; }
 .animate-glow-pulse { animation: std-glow-pulse 2.5s ease-in-out infinite; }
 .animate-spin-slow { animation: std-spin-slow 20s linear infinite; }
-.animate-orb-drift { animation: std-orb-drift 12s ease-in-out infinite; }
 .gradient-border {
   border: 1.5px solid transparent;
   background: linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.85)) padding-box,
@@ -161,27 +155,6 @@ button:not([data-no-glass]) {
 @media (prefers-reduced-motion: reduce) {
   .std-galaxy-rot { animation: none !important; }
 }
-
-/* Existing landing orb: transform / opacity animation only. */
-@keyframes std-orb-breathe {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.08); }
-}
-@keyframes std-vsw-spin { to { transform: rotate(360deg); } }
-@keyframes std-vpart-spin { to { transform: rotate(360deg); } }
-.std-orb-breathe { animation: std-orb-breathe 7s ease-in-out infinite; will-change: transform; }
-.std-vsw { animation: std-vsw-spin 160s linear infinite; will-change: transform; }
-.std-vpart { animation: std-vpart-spin 320s linear infinite; will-change: transform; }
-.std-vp {
-  animation-name: std-twinkle;
-  animation-timing-function: ease-in-out;
-  animation-iteration-count: infinite;
-  will-change: opacity;
-}
-@media (prefers-reduced-motion: reduce) {
-  .std-orb-breathe, .std-vsw, .std-vpart, .std-vp { animation: none !important; }
-}
-
 
 /* All native buttons respond to pointer hover/press and keyboard focus. */
 button:not([data-no-motion]) {

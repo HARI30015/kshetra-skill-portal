@@ -50,7 +50,7 @@ export default function Landing() {
   return (
     <PageWrapper>
       <div className="flex flex-col items-center px-4">
-        <div data-vesper-hero className="flex min-h-[90vh] w-full flex-col items-center justify-center">
+        <div data-hero className="flex min-h-[90vh] w-full flex-col items-center justify-center">
           <motion.main
             variants={container}
             initial="hidden"
