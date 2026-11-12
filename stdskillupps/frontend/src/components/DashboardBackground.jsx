@@ -1,7 +1,13 @@
-import React, { useEffect, useMemo, useRef } from 'react';
+import React, { useMemo } from 'react';
 import { useReducedMotion } from 'framer-motion';
 
-const COLORS = ['#38bdf8', '#60a5fa', '#f59e0b', '#fb923c', '#a78bfa'];
+// Aurora gradient bubbles for the student + lecturer dashboards: the same
+// slow-drifting glass bubbles as the moss version, but each bubble is tinted
+// one hue from a violet / sky / pink / mint palette (owner's rule,
+// 2026-11-12: attractive gradient colours instead of green). The hue is
+// chosen deterministically by bubble index so colours never flicker on
+// re-render. Respects reduced-motion and lite devices.
+const HUES = [258, 199, 330, 156]; // violet, sky, pink, mint
 
 function isLiteDevice() {
   return (
@@ -10,144 +16,72 @@ function isLiteDevice() {
   );
 }
 
-function makeParticles(count) {
-  let seed = 29;
+function makeBubbles(count) {
+  let seed = 418;
   const random = () => {
     seed = (seed * 9301 + 49297) % 233280;
     return seed / 233280;
   };
 
   return Array.from({ length: count }, (_, index) => {
-    const angle = random() * Math.PI * 2;
-    const radius = 20 + Math.sqrt(random()) * 48;
-    const size = random() > 0.9 ? 2.8 + random() * 1.6 : 0.9 + random() * 1.3;
+    const depth = random();
+    const size = 48 + Math.round((random() ** 1.55) * 252);
     return {
       id: index,
-      left: 50 + Math.cos(angle) * radius,
-      top: 50 + Math.sin(angle) * radius * 0.64,
+      left: Math.round(random() * 108 - 4),
+      top: Math.round(random() * 112 - 6),
       size,
-      color: COLORS[Math.floor(random() * COLORS.length)],
-      delay: random() * 6,
-      duration: 4 + random() * 7,
-      glow: size > 2.6,
+      depth,
+      hue: HUES[index % HUES.length],
+      driftX: Math.round(random() * 60 - 30),
+      driftY: Math.round(24 + random() * 78),
+      rotate: Math.round(random() * 24 - 12),
+      delay: Math.round(random() * -34),
+      duration: Math.round(25 + random() * 38),
     };
   });
 }
 
 export default function DashboardBackground() {
-  const stageRef = useRef(null);
   const lite = useMemo(isLiteDevice, []);
   const reduced = useReducedMotion();
-  const particles = useMemo(() => makeParticles(lite ? 38 : 78), [lite]);
-
-  useEffect(() => {
-    if (reduced) return undefined;
-    const stage = stageRef.current;
-    if (!stage) return undefined;
-
-    const current = { x: 0, y: 0, rx: 0, ry: 0, rz: 0 };
-    const target = { x: 0, y: 0, rx: 0, ry: 0, rz: 0 };
-    let frame = 0;
-
-    const schedule = () => {
-      if (!frame) frame = window.requestAnimationFrame(tick);
-    };
-
-    const tick = () => {
-      frame = 0;
-      current.x += (target.x - current.x) * 0.075;
-      current.y += (target.y - current.y) * 0.075;
-      current.rx += (target.rx - current.rx) * 0.075;
-      current.ry += (target.ry - current.ry) * 0.075;
-      current.rz += (target.rz - current.rz) * 0.075;
-      stage.style.transform =
-        `perspective(1300px) translate3d(${current.x.toFixed(2)}px, ${current.y.toFixed(2)}px, 0) ` +
-        `rotateX(${current.rx.toFixed(3)}deg) rotateY(${current.ry.toFixed(3)}deg) rotateZ(${current.rz.toFixed(3)}deg)`;
-
-      const settled =
-        Math.abs(target.x - current.x) < 0.04 &&
-        Math.abs(target.y - current.y) < 0.04 &&
-        Math.abs(target.rx - current.rx) < 0.02 &&
-        Math.abs(target.ry - current.ry) < 0.02 &&
-        Math.abs(target.rz - current.rz) < 0.02;
-      if (!settled) schedule();
-    };
-
-    const updateScroll = () => {
-      const maxScroll = Math.max(document.documentElement.scrollHeight - window.innerHeight, 1);
-      const progress = Math.min(Math.max(window.scrollY / maxScroll, 0), 1) - 0.5;
-      target.y = progress * 9;
-      target.rz = progress * 5;
-      schedule();
-    };
-
-    const updatePointer = (event) => {
-      if (lite || event.pointerType === 'touch') return;
-      const x = (event.clientX / window.innerWidth - 0.5) * 2;
-      const y = (event.clientY / window.innerHeight - 0.5) * 2;
-      target.x = x * 10;
-      target.y = y * 7;
-      target.rx = -y * 2.4;
-      target.ry = x * 3.4;
-      schedule();
-    };
-
-    const resetPointer = () => {
-      target.x = 0;
-      target.rx = 0;
-      target.ry = 0;
-      updateScroll();
-    };
-
-    window.addEventListener('pointermove', updatePointer, { passive: true });
-    window.addEventListener('scroll', updateScroll, { passive: true });
-    window.addEventListener('resize', updateScroll, { passive: true });
-    document.documentElement.addEventListener('mouseleave', resetPointer);
-    updateScroll();
-
-    return () => {
-      window.removeEventListener('pointermove', updatePointer);
-      window.removeEventListener('scroll', updateScroll);
-      window.removeEventListener('resize', updateScroll);
-      document.documentElement.removeEventListener('mouseleave', resetPointer);
-      if (frame) window.cancelAnimationFrame(frame);
-    };
-  }, [lite, reduced]);
+  const bubbles = useMemo(() => makeBubbles(lite ? 12 : 22), [lite]);
 
   return (
     <div
-      className={`dashboard3d${lite ? ' dashboard3d--lite' : ''}${reduced ? ' dashboard3d--reduced' : ''}`}
+      className={`auroraglass${lite ? ' auroraglass--lite' : ''}${reduced ? ' auroraglass--reduced' : ''}`}
       aria-hidden="true"
     >
-      <div ref={stageRef} className="dashboard3d__scene">
-        <div className="dashboard3d__cloud dashboard3d__cloud--blue" />
-        <div className="dashboard3d__cloud dashboard3d__cloud--orange" />
-        <div className="dashboard3d__core">
-          <div className="dashboard3d__core-light" />
-          <div className="dashboard3d__core-edge" />
-        </div>
-        <div className="dashboard3d__orbit dashboard3d__orbit--outer" />
-        <div className="dashboard3d__orbit dashboard3d__orbit--inner" />
-        <div className="dashboard3d__particle-field">
-          {particles.map((particle) => (
-            <span
-              key={particle.id}
-              className="dashboard3d__particle"
-              style={{
-                left: `${particle.left}%`,
-                top: `${particle.top}%`,
-                width: particle.size,
-                height: particle.size,
-                backgroundColor: particle.color,
-                boxShadow: particle.glow ? `0 0 ${particle.size * 4}px ${particle.color}` : undefined,
-                animationDelay: `${particle.delay}s`,
-                animationDuration: `${particle.duration}s`,
-              }}
-            />
-          ))}
-        </div>
+      <div className="auroraglass__atmosphere" />
+      <div className="auroraglass__glow auroraglass__glow--left" />
+      <div className="auroraglass__glow auroraglass__glow--right" />
+      <div className="auroraglass__bubbles">
+        {bubbles.map((bubble) => (
+          <span
+            key={bubble.id}
+            className="auroraglass__bubble"
+            style={{
+              left: `${bubble.left}%`,
+              top: `${bubble.top}%`,
+              width: bubble.size,
+              height: bubble.size,
+              '--bubble-hue': bubble.hue,
+              '--bubble-depth': bubble.depth.toFixed(2),
+              '--bubble-alpha': (0.38 + bubble.depth * 0.42).toFixed(3),
+              '--bubble-rim': (0.24 + bubble.depth * 0.26).toFixed(3),
+              '--bubble-glow': (0.07 + bubble.depth * 0.1).toFixed(3),
+              '--bubble-drift-x': `${bubble.driftX}px`,
+              '--bubble-rise-y': `${-bubble.driftY}px`,
+              '--bubble-z-start': `${Math.round(bubble.depth * 36)}px`,
+              '--bubble-z-end': `${Math.round(bubble.depth * 72)}px`,
+              '--bubble-rotate': `${bubble.rotate}deg`,
+              animationDelay: `${bubble.delay}s`,
+              animationDuration: `${bubble.duration}s`,
+            }}
+          />
+        ))}
       </div>
-      <div className="dashboard3d__veil" />
+      <div className="auroraglass__vignette" />
     </div>
   );
 }

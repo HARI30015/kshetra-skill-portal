@@ -110,6 +110,27 @@ const friendlyLeetCodeWarning = (w) => {
   return 'Couldn’t reach LeetCode right now. Tap Sync to try again.';
 };
 
+// Distinct calendar days (browser local time) with a login record in the last
+// 7 days, from the same history shape computeStreak() accepts (an array of
+// timestamps, or { logins: [...] }). Real data only — 0 when there is none.
+const countLoginDaysLastWeek = (data) => {
+  const list = Array.isArray(data) ? data : Array.isArray(data?.logins) ? data.logins : [];
+  const days = new Set();
+  list.forEach((v) => {
+    const d = new Date(v);
+    if (!Number.isNaN(d.getTime())) days.add(`${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`);
+  });
+  if (days.size === 0) return 0;
+  let n = 0;
+  const cursor = new Date();
+  cursor.setHours(0, 0, 0, 0);
+  for (let i = 0; i < 7; i += 1) {
+    if (days.has(`${cursor.getFullYear()}-${cursor.getMonth()}-${cursor.getDate()}`)) n += 1;
+    cursor.setDate(cursor.getDate() - 1);
+  }
+  return n;
+};
+
 // Retries transient failures (server waking up) for up to ~100s in total.
 async function withRetry(fn, alive, onRetry) {
   const started = Date.now();
@@ -545,6 +566,39 @@ export default function Dashboard() {
   const scheduleParas = scheduleText.split(/\n{2,}/).filter((p) => p.trim());
   const scheduleLong = scheduleText.length > 600;
 
+  /* ---------- home hero (real data only — never mock numbers) ---------- */
+  const hour = new Date().getHours();
+  const daypart = hour < 12 ? 'morning' : hour < 17 ? 'afternoon' : 'evening';
+  const weekLogins = history.status === 'ready' ? countLoginDaysLastWeek(history.data) : 0;
+  const totalSolved = s?.total_solved || 0;
+  const ctScoreNum = Number(ctScore) || 0;
+  const lcLinked = !!profile.leetcode_username;
+  const ctLinked = !!ctUsername;
+  // Placement readiness from real signals only. Formula (kept visible here):
+  // 40% LeetCode solved toward 150 + 30% CampusTrack score toward 2000 +
+  // 30% profile completeness (name, year, target field, LeetCode, CampusTrack).
+  const filledFields = [profile.full_name, profile.year_of_study, profile.target_job_field, profile.leetcode_username, profile.campus_track_username].filter(
+    (v) => v !== null && v !== undefined && v !== '',
+  ).length;
+  const profileComplete = filledFields / 5;
+  const readiness = lcLinked || ctLinked
+    ? Math.round(100 * (0.4 * Math.min(totalSolved / 150, 1) + 0.3 * Math.min(ctScoreNum / 2000, 1) + 0.3 * profileComplete))
+    : null;
+  const readinessLabel = readiness === null
+    ? 'Link LeetCode or CampusTrack to see readiness'
+    : readiness >= 70 ? 'Looking strong' : readiness >= 40 ? 'Building up' : 'Getting started';
+  // Current plan week topic: the "**Week N: topic**" line for the week the
+  // stored plan is in (weeks since the plan was created, capped at 12),
+  // falling back to the first week in the plan text.
+  const weekMatches = [...scheduleText.matchAll(/\*\*Week\s+(\d+):\s*([^*]+?)\*\*/g)];
+  const planCreated = r?.created_at ? new Date(r.created_at) : null;
+  const planWeek = planCreated && !Number.isNaN(planCreated.getTime())
+    ? Math.min(12, Math.max(1, Math.floor((Date.now() - planCreated.getTime()) / 604800000) + 1))
+    : 1;
+  const weekEntry = weekMatches.find((m) => Number(m[1]) === planWeek) || weekMatches[0];
+  const currentTopic = weekEntry ? `Week ${weekEntry[1]} · ${weekEntry[2].trim()}` : null;
+  const scrollToId = (id) => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
   /* ---------- actions ---------- */
 
   const setField = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
@@ -946,13 +1000,74 @@ export default function Dashboard() {
   return (
     <PageWrapper>
       <main className="mx-auto max-w-6xl px-4 pb-24 pt-28">
-        <motion.h1
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-3xl font-extrabold text-white"
-        >
-          Hey, {firstName} 👋 <span className="text-gradient">let’s get you placed</span>
-        </motion.h1>
+        {/* Home hero: greeting + real-data stats + continue learning + upcoming.
+            Every number below comes from live data (login history, LeetCode
+            stats, stored plan) — never mock numbers. */}
+        <motion.section initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}>
+          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-zinc-400">Your placement journey</p>
+          <h1 className="mt-2 text-3xl font-extrabold text-white sm:text-4xl">
+            Good {daypart}, {firstName}.
+          </h1>
+          <p className="mt-2 text-sm leading-relaxed text-zinc-300 sm:text-base">
+            Keep your preparation moving. Your next opportunity is one good session away.
+          </p>
+
+          <div className="mt-6 grid gap-4 sm:grid-cols-3">
+            <div className="rounded-2xl border border-white/10 bg-white/[0.06] px-5 py-4">
+              <p className="text-xs font-semibold uppercase tracking-wider text-zinc-400">Preparation streak</p>
+              <p className="mt-2 text-3xl font-extrabold text-white">{String(streakDays).padStart(2, '0')} days</p>
+              <p className="mt-1 text-xs text-zinc-400">
+                {streakDays > 0 ? `+${weekLogins} this week` : 'Sign in daily to build your streak'}
+              </p>
+            </div>
+            <div className="rounded-2xl border border-white/10 bg-white/[0.06] px-5 py-4">
+              <p className="text-xs font-semibold uppercase tracking-wider text-zinc-400">Problems solved</p>
+              <p className="mt-2 text-3xl font-extrabold text-white">{totalSolved}</p>
+              <p className="mt-1 text-xs text-zinc-400">
+                {s ? `Easy ${s.easy_solved || 0} · Medium ${s.medium_solved || 0} · Hard ${s.hard_solved || 0}` : 'Not linked yet — add your LeetCode username'}
+              </p>
+            </div>
+            <div className="rounded-2xl border border-white/10 bg-white/[0.06] px-5 py-4">
+              <p className="text-xs font-semibold uppercase tracking-wider text-zinc-400">Placement readiness</p>
+              <p className="mt-2 text-3xl font-extrabold text-white">{readiness === null ? '—' : `${readiness}%`}</p>
+              <p className="mt-1 text-xs text-zinc-400">{readinessLabel}</p>
+            </div>
+          </div>
+
+          <div className="mt-4 grid gap-4 lg:grid-cols-5">
+            <div className="rounded-2xl border border-white/10 bg-white/[0.06] px-5 py-4 lg:col-span-3">
+              <p className="text-xs font-semibold uppercase tracking-wider text-zinc-400">Continue learning</p>
+              <p className="mt-2 text-xl font-bold text-white">{currentTopic || (r ? 'Your plan is ready' : 'Your personal plan is being built…')}</p>
+              <p className="mt-1 text-sm text-zinc-300">Pick up where you left off and keep your streak alive.</p>
+              {r ? (
+                <TapButton variant="secondary" onClick={() => scrollToId('student-plan')} className="mt-4">
+                  Resume practice
+                </TapButton>
+              ) : (
+                <TapButton onClick={() => doGenerate()} loading={planBusy} className="mt-4">
+                  {planBusy ? 'Generating…' : 'Generate my plan'}
+                </TapButton>
+              )}
+            </div>
+            <div className="rounded-2xl border border-white/10 bg-white/[0.06] px-5 py-4 lg:col-span-2">
+              <p className="text-xs font-semibold uppercase tracking-wider text-zinc-400">Upcoming</p>
+              <p className="mt-2 text-xl font-bold text-white">CampusTrack sync</p>
+              {ctLinked ? (
+                <>
+                  <p className="mt-1 text-sm text-zinc-300">Your latest CampusTrack activity is ready to review.</p>
+                  <p className="mt-2 text-xs text-zinc-400">Today · Placement prep</p>
+                </>
+              ) : (
+                <>
+                  <p className="mt-1 text-sm text-zinc-300">Link CampusTrack to sync your activity.</p>
+                  <TapButton variant="secondary" onClick={() => scrollToId('student-progress')} className="mt-4">
+                    Link CampusTrack
+                  </TapButton>
+                </>
+              )}
+            </div>
+          </div>
+        </motion.section>
 
         <DashboardTabs
           label="Student dashboard sections"

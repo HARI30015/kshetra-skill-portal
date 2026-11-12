@@ -183,154 +183,6 @@ button:not([data-no-glass]) {
 }
 
 
-/* Dashboard-only orange/blue particle galaxy: layered gradients and masked
-   elliptical rings create depth without extra assets or packages. */
-.dashboard3d {
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  overflow: hidden;
-  pointer-events: none;
-  isolation: isolate;
-  background: #050914;
-}
-.dashboard3d__scene {
-  position: absolute;
-  inset: -8%;
-  overflow: hidden;
-  transform-style: preserve-3d;
-  will-change: transform;
-}
-.dashboard3d__cloud {
-  position: absolute;
-  width: min(72vw, 960px);
-  aspect-ratio: 1;
-  border-radius: 50%;
-  mix-blend-mode: screen;
-  will-change: transform, opacity;
-}
-.dashboard3d__cloud--blue {
-  top: -24%;
-  right: -14%;
-  background: radial-gradient(circle, rgba(14,165,233,0.24) 0%, rgba(37,99,235,0.15) 30%, rgba(37,99,235,0.04) 54%, transparent 72%);
-  animation: dashboard3d-cloud-drift 36s ease-in-out infinite alternate;
-}
-.dashboard3d__cloud--orange {
-  bottom: -34%;
-  left: -16%;
-  background: radial-gradient(circle, rgba(249,115,22,0.22) 0%, rgba(234,88,12,0.13) 30%, rgba(234,88,12,0.035) 55%, transparent 73%);
-  animation: dashboard3d-cloud-drift 42s ease-in-out -12s infinite alternate-reverse;
-}
-.dashboard3d__core {
-  position: absolute;
-  top: 47%;
-  left: 50%;
-  width: min(66vw, 860px);
-  aspect-ratio: 1;
-  border-radius: 50%;
-  transform: translate3d(-50%, -50%, 0) rotateX(8deg);
-  transform-style: preserve-3d;
-  background: radial-gradient(circle at 48% 46%, rgba(15,23,42,0.06) 0%, rgba(7,13,26,0.13) 30%, rgba(4,8,18,0.5) 59%, transparent 73%);
-  animation: dashboard3d-core-breathe 18s ease-in-out infinite;
-}
-.dashboard3d__core-light {
-  position: absolute;
-  inset: 3%;
-  border-radius: 50%;
-  background: radial-gradient(circle at 46% 47%, rgba(255,237,213,0.46) 0%, rgba(251,146,60,0.32) 5%, rgba(249,115,22,0.18) 16%, rgba(56,189,248,0.17) 34%, rgba(37,99,235,0.08) 49%, transparent 68%);
-  box-shadow: 0 0 70px rgba(56,189,248,0.09), 0 0 90px rgba(249,115,22,0.10);
-}
-.dashboard3d__core-edge {
-  position: absolute;
-  inset: 18%;
-  border: 1px solid rgba(125,211,252,0.13);
-  border-radius: 50%;
-  transform: rotateX(65deg) rotateZ(-16deg);
-  box-shadow: inset 0 0 38px rgba(56,189,248,0.10), 0 0 30px rgba(251,146,60,0.08);
-}
-.dashboard3d__orbit {
-  position: absolute;
-  top: 47%;
-  left: 50%;
-  border-radius: 50%;
-  background: conic-gradient(from 20deg, transparent 0 12%, rgba(56,189,248,0.72) 16%, transparent 24% 52%, rgba(249,115,22,0.76) 61%, transparent 69% 100%);
-  -webkit-mask: radial-gradient(ellipse, transparent 64%, #000 65%, #000 65.7%, transparent 66.8%);
-  mask: radial-gradient(ellipse, transparent 64%, #000 65%, #000 65.7%, transparent 66.8%);
-  opacity: 0.72;
-  transform-style: preserve-3d;
-  will-change: transform;
-}
-.dashboard3d__orbit--outer {
-  width: min(116vw, 1540px);
-  height: min(54vw, 670px);
-  animation: dashboard3d-orbit-outer 84s linear infinite;
-}
-.dashboard3d__orbit--inner {
-  width: min(82vw, 1050px);
-  height: min(42vw, 520px);
-  opacity: 0.48;
-  background: conic-gradient(from 210deg, transparent 0 18%, rgba(96,165,250,0.62) 23%, transparent 33% 62%, rgba(251,146,60,0.58) 70%, transparent 80% 100%);
-  -webkit-mask: radial-gradient(ellipse, transparent 64%, #000 65%, #000 65.8%, transparent 67%);
-  mask: radial-gradient(ellipse, transparent 64%, #000 65%, #000 65.8%, transparent 67%);
-  animation: dashboard3d-orbit-inner 61s linear infinite reverse;
-}
-.dashboard3d__particle-field {
-  position: absolute;
-  inset: 0;
-  transform-style: preserve-3d;
-  animation: dashboard3d-particle-turn 150s linear infinite;
-}
-.dashboard3d__particle {
-  position: absolute;
-  display: block;
-  border-radius: 50%;
-  opacity: 0.25;
-  animation-name: dashboard3d-particle-pulse;
-  animation-timing-function: ease-in-out;
-  animation-iteration-count: infinite;
-  will-change: transform, opacity;
-}
-.dashboard3d__veil {
-  position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(ellipse 76% 72% at 50% 46%, rgba(2,6,23,0.14) 0%, rgba(2,6,23,0.42) 67%, rgba(2,6,23,0.64) 100%),
-    linear-gradient(180deg, rgba(2,6,23,0.44), rgba(2,6,23,0.28) 45%, rgba(2,6,23,0.56));
-}
-.dashboard3d--lite .dashboard3d__core { width: min(92vw, 700px); }
-.dashboard3d--lite .dashboard3d__orbit--outer { width: 148vw; height: 82vw; opacity: 0.5; }
-.dashboard3d--lite .dashboard3d__orbit--inner { width: 112vw; height: 68vw; opacity: 0.34; }
-.dashboard3d--reduced .dashboard3d__cloud,
-.dashboard3d--reduced .dashboard3d__core,
-.dashboard3d--reduced .dashboard3d__orbit,
-.dashboard3d--reduced .dashboard3d__particle-field,
-.dashboard3d--reduced .dashboard3d__particle { animation: none !important; }
-
-@keyframes dashboard3d-orbit-outer {
-  from { transform: translate(-50%, -50%) rotateX(68deg) rotateZ(-18deg); }
-  to { transform: translate(-50%, -50%) rotateX(68deg) rotateZ(342deg); }
-}
-@keyframes dashboard3d-orbit-inner {
-  from { transform: translate(-50%, -50%) rotateX(72deg) rotateZ(22deg); }
-  to { transform: translate(-50%, -50%) rotateX(72deg) rotateZ(382deg); }
-}
-@keyframes dashboard3d-particle-turn {
-  from { transform: rotateY(0deg) rotateZ(0deg); }
-  to { transform: rotateY(360deg) rotateZ(8deg); }
-}
-@keyframes dashboard3d-particle-pulse {
-  0%, 100% { opacity: 0.22; transform: translate3d(0, 0, 0) scale(0.82); }
-  50% { opacity: 0.94; transform: translate3d(3px, -10px, 16px) scale(1.18); }
-}
-@keyframes dashboard3d-cloud-drift {
-  from { transform: translate3d(-3%, 1%, 0) scale(0.94); opacity: 0.7; }
-  to { transform: translate3d(5%, -4%, 0) scale(1.08); opacity: 1; }
-}
-@keyframes dashboard3d-core-breathe {
-  0%, 100% { scale: 0.98; opacity: 0.82; }
-  50% { scale: 1.04; opacity: 1; }
-}
-
 /* All native buttons respond to pointer hover/press and keyboard focus. */
 button:not([data-no-motion]) {
   touch-action: manipulation;
@@ -356,13 +208,145 @@ button:not([data-no-motion]):focus-visible {
   outline-offset: 3px;
 }
 @media (prefers-reduced-motion: reduce) {
-  .dashboard3d__cloud,
-  .dashboard3d__core,
-  .dashboard3d__orbit,
-  .dashboard3d__particle-field,
-  .dashboard3d__particle { animation: none !important; }
   button:not([data-no-motion]),
   button:not([data-no-motion]):hover,
   button:not([data-no-motion]):active { transition: none !important; translate: none !important; }
   .dashboard-tab { transition: none !important; }
+}
+
+/* Aurora gradient bubbles background for student and lecturer dashboards.
+   Violet / sky / pink / mint bubbles over a deep indigo base (owner's rule,
+   2026-11-12: attractive gradient colours instead of green). Each bubble is
+   tinted by its own --bubble-hue, set in DashboardBackground.jsx. */
+.auroraglass {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  isolation: isolate;
+  background: #0a0a18;
+}
+.auroraglass__atmosphere {
+  position: absolute;
+  inset: -16%;
+  background:
+    radial-gradient(ellipse 54% 48% at 24% 28%, rgba(139,92,246,0.28), transparent 74%),
+    radial-gradient(ellipse 48% 58% at 78% 72%, rgba(56,189,248,0.26), transparent 70%),
+    radial-gradient(ellipse 42% 40% at 62% 30%, rgba(244,114,182,0.20), transparent 72%),
+    radial-gradient(ellipse 80% 90% at 48% 52%, rgba(24,24,64,0.36), transparent 72%),
+    linear-gradient(145deg, #0b0b1e 0%, #12122b 45%, #0a0a18 100%);
+  animation: auroraglass-atmosphere 48s ease-in-out infinite alternate;
+}
+.auroraglass__glow {
+  position: absolute;
+  width: min(58vw, 760px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.14;
+  mix-blend-mode: screen;
+  animation: auroraglass-glow-drift 42s ease-in-out infinite alternate;
+}
+.auroraglass__glow--left {
+  top: -35%;
+  left: -18%;
+  background: radial-gradient(circle, rgba(167,139,250,0.74), rgba(139,92,246,0.24) 42%, transparent 70%);
+}
+.auroraglass__glow--right {
+  right: -20%;
+  bottom: -40%;
+  opacity: 0.12;
+  background: radial-gradient(circle, rgba(249,168,212,0.7), rgba(244,114,182,0.24) 43%, transparent 72%);
+  animation-delay: -17s;
+  animation-direction: alternate-reverse;
+}
+.auroraglass__bubbles {
+  position: absolute;
+  inset: -5%;
+  overflow: hidden;
+  perspective: 1000px;
+  transform-style: preserve-3d;
+}
+.auroraglass__bubble {
+  position: absolute;
+  display: block;
+  border: 1px solid hsl(var(--bubble-hue, 258) 95% 88% / var(--bubble-rim));
+  border-radius: 50%;
+  opacity: var(--bubble-alpha);
+  background:
+    radial-gradient(ellipse at 25% 18%, rgba(255,255,255,0.82) 0%, hsl(var(--bubble-hue, 258) 90% 80% / 0.45) 4%, transparent 18%),
+    radial-gradient(ellipse at 35% 27%, hsl(var(--bubble-hue, 258) 90% 70% / 0.31), transparent 42%),
+    radial-gradient(ellipse at 72% 82%, hsl(var(--bubble-hue, 258) 80% 45% / 0.36), transparent 39%),
+    linear-gradient(138deg, hsl(var(--bubble-hue, 258) 90% 85% / 0.30) 0%, hsl(var(--bubble-hue, 258) 85% 70% / 0.16) 18%, hsl(var(--bubble-hue, 258) 70% 40% / 0.12) 49%, hsl(var(--bubble-hue, 258) 90% 85% / 0.22) 75%, hsl(var(--bubble-hue, 258) 70% 35% / 0.20) 100%);
+  box-shadow:
+    inset 1px 2px 6px rgba(255,255,255,0.46),
+    inset -5px -8px 18px hsl(var(--bubble-hue, 258) 70% 25% / 0.42),
+    inset 4px 6px 20px hsl(var(--bubble-hue, 258) 90% 70% / 0.16),
+    0 10px 34px rgba(0,0,0,0.18),
+    0 0 42px hsl(var(--bubble-hue, 258) 90% 65% / var(--bubble-glow));
+  -webkit-backdrop-filter: blur(1.5px) saturate(132%);
+  backdrop-filter: blur(1.5px) saturate(132%);
+  transform-style: preserve-3d;
+  will-change: transform;
+  animation-name: auroraglass-bubble-float;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+}
+.auroraglass__bubble::before {
+  content: '';
+  position: absolute;
+  inset: 4% 8% 10% 5%;
+  border-radius: inherit;
+  border-top: 1px solid rgba(255,255,255,0.46);
+  border-left: 1px solid hsl(var(--bubble-hue, 258) 95% 90% / 0.26);
+  background: linear-gradient(148deg, rgba(255,255,255,0.2), transparent 20% 68%, hsl(var(--bubble-hue, 258) 90% 75% / 0.10));
+  transform: rotate(-14deg) scale(0.86, 0.76);
+  filter: blur(0.4px);
+}
+.auroraglass__bubble::after {
+  content: '';
+  position: absolute;
+  top: 13%;
+  left: 19%;
+  width: 17%;
+  height: 7%;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.58);
+  filter: blur(3px);
+  transform: rotate(-34deg);
+  opacity: 0.68;
+}
+.auroraglass__vignette {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 82% 78% at 50% 48%, transparent 30%, rgba(3,3,14,0.2) 76%, rgba(3,3,14,0.48) 100%),
+    linear-gradient(180deg, rgba(4,4,16,0.34), rgba(4,4,16,0.08) 42%, rgba(4,4,16,0.38));
+}
+.auroraglass--lite .auroraglass__glow { filter: blur(56px); opacity: 0.12; }
+.auroraglass--lite .auroraglass__bubble { -webkit-backdrop-filter: none; backdrop-filter: none; }
+.auroraglass--reduced .auroraglass__atmosphere,
+.auroraglass--reduced .auroraglass__glow,
+.auroraglass--reduced .auroraglass__bubble { animation: none !important; }
+@keyframes auroraglass-bubble-float {
+  0%, 100% {
+    transform: translate3d(0, 0, var(--bubble-z-start)) rotateX(0deg) rotateY(0deg) rotateZ(0deg) scale(0.96);
+  }
+  50% {
+    transform: translate3d(var(--bubble-drift-x), var(--bubble-rise-y), var(--bubble-z-end)) rotateX(8deg) rotateY(-9deg) rotateZ(var(--bubble-rotate)) scale(1.035);
+  }
+}
+@keyframes auroraglass-atmosphere {
+  from { transform: translate3d(-1%, 0.5%, 0) scale(1); filter: hue-rotate(-4deg); }
+  to { transform: translate3d(1%, -0.5%, 0) scale(1.04); filter: hue-rotate(5deg); }
+}
+@keyframes auroraglass-glow-drift {
+  from { transform: translate3d(-4%, 2%, 0) scale(0.92); }
+  to { transform: translate3d(6%, -5%, 0) scale(1.08); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .auroraglass__atmosphere,
+  .auroraglass__glow,
+  .auroraglass__bubble { animation: none !important; }
 }

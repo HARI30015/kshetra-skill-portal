@@ -10,8 +10,9 @@ import { galaxyUrl } from '../assets/galaxy';
 // BACKGROUND SYSTEM — mounted once in App.jsx behind every page.
 //
 //  • LANDING ("/"): the Vesper-style mint + violet living orb.
-//  • STUDENT + LECTURER DASHBOARDS: an orange/blue particle galaxy with gentle
-//    pointer and scroll parallax, honoring reduced-motion preferences.
+//  • STUDENT + LECTURER DASHBOARDS: an aurora gradient bubble scene (violet /
+//    sky / pink / mint glass bubbles, continuously drifting), honoring
+//    reduced-motion preferences.
 //  • OTHER PAGES: the original black-and-white galaxy (MonoBackground below).
 //
 // All scenes are fixed at z-0 and pointer-events: none, behind page content.
@@ -620,8 +621,8 @@ function VesperBackground() {
   );
 }
 
-// Landing keeps the mint/violet orb; both dashboards use the new orange/blue
-// depth-field; auth and other pages retain the monochrome galaxy.
+// Landing keeps the mint/violet orb; both dashboards use the aurora gradient
+// bubble scene; auth and other pages retain the monochrome galaxy.
 export default function Background3D() {
   const { pathname } = useLocation();
   if (pathname === '/') return <VesperBackground />;
