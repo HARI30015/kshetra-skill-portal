@@ -181,3 +181,188 @@ button:not([data-no-glass]) {
 @media (prefers-reduced-motion: reduce) {
   .std-orb-breathe, .std-vsw, .std-vpart, .std-vp { animation: none !important; }
 }
+
+
+/* Dashboard-only orange/blue particle galaxy: layered gradients and masked
+   elliptical rings create depth without extra assets or packages. */
+.dashboard3d {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  isolation: isolate;
+  background: #050914;
+}
+.dashboard3d__scene {
+  position: absolute;
+  inset: -8%;
+  overflow: hidden;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+.dashboard3d__cloud {
+  position: absolute;
+  width: min(72vw, 960px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  mix-blend-mode: screen;
+  will-change: transform, opacity;
+}
+.dashboard3d__cloud--blue {
+  top: -24%;
+  right: -14%;
+  background: radial-gradient(circle, rgba(14,165,233,0.24) 0%, rgba(37,99,235,0.15) 30%, rgba(37,99,235,0.04) 54%, transparent 72%);
+  animation: dashboard3d-cloud-drift 36s ease-in-out infinite alternate;
+}
+.dashboard3d__cloud--orange {
+  bottom: -34%;
+  left: -16%;
+  background: radial-gradient(circle, rgba(249,115,22,0.22) 0%, rgba(234,88,12,0.13) 30%, rgba(234,88,12,0.035) 55%, transparent 73%);
+  animation: dashboard3d-cloud-drift 42s ease-in-out -12s infinite alternate-reverse;
+}
+.dashboard3d__core {
+  position: absolute;
+  top: 47%;
+  left: 50%;
+  width: min(66vw, 860px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  transform: translate3d(-50%, -50%, 0) rotateX(8deg);
+  transform-style: preserve-3d;
+  background: radial-gradient(circle at 48% 46%, rgba(15,23,42,0.06) 0%, rgba(7,13,26,0.13) 30%, rgba(4,8,18,0.5) 59%, transparent 73%);
+  animation: dashboard3d-core-breathe 18s ease-in-out infinite;
+}
+.dashboard3d__core-light {
+  position: absolute;
+  inset: 3%;
+  border-radius: 50%;
+  background: radial-gradient(circle at 46% 47%, rgba(255,237,213,0.46) 0%, rgba(251,146,60,0.32) 5%, rgba(249,115,22,0.18) 16%, rgba(56,189,248,0.17) 34%, rgba(37,99,235,0.08) 49%, transparent 68%);
+  box-shadow: 0 0 70px rgba(56,189,248,0.09), 0 0 90px rgba(249,115,22,0.10);
+}
+.dashboard3d__core-edge {
+  position: absolute;
+  inset: 18%;
+  border: 1px solid rgba(125,211,252,0.13);
+  border-radius: 50%;
+  transform: rotateX(65deg) rotateZ(-16deg);
+  box-shadow: inset 0 0 38px rgba(56,189,248,0.10), 0 0 30px rgba(251,146,60,0.08);
+}
+.dashboard3d__orbit {
+  position: absolute;
+  top: 47%;
+  left: 50%;
+  border-radius: 50%;
+  background: conic-gradient(from 20deg, transparent 0 12%, rgba(56,189,248,0.72) 16%, transparent 24% 52%, rgba(249,115,22,0.76) 61%, transparent 69% 100%);
+  -webkit-mask: radial-gradient(ellipse, transparent 64%, #000 65%, #000 65.7%, transparent 66.8%);
+  mask: radial-gradient(ellipse, transparent 64%, #000 65%, #000 65.7%, transparent 66.8%);
+  opacity: 0.72;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+.dashboard3d__orbit--outer {
+  width: min(116vw, 1540px);
+  height: min(54vw, 670px);
+  animation: dashboard3d-orbit-outer 84s linear infinite;
+}
+.dashboard3d__orbit--inner {
+  width: min(82vw, 1050px);
+  height: min(42vw, 520px);
+  opacity: 0.48;
+  background: conic-gradient(from 210deg, transparent 0 18%, rgba(96,165,250,0.62) 23%, transparent 33% 62%, rgba(251,146,60,0.58) 70%, transparent 80% 100%);
+  -webkit-mask: radial-gradient(ellipse, transparent 64%, #000 65%, #000 65.8%, transparent 67%);
+  mask: radial-gradient(ellipse, transparent 64%, #000 65%, #000 65.8%, transparent 67%);
+  animation: dashboard3d-orbit-inner 61s linear infinite reverse;
+}
+.dashboard3d__particle-field {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+  animation: dashboard3d-particle-turn 150s linear infinite;
+}
+.dashboard3d__particle {
+  position: absolute;
+  display: block;
+  border-radius: 50%;
+  opacity: 0.25;
+  animation-name: dashboard3d-particle-pulse;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+  will-change: transform, opacity;
+}
+.dashboard3d__veil {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 76% 72% at 50% 46%, rgba(2,6,23,0.14) 0%, rgba(2,6,23,0.42) 67%, rgba(2,6,23,0.64) 100%),
+    linear-gradient(180deg, rgba(2,6,23,0.44), rgba(2,6,23,0.28) 45%, rgba(2,6,23,0.56));
+}
+.dashboard3d--lite .dashboard3d__core { width: min(92vw, 700px); }
+.dashboard3d--lite .dashboard3d__orbit--outer { width: 148vw; height: 82vw; opacity: 0.5; }
+.dashboard3d--lite .dashboard3d__orbit--inner { width: 112vw; height: 68vw; opacity: 0.34; }
+.dashboard3d--reduced .dashboard3d__cloud,
+.dashboard3d--reduced .dashboard3d__core,
+.dashboard3d--reduced .dashboard3d__orbit,
+.dashboard3d--reduced .dashboard3d__particle-field,
+.dashboard3d--reduced .dashboard3d__particle { animation: none !important; }
+
+@keyframes dashboard3d-orbit-outer {
+  from { transform: translate(-50%, -50%) rotateX(68deg) rotateZ(-18deg); }
+  to { transform: translate(-50%, -50%) rotateX(68deg) rotateZ(342deg); }
+}
+@keyframes dashboard3d-orbit-inner {
+  from { transform: translate(-50%, -50%) rotateX(72deg) rotateZ(22deg); }
+  to { transform: translate(-50%, -50%) rotateX(72deg) rotateZ(382deg); }
+}
+@keyframes dashboard3d-particle-turn {
+  from { transform: rotateY(0deg) rotateZ(0deg); }
+  to { transform: rotateY(360deg) rotateZ(8deg); }
+}
+@keyframes dashboard3d-particle-pulse {
+  0%, 100% { opacity: 0.22; transform: translate3d(0, 0, 0) scale(0.82); }
+  50% { opacity: 0.94; transform: translate3d(3px, -10px, 16px) scale(1.18); }
+}
+@keyframes dashboard3d-cloud-drift {
+  from { transform: translate3d(-3%, 1%, 0) scale(0.94); opacity: 0.7; }
+  to { transform: translate3d(5%, -4%, 0) scale(1.08); opacity: 1; }
+}
+@keyframes dashboard3d-core-breathe {
+  0%, 100% { scale: 0.98; opacity: 0.82; }
+  50% { scale: 1.04; opacity: 1; }
+}
+
+/* All native buttons respond to pointer hover/press and keyboard focus. */
+button:not([data-no-motion]) {
+  touch-action: manipulation;
+  transition: translate 140ms ease, filter 140ms ease, box-shadow 140ms ease, border-color 140ms ease;
+}
+@media (hover: hover) and (pointer: fine) {
+  button:not([data-no-motion]):hover:not(:disabled) {
+    translate: 0 -1px;
+    filter: brightness(1.07);
+  }
+}
+button:not([data-no-motion]):active:not(:disabled) {
+  translate: 0 1px;
+  filter: brightness(0.94);
+}
+button:not([data-no-motion]):focus-visible {
+  outline: 2px solid rgba(125,211,252,0.94);
+  outline-offset: 3px;
+  box-shadow: 0 0 0 4px rgba(56,189,248,0.18), 0 0 24px rgba(56,189,248,0.18);
+}
+.dashboard-tab:focus-visible {
+  outline: 2px solid rgba(125,211,252,0.94);
+  outline-offset: 3px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .dashboard3d__cloud,
+  .dashboard3d__core,
+  .dashboard3d__orbit,
+  .dashboard3d__particle-field,
+  .dashboard3d__particle { animation: none !important; }
+  button:not([data-no-motion]),
+  button:not([data-no-motion]):hover,
+  button:not([data-no-motion]):active { transition: none !important; translate: none !important; }
+  .dashboard-tab { transition: none !important; }
+}

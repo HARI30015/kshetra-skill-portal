@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { motion, useReducedMotion } from 'framer-motion';
+import DashboardBackground from './DashboardBackground';
 // The reference galaxy photo, converted to a monochrome square centred on the
 // galaxy core. It is embedded as a data URI in src/assets/galaxy.js (same image
 // bytes) because the GitHub connector only pushes text files, not binary images.
@@ -8,13 +9,12 @@ import { galaxyUrl } from '../assets/galaxy';
 
 // BACKGROUND SYSTEM — mounted once in App.jsx behind every page.
 //
-//  • LANDING ("/"): the Vesper-style mint + violet living orb (VesperBackground
-//    below). Chosen by the owner on 2026-11-07 for the LANDING ONLY; it
-//    supersedes the monochrome and no-mouse-animation rules for that page.
-//  • EVERY OTHER PAGE: the original BLACK + WHITE GALAXY (MonoBackground below),
-//    unchanged — monochrome, no mouse-driven motion.
+//  • LANDING ("/"): the Vesper-style mint + violet living orb.
+//  • STUDENT + LECTURER DASHBOARDS: an orange/blue particle galaxy with gentle
+//    pointer and scroll parallax, honoring reduced-motion preferences.
+//  • OTHER PAGES: the original black-and-white galaxy (MonoBackground below).
 //
-// Both are pointer-events: none, fixed, z-0, behind the page content.
+// All scenes are fixed at z-0 and pointer-events: none, behind page content.
 //
 // ── MonoBackground: CHOOSE YOUR BACKGROUND ─────────────────────────────
 // Set DEFAULT_BG_THEME below to one of: 'nebula' | 'starfield' | 'spiral' | 'milkyway'
@@ -620,9 +620,11 @@ function VesperBackground() {
   );
 }
 
-// Landing ("/") gets the mint + violet living orb; every other page keeps
-// the original monochrome galaxy exactly as before.
+// Landing keeps the mint/violet orb; both dashboards use the new orange/blue
+// depth-field; auth and other pages retain the monochrome galaxy.
 export default function Background3D() {
   const { pathname } = useLocation();
-  return pathname === '/' ? <VesperBackground /> : <MonoBackground />;
+  if (pathname === '/') return <VesperBackground />;
+  if (pathname === '/dashboard' || pathname === '/lecturer') return <DashboardBackground />;
+  return <MonoBackground />;
 }
