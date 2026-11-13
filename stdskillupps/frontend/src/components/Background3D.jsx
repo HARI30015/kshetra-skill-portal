@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { motion, useReducedMotion } from 'framer-motion';
 import DashboardBackground from './DashboardBackground';
+import LoginBackground from './LoginBackground';
 // The reference galaxy photo, converted to a monochrome square centred on the
 // galaxy core. It is embedded as a data URI in src/assets/galaxy.js (same image
 // bytes) because the GitHub connector only pushes text files, not binary images.
@@ -13,6 +14,7 @@ import { galaxyUrl } from '../assets/galaxy';
 //  • STUDENT + LECTURER DASHBOARDS: an aurora gradient bubble scene (violet /
 //    sky / pink / mint glass bubbles, continuously drifting), honoring
 //    reduced-motion preferences.
+//  • LOGIN ("/login"): a colored aurora, drifting stars, and light trails.
 //  • OTHER PAGES: the original black-and-white galaxy (MonoBackground below).
 //
 // All scenes are fixed at z-0 and pointer-events: none, behind page content.
@@ -449,5 +451,14 @@ export default function Background3D() {
   const { pathname } = useLocation();
   if (pathname === '/') return <LandingStarfield />;
   if (pathname === '/dashboard' || pathname === '/lecturer') return <DashboardBackground />;
+  if (pathname === '/login') {
+    let previewTheme = new URLSearchParams(window.location.search).get('bg');
+    try {
+      previewTheme ||= window.sessionStorage.getItem('std-bg-preview');
+    } catch {
+      /* Storage is optional; use the login scene when it is unavailable. */
+    }
+    if (!BG_THEMES.includes(previewTheme)) return <LoginBackground />;
+  }
   return <MonoBackground />;
 }

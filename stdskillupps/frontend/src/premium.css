@@ -441,3 +441,181 @@ button:not([data-no-motion]):focus-visible {
   .landing-shooting-star { animation: none !important; }
   .landing-shooting-star { opacity: 0; }
 }
+
+/* Login-only motionscape: dark editorial canvas, flowing color, sparse stars. */
+.login-motionscape {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  isolation: isolate;
+  pointer-events: none;
+  background: #040611;
+}
+.login-motionscape__wash,
+.login-motionscape__aurora,
+.login-motionscape__glow,
+.login-motionscape__starfield,
+.login-motionscape__streaks,
+.login-motionscape__vignette { position: absolute; }
+.login-motionscape__wash {
+  inset: -18%;
+  background:
+    radial-gradient(ellipse 38% 56% at 13% 34%, rgba(29,100,224,0.31), transparent 76%),
+    radial-gradient(ellipse 38% 54% at 88% 29%, rgba(121,62,210,0.29), transparent 76%),
+    radial-gradient(ellipse 50% 38% at 53% 96%, rgba(12,151,171,0.22), transparent 78%),
+    linear-gradient(132deg, #050711 0%, #0b0d1c 48%, #050711 100%);
+  animation: login-wash-drift 42s ease-in-out infinite alternate;
+  will-change: transform;
+}
+.login-motionscape__aurora {
+  inset: -25%;
+  opacity: 0.78;
+  will-change: transform, opacity;
+}
+.login-motionscape__aurora--one {
+  background:
+    linear-gradient(126deg, transparent 30%, rgba(42,136,255,0.035) 40%, rgba(77,157,255,0.15) 47%, rgba(132,111,255,0.16) 53%, rgba(41,207,208,0.09) 60%, transparent 72%),
+    radial-gradient(ellipse 32% 48% at 20% 50%, rgba(50,147,255,0.29), transparent 74%),
+    radial-gradient(ellipse 30% 46% at 78% 35%, rgba(177,104,255,0.25), transparent 76%);
+  animation: login-aurora-one 34s ease-in-out infinite alternate;
+}
+.login-motionscape__aurora--two {
+  background:
+    linear-gradient(115deg, transparent 28%, rgba(65,119,250,0.035) 42%, rgba(73,204,223,0.1) 54%, rgba(169,106,255,0.08) 64%, transparent 78%),
+    radial-gradient(ellipse 40% 22% at 52% 77%, rgba(46,201,210,0.18), transparent 76%),
+    radial-gradient(ellipse 28% 38% at 66% 15%, rgba(93,117,255,0.18), transparent 76%);
+  animation: login-aurora-two 48s ease-in-out -13s infinite alternate;
+}
+.login-motionscape__glow {
+  border-radius: 50%;
+  opacity: 0.68;
+  will-change: transform, opacity;
+}
+.login-motionscape__glow--left {
+  width: 44vw;
+  height: 46vh;
+  left: -18vw;
+  top: 22vh;
+  background: radial-gradient(ellipse, rgba(43,135,255,0.2), rgba(25,74,164,0.08) 42%, transparent 73%);
+  animation: login-glow-left 27s ease-in-out infinite alternate;
+}
+.login-motionscape__glow--right {
+  width: 48vw;
+  height: 50vh;
+  right: -18vw;
+  top: 8vh;
+  background: radial-gradient(ellipse, rgba(162,91,255,0.19), rgba(96,60,179,0.07) 45%, transparent 74%);
+  animation: login-glow-right 32s ease-in-out -9s infinite alternate;
+}
+.login-motionscape__glow--low {
+  width: 58vw;
+  height: 38vh;
+  left: 24vw;
+  bottom: -24vh;
+  background: radial-gradient(ellipse, rgba(28,186,204,0.17), rgba(36,103,160,0.05) 49%, transparent 74%);
+  animation: login-glow-low 36s ease-in-out -17s infinite alternate;
+}
+.login-motionscape__starfield,
+.login-motionscape__streaks,
+.login-motionscape__vignette { inset: 0; }
+.login-motionscape__starfield { z-index: 3; }
+.login-motionscape__star {
+  position: absolute;
+  display: block;
+  border-radius: 50%;
+  opacity: var(--login-star-alpha);
+  box-shadow: 0 0 6px currentColor;
+  will-change: transform, opacity;
+}
+.login-motionscape__star--twinkle { animation-name: login-star-twinkle; animation-timing-function: ease-in-out; animation-iteration-count: infinite; }
+.login-motionscape__star--drift { animation-name: login-star-drift; animation-timing-function: ease-in-out; animation-iteration-count: infinite; }
+.login-motionscape__star--rise { animation-name: login-star-rise; animation-timing-function: ease-in-out; animation-iteration-count: infinite; }
+.login-motionscape__star--sway { animation-name: login-star-sway; animation-timing-function: ease-in-out; animation-iteration-count: infinite; }
+.login-motionscape__streaks { z-index: 2; }
+.login-motionscape__streak {
+  position: absolute;
+  left: -40vw;
+  height: 1.5px;
+  opacity: 0;
+  transform: rotate(-17deg);
+  transform-origin: left center;
+  background: linear-gradient(90deg, transparent, rgba(120,195,255,0.08) 12%, rgba(194,225,255,0.82) 52%, rgba(180,151,255,0.26) 78%, transparent);
+  box-shadow: 0 0 15px rgba(116,175,255,0.48);
+  animation: login-light-streak linear infinite;
+  will-change: transform, opacity;
+}
+.login-motionscape__vignette {
+  z-index: 4;
+  background: radial-gradient(ellipse 78% 82% at 50% 47%, transparent 26%, rgba(1,3,10,0.2) 75%, rgba(1,3,10,0.52) 100%);
+}
+.login-motionscape--lite .login-motionscape__glow { opacity: 0.36; }
+.login-motionscape--lite .login-motionscape__aurora { opacity: 0.45; }
+.login-motionscape--reduced .login-motionscape__wash,
+.login-motionscape--reduced .login-motionscape__aurora,
+.login-motionscape--reduced .login-motionscape__glow,
+.login-motionscape--reduced .login-motionscape__star,
+.login-motionscape--reduced .login-motionscape__streak { animation: none !important; }
+.login-motionscape--reduced .login-motionscape__streak { opacity: 0; }
+@keyframes login-wash-drift {
+  from { transform: translate3d(-1.5%, 0.7%, 0) scale(1); }
+  to { transform: translate3d(1.4%, -0.7%, 0) scale(1.06); }
+}
+@keyframes login-aurora-one {
+  from { transform: translate3d(-2%, 1%, 0) rotate(-2deg) scale(0.96); opacity: 0.42; }
+  to { transform: translate3d(2%, -1%, 0) rotate(2deg) scale(1.06); opacity: 0.82; }
+}
+@keyframes login-aurora-two {
+  from { transform: translate3d(1%, -1%, 0) rotate(1deg) scale(1.03); }
+  to { transform: translate3d(-1.5%, 1%, 0) rotate(-2deg) scale(0.95); }
+}
+@keyframes login-glow-left {
+  from { transform: translate3d(0, 0, 0) scale(0.92); opacity: 0.4; }
+  to { transform: translate3d(8vw, -4vh, 0) scale(1.1); opacity: 0.68; }
+}
+@keyframes login-glow-right {
+  from { transform: translate3d(0, 0, 0) scale(1.08); opacity: 0.4; }
+  to { transform: translate3d(-7vw, 5vh, 0) scale(0.92); opacity: 0.66; }
+}
+@keyframes login-glow-low {
+  from { transform: translate3d(-3vw, 0, 0) scale(0.94); opacity: 0.35; }
+  to { transform: translate3d(4vw, -6vh, 0) scale(1.08); opacity: 0.56; }
+}
+@keyframes login-star-twinkle {
+  0%, 100% { opacity: 0.12; transform: scale(0.72); }
+  50% { opacity: var(--login-star-alpha); transform: scale(1.28); }
+}
+@keyframes login-star-drift {
+  0%, 100% { opacity: 0.24; transform: translate3d(0, 0, 0); }
+  50% { opacity: var(--login-star-alpha); transform: translate3d(var(--login-star-dx), 4px, 0); }
+}
+@keyframes login-star-rise {
+  0%, 100% { opacity: 0.28; transform: translate3d(0, 0, 0); }
+  50% { opacity: var(--login-star-alpha); transform: translate3d(var(--login-star-dx), var(--login-star-dy), 0); }
+}
+@keyframes login-star-sway {
+  0%, 100% { opacity: 0.3; transform: translate3d(0, 0, 0); }
+  35% { opacity: var(--login-star-alpha); transform: translate3d(var(--login-star-dx), -5px, 0); }
+  75% { opacity: 0.54; transform: translate3d(var(--login-star-reverse-dx), 6px, 0); }
+}
+@keyframes login-light-streak {
+  0% { transform: translate3d(-10vw, 0, 0) rotate(-17deg); opacity: 0; }
+  12% { opacity: 0.56; }
+  38% { opacity: 0.14; }
+  62%, 100% { transform: translate3d(160vw, 0, 0) rotate(-17deg); opacity: 0; }
+}
+@media (max-width: 767px) {
+  .login-motionscape__glow--left { width: 76vw; left: -35vw; }
+  .login-motionscape__glow--right { width: 82vw; right: -42vw; }
+  .login-motionscape__glow--low { width: 95vw; left: 5vw; }
+  .login-motionscape__vignette { background: radial-gradient(ellipse 92% 75% at 50% 47%, transparent 18%, rgba(1,3,10,0.3) 100%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .login-motionscape__wash,
+  .login-motionscape__aurora,
+  .login-motionscape__glow,
+  .login-motionscape__star,
+  .login-motionscape__streak { animation: none !important; }
+  .login-motionscape__streak { opacity: 0; }
+}
+
