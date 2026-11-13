@@ -1,20 +1,14 @@
 import { motion } from 'framer-motion';
 
-// Light, normal-feel button (owner's rule, 2026-10-23, re-affirmed
-// 2026-10-31): a single ordinary click/tap must act instantly.
-// No tilt-under-the-pointer, no ripples, no shine sweeps, no springy
-// hover lift — the button stays exactly where it is and only dims a
-// touch while pressed. The gradient/glow LOOK is unchanged.
-// 2026-10-31 change: the infinite `btn-shimmer` shine sweep is
-// REMOVED from every variant — it contradicted the no-shine rule.
+// Shared liquid-glass button with reflective hover, spring press, and clear focus.
 export default function AnimatedButton({ children, type = 'button', onClick, loading = false, disabled = false, variant = 'primary', className = '', size = 'md' }) {
   const variants = {
-    primary: 'bg-white text-black shadow-[0_8px_36px_rgba(255,255,255,0.28)] hover:bg-zinc-200',
-    secondary: 'bg-black/60 border border-white/70 text-white backdrop-blur-xl hover:bg-white/10 glass-interactive',
-    ghost: 'text-zinc-300 hover:text-white hover:bg-white/10',
-    danger: 'bg-black/70 border border-white/40 text-white hover:bg-white/10',
-    success: 'bg-white/90 text-black hover:bg-white',
-    gold: 'bg-zinc-200 text-black hover:bg-white',
+    primary: 'text-white',
+    secondary: 'text-white',
+    ghost: 'text-zinc-200',
+    danger: 'text-rose-100',
+    success: 'text-emerald-100',
+    gold: 'text-amber-100',
   };
 
   const sizes = {
@@ -29,12 +23,12 @@ export default function AnimatedButton({ children, type = 'button', onClick, loa
       onClick={onClick}
       disabled={disabled || loading}
       whileTap={disabled || loading ? undefined : { scale: 0.98 }}
-      transition={{ duration: 0.08 }}
+      transition={{ type: 'spring', stiffness: 520, damping: 30, mass: 0.42 }}
       data-variant={variant}
       className={`liquid-button relative inline-flex touch-manipulation select-none items-center justify-center gap-2 overflow-hidden rounded-xl font-semibold transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-60 ${variants[variant]} ${sizes[size]} ${className}`}
     >
-      {/* Top highlight for 3D depth (static, costs nothing) */}
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-1/2 rounded-t-xl bg-gradient-to-b from-white/10 to-transparent" />
+      {/* Glass rim highlight */}
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-1/2 rounded-t-xl bg-gradient-to-b from-white/20 to-transparent" />
 
       {/* Loading spinner */}
       {loading && (
