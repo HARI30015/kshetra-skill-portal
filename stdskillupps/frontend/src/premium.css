@@ -642,3 +642,24 @@ button.password-visibility-toggle {
   justify-content: center;
 }
 
+/* Phone speed-up (small screens only, max-width 767px — same line as the lite
+   device check): lighter blur so scrolling stays smooth on phones. The glass
+   stays frosted, just less heavy; desktop is untouched. */
+@media (max-width: 767px) {
+  .glass-3d {
+    -webkit-backdrop-filter: blur(12px) saturate(150%);
+    backdrop-filter: blur(12px) saturate(150%);
+  }
+  button:not([data-no-glass]) {
+    -webkit-backdrop-filter: blur(10px) saturate(150%);
+    backdrop-filter: blur(10px) saturate(150%);
+  }
+  .dashboard-tabs {
+    -webkit-backdrop-filter: blur(12px) saturate(140%);
+    backdrop-filter: blur(12px) saturate(140%);
+  }
+  .auroraglass--lite .auroraglass__glow { filter: blur(40px); }
+  .backdrop-blur-2xl { --tw-backdrop-blur: blur(12px); }
+  .backdrop-blur-xl { --tw-backdrop-blur: blur(10px); }
+}
+
