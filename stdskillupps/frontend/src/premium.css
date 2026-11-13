@@ -619,3 +619,26 @@ button:not([data-no-motion]):focus-visible {
   .login-motionscape__streak { opacity: 0; }
 }
 
+/* The non-button wrapper isolates password-eye placement from global button motion styles. */
+.password-visibility-toggle-positioner {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  z-index: 10;
+  display: flex;
+  width: 32px;
+  height: 32px;
+  align-items: center;
+  justify-content: center;
+  transform: translateY(-50%);
+}
+button.password-visibility-toggle {
+  position: relative;
+  display: flex;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  align-items: center;
+  justify-content: center;
+}
+

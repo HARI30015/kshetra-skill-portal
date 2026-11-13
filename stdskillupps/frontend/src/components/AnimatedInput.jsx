@@ -80,17 +80,19 @@ export default function AnimatedInput({
           className={`w-full bg-transparent px-4 py-3 text-white placeholder-zinc-400 outline-none ${useToggle ? 'pr-12' : ''}`}
         />
         {useToggle && (
-          <button
-            type="button"
-            aria-label={showPassword ? 'Hide password' : 'Show password'}
-            aria-pressed={showPassword}
-            data-variant="ghost"
-            onMouseDown={(event) => event.preventDefault()}
-            onClick={() => setShowPassword((visible) => !visible)}
-            className="password-visibility-toggle absolute right-3 top-1/2 z-10 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full text-zinc-300 transition-colors hover:text-white"
-          >
-            <EyeIcon off={showPassword} />
-          </button>
+          <span className="password-visibility-toggle-positioner">
+            <button
+              type="button"
+              aria-label={showPassword ? 'Hide password' : 'Show password'}
+              aria-pressed={showPassword}
+              data-variant="ghost"
+              onMouseDown={(event) => event.preventDefault()}
+              onClick={() => setShowPassword((visible) => !visible)}
+              className="password-visibility-toggle flex h-8 w-8 items-center justify-center rounded-full text-zinc-300 transition-colors hover:text-white"
+            >
+              <EyeIcon off={showPassword} />
+            </button>
+          </span>
         )}
       </motion.div>
     </label>
