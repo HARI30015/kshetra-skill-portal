@@ -136,12 +136,10 @@ export default function Onboarding() {
           {YEARS.map((y) => {
             const active = year === y;
             return (
-              <motion.button
+              <button
                 key={y}
                 type="button"
                 data-variant={active ? 'primary' : 'secondary'}
-                whileTap={{ scale: 0.98 }}
-                transition={{ duration: 0.08 }}
                 onClick={() => setYear(y)}
                 className={`liquid-button relative rounded-2xl border px-4 py-6 text-center transition-colors ${
                   active
@@ -160,7 +158,7 @@ export default function Onboarding() {
                     ✓
                   </motion.span>
                 )}
-              </motion.button>
+              </button>
             );
           })}
         </div>
@@ -174,12 +172,10 @@ export default function Onboarding() {
           {FIELDS.map((f) => {
             const active = field === f;
             return (
-              <motion.button
+              <button
                 key={f}
                 type="button"
                 data-variant={active ? 'primary' : 'secondary'}
-                whileTap={{ scale: 0.98 }}
-                transition={{ duration: 0.08 }}
                 onClick={() => setField(f)}
                 className={`liquid-button rounded-full border px-5 py-2.5 text-sm font-semibold transition-colors ${
                   active
@@ -188,7 +184,7 @@ export default function Onboarding() {
                 }`}
               >
                 {f}
-              </motion.button>
+              </button>
             );
           })}
         </div>
@@ -206,16 +202,14 @@ export default function Onboarding() {
             placeholder="e.g. neetcode_fan"
             name="leetcode_username"
           />
-          <motion.a
+          <a
             href={LEETCODE_URL}
             target="_blank"
             rel="noreferrer"
-            whileTap={{ scale: 0.98 }}
-            transition={{ duration: 0.08 }}
             className="liquid-button mt-4 inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold text-white"
           >
             🔗 Not signed in? Open leetcode.com to sign in first ↗
-          </motion.a>
+          </a>
           <p className="mt-2 text-xs text-zinc-400">
             Sign in there, then come back and enter your username above.
           </p>
@@ -245,16 +239,14 @@ export default function Onboarding() {
           <p className="text-xs text-zinc-400">
             Enter your current score for now. After setup, your dashboard has a private browser bookmark to sync the real score from your CampusTrack profile.
           </p>
-          <motion.a
+          <a
             href={CAMPUSTRACK_URL}
             target="_blank"
             rel="noreferrer"
-            whileTap={{ scale: 0.98 }}
-            transition={{ duration: 0.08 }}
             className="liquid-button inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold text-white"
           >
             🔗 Not signed in? Open campustrack.in to sign in first ↗
-          </motion.a>
+          </a>
           <p className="text-xs text-zinc-400">
             Sign in there, then come back and enter your username above.
           </p>

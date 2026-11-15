@@ -48,14 +48,13 @@ function Modal({ onClose, children, title }) {
       >
         <div className="mb-5 flex items-center justify-between">
           <h3 className="text-xl font-bold text-white">{title}</h3>
-          <motion.button
-            whileHover={{ rotate: 90, scale: 1.1 }}
+          <button
             onClick={onClose}
             className="rounded-lg p-1.5 text-zinc-300 hover:bg-white/10"
             aria-label="Close"
           >
             ✕
-          </motion.button>
+          </button>
         </div>
         {children}
       </motion.div>
@@ -365,14 +364,12 @@ export default function LecturerDashboard() {
                           </span>
                         </td>
                         <td className="px-6 py-3.5">
-                          <motion.button
-                            whileTap={{ scale: 0.98 }}
-                            transition={{ duration: 0.08 }}
+                          <button
                             onClick={() => openStudentEdit(s)}
                             className="liquid-button rounded-lg px-3 py-1.5 text-xs font-semibold text-white"
                           >
                             Edit
-                          </motion.button>
+                          </button>
                         </td>
                       </motion.tr>
                     ))}
@@ -418,22 +415,18 @@ export default function LecturerDashboard() {
                       </p>
                     </div>
                     <div className="flex shrink-0 gap-2">
-                      <motion.button
-                        whileTap={{ scale: 0.98 }}
-                        transition={{ duration: 0.08 }}
+                      <button
                         onClick={() => openPlacementModal(p)}
                         className="liquid-button rounded-lg px-3 py-1.5 text-xs font-semibold text-white"
                       >
                         Edit
-                      </motion.button>
-                      <motion.button
-                        whileTap={{ scale: 0.98 }}
-                        transition={{ duration: 0.08 }}
+                      </button>
+                      <button
                         onClick={() => setDeleteId(p.id)}
                         className="liquid-button rounded-lg px-3 py-1.5 text-xs font-semibold text-zinc-200"
                       >
                         Delete
-                      </motion.button>
+                      </button>
                     </div>
                   </div>
                   {(p.languages?.length > 0) && (

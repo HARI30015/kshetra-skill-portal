@@ -18,12 +18,10 @@ export default function AnimatedButton({ children, type = 'button', onClick, loa
   };
 
   return (
-    <motion.button
+    <button
       type={type}
       onClick={onClick}
       disabled={disabled || loading}
-      whileTap={disabled || loading ? undefined : { scale: 0.98 }}
-      transition={{ type: 'spring', stiffness: 520, damping: 30, mass: 0.42 }}
       data-variant={variant}
       className={`liquid-button relative inline-flex touch-manipulation select-none items-center justify-center gap-2 overflow-hidden rounded-xl font-semibold transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-60 ${variants[variant]} ${sizes[size]} ${className}`}
     >
@@ -40,6 +38,6 @@ export default function AnimatedButton({ children, type = 'button', onClick, loa
       )}
 
       <span className={`relative z-10 ${loading ? 'opacity-80' : ''}`}>{children}</span>
-    </motion.button>
+    </button>
   );
 }

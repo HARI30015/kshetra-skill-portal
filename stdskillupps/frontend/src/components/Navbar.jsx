@@ -171,15 +171,13 @@ export default function Navbar() {
                   >
                     <Avatar name={profile?.full_name} email={profile?.email} avatarPath={profile?.avatar_path} size={34} />
                   </button>
-                  <motion.button
+                  <button
                     data-variant="secondary"
-                    whileTap={{ scale: 0.98 }}
-                    transition={{ duration: 0.08 }}
                     onClick={() => setConfirmOpen(true)}
                     className="liquid-button ml-1 rounded-lg px-4 py-2 text-sm font-semibold text-zinc-200 transition"
                   >
                     Logout
-                  </motion.button>
+                  </button>
                 </>
               )}
             </div>
@@ -320,24 +318,20 @@ export default function Navbar() {
                     You'll need to sign in again to track your progress.
                   </p>
                   <div className="mt-6 flex gap-3">
-                    <motion.button
+                    <button
                       data-variant="secondary"
-                      whileTap={{ scale: 0.98 }}
-                      transition={{ duration: 0.08 }}
                       onClick={() => setConfirmOpen(false)}
                       className="liquid-button flex-1 rounded-xl px-4 py-2.5 text-sm font-semibold text-white"
                     >
                       Stay
-                    </motion.button>
-                    <motion.button
+                    </button>
+                    <button
                       data-variant="primary"
-                      whileTap={{ scale: 0.98 }}
-                      transition={{ duration: 0.08 }}
                       onClick={handleLogout}
                       className="liquid-button flex-1 rounded-xl px-4 py-2.5 text-sm font-semibold text-black"
                     >
                       Log out
-                    </motion.button>
+                    </button>
                   </div>
                 </>
               )}

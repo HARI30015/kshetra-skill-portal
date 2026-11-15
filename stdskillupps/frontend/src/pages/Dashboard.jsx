@@ -215,18 +215,16 @@ function TapButton({ children, onClick, loading, disabled, variant = 'primary', 
     ghost: 'text-zinc-200 hover:text-zinc-200',
   };
   return (
-    <motion.button
+    <button
       type={type}
       onClick={onClick}
       disabled={disabled || loading}
       data-variant={variant}
-      whileTap={{ scale: 0.98 }}
-      transition={{ duration: 0.08 }}
       className={`liquid-button inline-flex touch-manipulation select-none items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-60 ${styles[variant]} ${className}`}
     >
       {loading && <Spinner size={14} />}
       {children}
-    </motion.button>
+    </button>
   );
 }
 
