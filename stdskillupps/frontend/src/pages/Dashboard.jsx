@@ -622,8 +622,10 @@ export default function Dashboard() {
     // Make the opened panel unmistakable: once React has rendered
     // it, scroll it into the middle of the viewport and focus its
     // first field, so a tap can never look like "nothing happened".
-    setTimeout(() => {
-      const field = document.querySelector('[data-edit-panel] input, [data-edit-panel] select');
+    const focusPanel = () => {
+      const field = kind === 'lc'
+        ? document.getElementById('leetcode-username-input')
+        : document.querySelector('[data-edit-panel] input, [data-edit-panel] select');
       if (field) {
         field.scrollIntoView({ block: 'center', behavior: 'smooth' });
         try {
@@ -632,7 +634,11 @@ export default function Dashboard() {
           // focus is best-effort (e.g. touch keyboards)
         }
       }
-    }, 50);
+    };
+    // Run after React paints the panel, with a second pass for slower mobile
+    // browsers where the animated panel is not mounted on the first frame.
+    requestAnimationFrame(focusPanel);
+    setTimeout(focusPanel, 120);
   };
 
   // LeetCode Add: open the username panel on THIS site first (so the tap
@@ -717,14 +723,20 @@ export default function Dashboard() {
       setSaving(false);
       return;
     }
-    setSaving(false);
-    setEditing(null);
-    safeRefresh();
     if (next) {
+      // Do not start a sync against the old profile snapshot. Wait for the
+      // profile update and refresh to complete, then ask the backend to fetch
+      // the real score for the newly saved username.
+      setEditing(null);
+      await safeRefresh();
+      setSaving(false);
       autoSyncKey.current = `${profile.id}:${next}`;
-      toast('Username saved — fetching your score…');
+      toast(`@${next} saved — fetching your LeetCode score…`);
       doSync();
     } else {
+      setSaving(false);
+      setEditing(null);
+      await safeRefresh();
       setStatsData(null);
       setSyncError('');
       toast('LeetCode username removed');
@@ -1312,6 +1324,7 @@ export default function Dashboard() {
                       </div>
                     )}
                     <AnimatedInput
+                      id="leetcode-username-input"
                       label="LeetCode username"
                       value={form.leetcode_username}
                       onChange={setField('leetcode_username')}

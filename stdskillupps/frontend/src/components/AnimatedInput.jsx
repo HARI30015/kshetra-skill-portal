@@ -22,6 +22,7 @@ function EyeIcon({ off }) {
 
 export default function AnimatedInput({
   label,
+  id,
   type = 'text',
   value,
   onChange,
@@ -63,6 +64,7 @@ export default function AnimatedInput({
         className="relative overflow-hidden rounded-xl border bg-white/[0.08] backdrop-blur-xl"
       >
         <input
+          id={id}
           type={inputType}
           name={name}
           value={value}
