@@ -163,7 +163,14 @@ export default function Navbar() {
                 </>
               ) : (
                 <>
-                  <Avatar name={profile?.full_name} email={profile?.email} avatarPath={profile?.avatar_path} size={34} className="ml-2" />
+                  <button
+                    type="button"
+                    aria-label="Open profile settings"
+                    onClick={() => navigate('/dashboard#student-profile')}
+                    className="ml-2 rounded-full focus:outline-none focus:ring-2 focus:ring-white/70"
+                  >
+                    <Avatar name={profile?.full_name} email={profile?.email} avatarPath={profile?.avatar_path} size={34} />
+                  </button>
                   <motion.button
                     data-variant="secondary"
                     whileTap={{ scale: 0.98 }}
@@ -179,7 +186,16 @@ export default function Navbar() {
 
             {/* Mobile: avatar + menu toggle */}
             <div className="flex items-center gap-2 md:hidden">
-              {isAuthenticated && <Avatar name={profile?.full_name} email={profile?.email} avatarPath={profile?.avatar_path} size={32} />}
+              {isAuthenticated && (
+                <button
+                  type="button"
+                  aria-label="Open profile settings"
+                  onClick={() => navigate('/dashboard#student-profile')}
+                  className="rounded-full focus:outline-none focus:ring-2 focus:ring-white/70"
+                >
+                  <Avatar name={profile?.full_name} email={profile?.email} avatarPath={profile?.avatar_path} size={32} />
+                </button>
+              )}
               <button
                 data-variant="ghost"
                 className="liquid-button rounded-lg p-2 text-zinc-200 hover:bg-white/10"

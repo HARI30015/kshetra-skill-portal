@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from supabase import Client
 
 from deps import get_current_profile, get_supabase, self_or_lecturer
-from services.recommender import generate_plan
+from services.ai_planner import AIPlannerError, generate_ai_plan
 from shaping import recommendation_out
 
 router = APIRouter(prefix="/recommendations", tags=["recommendations"])
@@ -41,7 +41,10 @@ def generate_recommendation(
     )
     placements = placements_resp.data or []
 
-    plan = generate_plan(target, stats, placements)
+    try:
+        plan = generate_ai_plan(target, stats, placements)
+    except AIPlannerError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
 
     row = {
         "profile_id": profile_id,

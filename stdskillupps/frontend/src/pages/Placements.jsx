@@ -1,175 +1,159 @@
-import React, { useEffect, useState, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useMemo, useState } from 'react';
+import { motion } from 'framer-motion';
 import PageWrapper from '../components/PageWrapper';
 import GlassCard from '../components/GlassCard';
-import Loader from '../components/Loader';
-import { getPlacements } from '../api';
 
-const FIELDS = ['All', 'SWE', 'Data Science', 'Frontend', 'Backend', 'DevOps', 'Mobile'];
+const COMPANIES = [
+  {
+    company: 'Tata Consultancy Services (TCS)',
+    short: 'TCS',
+    level: 'Moderate',
+    package: 'Approx. ₹3.3–9.3 LPA CTC',
+    roles: 'Ninja, Digital and Prime software tracks',
+    path: 'Clear the official NQT aptitude sections; add timed DSA, OOP, DBMS/SQL, OS, networks, projects and communication. Digital/Prime need stronger coding and advanced problem solving.',
+    source: 'https://www.tcs.com/careers/india/tcs-all-india-nqt-hiring',
+  },
+  {
+    company: 'Infosys',
+    short: 'Infosys',
+    level: 'Moderate',
+    package: 'Approx. ₹3–5 LPA common; selective tracks ₹6.25–21 LPA',
+    roles: 'Systems Engineer, Digital Specialist Engineer, Specialist Programmer',
+    path: 'Prepare aptitude, one strong coding language, DSA, SQL, core CS and two explainable projects. Use HackWithInfy practice for selective specialist tracks.',
+    source: 'https://www.infosys.com/careers/graduates.html',
+  },
+  {
+    company: 'Wipro',
+    short: 'Wipro',
+    level: 'Moderate',
+    package: 'Approx. ₹3.5–6.5 LPA CTC',
+    roles: 'Elite technical graduate and Turbo technical tracks',
+    path: 'Build timed coding and aptitude fundamentals, revise OOP/DBMS/OS/networks, and prepare one deployed project. Turbo needs deeper DSA and stronger technical evidence.',
+    source: 'https://careers.wipro.com/content/Early-Careers/',
+  },
+  {
+    company: 'Accenture India',
+    short: 'Accenture',
+    level: 'Moderate',
+    package: 'Approx. ₹3.9–5 LPA CTC for common fresher roles',
+    roles: 'Associate Software Engineer, Application Development Associate, AI/ML associate',
+    path: 'Prepare one language, OOP, DSA, SQL, REST APIs, Git and SDLC. Practise timed problem solving, logical reasoning, debugging and concise STAR stories.',
+    source: 'https://www.accenture.com/in-en/careers/entry-level',
+  },
+  {
+    company: 'Cognizant India',
+    short: 'Cognizant',
+    level: 'Moderate',
+    package: 'Approx. ₹3.8–4.4 LPA CTC',
+    roles: 'GenC Analyst Trainee and Programmer Analyst Trainee',
+    path: 'Prepare aptitude, communication and technical assessments. Focus on Java/Python/C++, OOP, basic DSA, SQL, DBMS, OS, networks and project explanations.',
+    source: 'https://careers.cognizant.com/india-en/pathways-to-cognizant/genc-program/',
+  },
+  {
+    company: 'Amazon India',
+    short: 'Amazon',
+    level: 'Highly competitive',
+    package: 'Approx. ₹25–35 LPA total compensation benchmark',
+    roles: 'Software Development Engineer I and university talent roles',
+    path: 'Reach strong DSA and coding-test fluency, learn OOD and basic system design, build credible projects, and prepare STAR stories mapped to Leadership Principles.',
+    source: 'https://amazon.jobs/content/en/career-programs/university/sde',
+  },
+  {
+    company: 'Microsoft India',
+    short: 'Microsoft',
+    level: 'Highly competitive',
+    package: 'Approx. ₹27–38 LPA annual package benchmark',
+    roles: 'Recent-graduate Software Engineer and product engineering roles',
+    path: 'Practise clean, compilable DSA solutions with edge-case testing. Cover OOP, OS, SQL, networking and basic distributed systems; explain project trade-offs clearly.',
+    source: 'https://careers.microsoft.com/v2/global/en/hiring-tips/technical-interviewing',
+  },
+  {
+    company: 'Google India',
+    short: 'Google',
+    level: 'Highly competitive',
+    package: 'Approx. ₹30–50 LPA total compensation benchmark',
+    roles: 'Early-career Software Engineer and team-specific technology roles',
+    path: 'Build excellent DSA, CS fundamentals, coding communication and project depth. Track the exact India-eligible posting because not every early-career role accepts BTech freshers.',
+    source: 'https://www.google.com/about/careers/applications/early-career',
+  },
+];
+
+const LEVEL_STYLES = {
+  Moderate: 'border-sky-200/30 bg-sky-200/10 text-sky-100',
+  'Highly competitive': 'border-fuchsia-200/30 bg-fuchsia-200/10 text-fuchsia-100',
+};
 
 export default function Placements() {
-  const [placements, setPlacements] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState('');
-  const [field, setField] = useState('All');
-  const [debouncedQuery, setDebouncedQuery] = useState('');
-
-  // Debounce the search input to avoid hammering the API.
-  useEffect(() => {
-    const t = setTimeout(() => setDebouncedQuery(query), 350);
-    return () => clearTimeout(t);
-  }, [query]);
-
-  const load = useCallback(async () => {
-    setLoading(true);
-    try {
-      const params = {};
-      if (debouncedQuery.trim()) params.q = debouncedQuery.trim();
-      if (field !== 'All') params.field = field;
-      const data = await getPlacements(params);
-      setPlacements(Array.isArray(data) ? data : data.placements || []);
-    } catch {
-      setPlacements([]);
-    } finally {
-      setLoading(false);
-    }
-  }, [debouncedQuery, field]);
-
-  useEffect(() => {
-    load();
-  }, [load]);
+  const [level, setLevel] = useState('All');
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return COMPANIES.filter((item) => {
+      const matchesQuery = !q || `${item.company} ${item.roles} ${item.path}`.toLowerCase().includes(q);
+      return matchesQuery && (level === 'All' || item.level === level);
+    });
+  }, [query, level]);
 
   return (
     <PageWrapper>
       <main className="mx-auto max-w-6xl px-4 pb-16 pt-28">
-        <motion.h1
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-3xl font-extrabold text-white"
-        >
-          Placement <span className="text-gradient">Drives</span> 🏢
+        <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-3xl font-extrabold text-white">
+          Placement <span className="text-gradient">targets</span>
         </motion.h1>
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.15 }}
-          className="mt-2 text-sm text-zinc-300"
-        >
-          Find drives hiring for your stack and target field.
-        </motion.p>
+        <p className="mt-2 max-w-3xl text-sm leading-relaxed text-zinc-300">
+          A practical starting map for a 4th-year BTech CSE student: who hires, what roles to watch, the approximate package signal, and the preparation level needed.
+        </p>
+        <div className="mt-4 rounded-2xl border border-amber-200/25 bg-amber-100/[0.08] p-4 text-xs leading-relaxed text-amber-50/90">
+          Package figures are approximate annual India CTC/total-compensation benchmarks from public company and salary sources, not guaranteed offers or take-home pay. They vary by year, role, location, hiring track, stock/bonus and written offer. Always verify the current official job notice.
+        </div>
 
-        {/* Search + filters */}
-        <motion.div
-          initial={{ opacity: 0, y: 18 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="glass mt-6 p-5"
-        >
-          <div className="relative">
-            <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400">
-              🔍
-            </span>
-            <input
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search by company, role, or skill…"
-              className="w-full rounded-xl border border-white/20 bg-white/10 py-3 pl-11 pr-4 text-white placeholder-zinc-400 backdrop-blur-xl outline-none transition focus:border-white"
-            />
-          </div>
+        <div className="glass mt-6 p-5">
+          <input
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder="Search company, role, skill or preparation…"
+            className="w-full rounded-xl border border-white/20 bg-white/10 px-4 py-3 text-white placeholder-zinc-400 outline-none focus:border-white"
+          />
           <div className="mt-4 flex flex-wrap gap-2">
-            {FIELDS.map((f) => {
-              const active = field === f;
-              return (
-                <motion.button
-                  key={f}
-                  data-variant={active ? 'primary' : 'secondary'}
-                  whileTap={{ scale: 0.98 }}
-                  transition={{ duration: 0.08 }}
-                  onClick={() => setField(f)}
-                  className={`liquid-button rounded-full border px-4 py-1.5 text-xs font-semibold transition-colors ${
-                    active
-                      ? 'border-transparent bg-white text-black shadow-glow'
-                      : 'border-white/20 bg-white/10 text-zinc-300 hover:bg-white/15'
-                  }`}
-                >
-                  {f}
-                </motion.button>
-              );
-            })}
+            {['All', 'Moderate', 'Highly competitive'].map((item) => (
+              <button
+                key={item}
+                type="button"
+                onClick={() => setLevel(item)}
+                className={`liquid-button rounded-full border px-4 py-1.5 text-xs font-semibold ${level === item ? 'border-transparent bg-white text-black shadow-glow' : 'border-white/20 bg-white/10 text-zinc-300'}`}
+              >
+                {item}
+              </button>
+            ))}
           </div>
-        </motion.div>
+        </div>
 
-        {/* Results */}
-        {loading ? (
-          <Loader label="Searching drives…" />
-        ) : placements.length === 0 ? (
-          <GlassCard delay={0.1} className="mt-6 text-center">
-            <p className="text-3xl">🔭</p>
-            <p className="mt-2 font-semibold text-white">No drives found</p>
-            <p className="mt-1 text-sm text-zinc-400">Try a different search or field filter.</p>
-          </GlassCard>
-        ) : (
-          <motion.div layout className="mt-6 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-            <AnimatePresence mode="popLayout">
-              {placements.map((p, i) => (
-                <motion.div
-                  layout
-                  key={p.id}
-                  initial={{ opacity: 0, y: 24, scale: 0.97 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.95 }}
-                  transition={{ duration: 0.45, delay: Math.min(i * 0.05, 0.5) }}
-                  whileHover={{ y: -6 }}
-                  className="glass flex flex-col p-6"
-                >
-                  <div className="flex items-start justify-between gap-2">
-                    <div>
-                      <h3 className="text-lg font-bold text-white">{p.company}</h3>
-                      <p className="text-sm text-zinc-300">{p.role}</p>
-                    </div>
-                    {p.package_lpa && (
-                      <span className="shrink-0 rounded-full bg-white px-3 py-1 text-xs font-bold text-black shadow-glow">
-                        {p.package_lpa} LPA
-                      </span>
-                    )}
+        <div className="mt-6 grid gap-5 md:grid-cols-2">
+          {filtered.map((item, index) => (
+            <motion.div key={item.company} initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: Math.min(index * 0.04, 0.35) }}>
+              <GlassCard className="h-full">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <h2 className="text-lg font-bold text-white">{item.company}</h2>
+                    <p className="mt-1 text-sm text-zinc-300">{item.roles}</p>
                   </div>
-
-                  <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs text-zinc-400">
-                    {p.job_field && <span>🎯 {p.job_field}</span>}
-                    {p.location && <span>📍 {p.location}</span>}
-                    {p.drive_date && <span>📅 {p.drive_date}</span>}
-                  </div>
-
-                  {p.languages?.length > 0 && (
-                    <div className="mt-3">
-                      <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wider text-zinc-400">Languages</p>
-                      <div className="flex flex-wrap gap-1.5">
-                        {p.languages.map((l) => (
-                          <span key={l} className="rounded-full bg-white/15 px-2.5 py-1 text-[11px] font-semibold text-zinc-200">
-                            {l}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {p.skills?.length > 0 && (
-                    <div className="mt-3">
-                      <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wider text-zinc-400">Skills</p>
-                      <div className="flex flex-wrap gap-1.5">
-                        {p.skills.map((s) => (
-                          <span key={s} className="rounded-full border border-white/15 bg-white/10 px-2.5 py-1 text-[11px] font-medium text-zinc-200">
-                            {s}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </motion.div>
-              ))}
-            </AnimatePresence>
-          </motion.div>
-        )}
+                  <span className={`shrink-0 rounded-full border px-3 py-1 text-[11px] font-bold ${LEVEL_STYLES[item.level]}`}>
+                    {item.level}
+                  </span>
+                </div>
+                <p className="mt-4 rounded-xl bg-white/10 px-4 py-3 text-sm font-semibold text-white">{item.package}</p>
+                <div className="mt-4">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-zinc-400">How to reach this placement</p>
+                  <p className="mt-2 text-sm leading-relaxed text-zinc-200">{item.path}</p>
+                </div>
+                <a href={item.source} target="_blank" rel="noreferrer" className="mt-4 inline-block text-xs font-semibold text-sky-100 underline underline-offset-2">
+                  Check source / current opening ↗
+                </a>
+              </GlassCard>
+            </motion.div>
+          ))}
+        </div>
+        {filtered.length === 0 && <GlassCard className="mt-6 text-center text-sm text-zinc-300">No company matches this search.</GlassCard>}
       </main>
     </PageWrapper>
   );

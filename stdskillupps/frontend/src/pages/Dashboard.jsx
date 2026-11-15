@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import PageWrapper from '../components/PageWrapper';
 import GlassCard from '../components/GlassCard';
 import AnimatedInput from '../components/AnimatedInput';
@@ -74,6 +75,7 @@ const YEAR_GUIDE = {
 };
 
 const CT_LOGIN_URL = 'https://vardhaman.campustrack.in/login';
+const CT_LINK_URL = 'https://share.google/VmWg06S7y9j9LB3Va';
 
 // INTERIM (for now): the LeetCode Add action directs to LeetCode's login
 // page first; the username panel still opens so the profile can be saved.
@@ -381,6 +383,7 @@ function ProfileWait({ onRetry, onLogout, loggingOut }) {
 
 export default function Dashboard() {
   const auth = useAuth();
+  const navigate = useNavigate();
   const { profile, refreshProfile } = auth;
   const pid = profile?.id;
   const username = profile?.leetcode_username || '';
@@ -425,9 +428,11 @@ export default function Dashboard() {
   const [refreshingCt, setRefreshingCt] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
   const [avatarBusy, setAvatarBusy] = useState(false);
-  const [passwordOpen, setPasswordOpen] = useState(false);
-  const [passwordForm, setPasswordForm] = useState({ password: '', confirm: '' });
   const [passwordBusy, setPasswordBusy] = useState(false);
+  const [emailOpen, setEmailOpen] = useState(false);
+  const [emailForm, setEmailForm] = useState({ email: '', code: '' });
+  const [emailStep, setEmailStep] = useState('email');
+  const [emailBusy, setEmailBusy] = useState(false);
   const avatarInputRef = useRef(null);
   const bmRef = useRef(null);
   const autoSyncKey = useRef('');
@@ -603,8 +608,6 @@ export default function Dashboard() {
     : 1;
   const weekEntry = weekMatches.find((m) => Number(m[1]) === planWeek) || weekMatches[0];
   const currentTopic = weekEntry ? `Week ${weekEntry[1]} · ${weekEntry[2].trim()}` : null;
-  const scrollToId = (id) => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-
   /* ---------- actions ---------- */
 
   const setField = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
@@ -816,27 +819,64 @@ export default function Dashboard() {
     }
   };
 
-  const handlePasswordChange = async (event) => {
-    event.preventDefault();
-    if (passwordForm.password.length < 6) {
-      toast('Password must be at least 6 characters.');
-      return;
-    }
-    if (passwordForm.password !== passwordForm.confirm) {
-      toast('Passwords do not match.');
-      return;
-    }
+  const startPasswordOtp = async () => {
     setPasswordBusy(true);
     try {
-      const { error: passwordError } = await supabase.auth.updateUser({ password: passwordForm.password });
-      if (passwordError) throw passwordError;
-      setPasswordForm({ password: '', confirm: '' });
-      setPasswordOpen(false);
-      toast('Password updated.');
+      const { error } = await supabase.auth.resetPasswordForEmail(profile.email);
+      if (error) throw error;
+      navigate('/login', {
+        state: {
+          passwordOtpEmail: profile.email,
+          notice: 'A password-change code was sent to your email. Enter it below to continue.',
+        },
+      });
     } catch (err) {
-      toast(err?.message || 'Could not update the password.', 4500);
+      toast(err?.message || 'Could not send the password code.', 4500);
     } finally {
       setPasswordBusy(false);
+    }
+  };
+
+  const startEmailChange = async (event) => {
+    event.preventDefault();
+    const nextEmail = emailForm.email.trim();
+    if (!nextEmail || !nextEmail.includes('@')) {
+      toast('Enter a valid new email address.');
+      return;
+    }
+    setEmailBusy(true);
+    try {
+      const { error } = await supabase.auth.updateUser({ email: nextEmail });
+      if (error) throw error;
+      setEmailStep('code');
+      toast('A verification code was sent to the new email.');
+    } catch (err) {
+      toast(err?.message || 'Could not start the email change.', 4500);
+    } finally {
+      setEmailBusy(false);
+    }
+  };
+
+  const verifyEmailChange = async (event) => {
+    event.preventDefault();
+    if (!/^\d{6}$/.test(emailForm.code)) {
+      toast('Enter the 6-digit email code.');
+      return;
+    }
+    setEmailBusy(true);
+    try {
+      const { error } = await supabase.auth.verifyOtp({ email: emailForm.email.trim(), token: emailForm.code, type: 'email_change' });
+      if (error) throw error;
+      await updateProfile(pid, payloadWith({ email: emailForm.email.trim() }));
+      await safeRefresh();
+      setEmailForm({ email: '', code: '' });
+      setEmailStep('email');
+      setEmailOpen(false);
+      toast('Email address updated.');
+    } catch (err) {
+      toast(err?.message || 'That email code is invalid or expired.', 4500);
+    } finally {
+      setEmailBusy(false);
     }
   };
 
@@ -1081,11 +1121,7 @@ export default function Dashboard() {
               <p className="text-xs font-semibold uppercase tracking-wider text-zinc-400">Continue learning</p>
               <p className="mt-2 text-xl font-bold text-white">{currentTopic || (r ? 'Your plan is ready' : 'Your personal plan is being built…')}</p>
               <p className="mt-1 text-sm text-zinc-300">Pick up where you left off and keep your streak alive.</p>
-              {r ? (
-                <TapButton variant="secondary" onClick={() => scrollToId('student-plan')} className="mt-4">
-                  Resume practice
-                </TapButton>
-              ) : (
+              {!r && (
                 <TapButton onClick={() => doGenerate()} loading={planBusy} className="mt-4">
                   {planBusy ? 'Generating…' : 'Generate my plan'}
                 </TapButton>
@@ -1102,7 +1138,11 @@ export default function Dashboard() {
               ) : (
                 <>
                   <p className="mt-1 text-sm text-zinc-300">Link CampusTrack to sync your activity.</p>
-                  <TapButton variant="secondary" onClick={() => scrollToId('student-progress')} className="mt-4">
+                  <TapButton
+                    variant="secondary"
+                    onClick={() => window.open(CT_LINK_URL, '_blank', 'noopener,noreferrer')}
+                    className="mt-4"
+                  >
                     Link CampusTrack
                   </TapButton>
                 </>
@@ -1159,10 +1199,12 @@ export default function Dashboard() {
 
                 <div className="mt-4 flex flex-wrap gap-3">
                   <TapButton variant="secondary" onClick={() => openEdit('profile')}>Edit details</TapButton>
-                  <TapButton variant="secondary" onClick={() => setPasswordOpen((open) => !open)}>
-                    {passwordOpen ? 'Close password settings' : 'Change password'}
+                  <TapButton variant="secondary" onClick={startPasswordOtp} loading={passwordBusy}>
+                    Change password by email code
                   </TapButton>
-                  <TapButton variant="ghost" onClick={handleLogout} loading={loggingOut}>Log out</TapButton>
+                  <TapButton variant="secondary" onClick={() => setEmailOpen((open) => !open)}>
+                    {emailOpen ? 'Close email settings' : 'Change email'}
+                  </TapButton>
                 </div>
 
                 {editing === 'profile' && (
@@ -1200,31 +1242,35 @@ export default function Dashboard() {
                   </EditPanel>
                 )}
 
-                {passwordOpen && (
-                  <form onSubmit={handlePasswordChange} className="mt-4 space-y-3 rounded-2xl border border-white/15 bg-white/[0.05] p-4">
-                    <h3 className="text-sm font-semibold text-white">Account password</h3>
-                    <AnimatedInput
-                      label="New password"
-                      type="password"
-                      value={passwordForm.password}
-                      onChange={(event) => setPasswordForm((current) => ({ ...current, password: event.target.value }))}
-                      autoComplete="new-password"
-                      placeholder="At least 6 characters"
-                      showPasswordToggle
-                      required
-                    />
-                    <AnimatedInput
-                      label="Confirm new password"
-                      type="password"
-                      value={passwordForm.confirm}
-                      onChange={(event) => setPasswordForm((current) => ({ ...current, confirm: event.target.value }))}
-                      autoComplete="new-password"
-                      placeholder="Enter it again"
-                      showPasswordToggle
-                      required
-                    />
-                    <TapButton type="submit" loading={passwordBusy}>
-                      {passwordBusy ? 'Updating…' : 'Save new password'}
+                {emailOpen && (
+                  <form onSubmit={emailStep === 'email' ? startEmailChange : verifyEmailChange} className="mt-4 space-y-3 rounded-2xl border border-white/15 bg-white/[0.05] p-4">
+                    <h3 className="text-sm font-semibold text-white">Change email by verification code</h3>
+                    {emailStep === 'email' ? (
+                      <AnimatedInput
+                        label="New email address"
+                        type="email"
+                        value={emailForm.email}
+                        onChange={(event) => setEmailForm((current) => ({ ...current, email: event.target.value }))}
+                        autoComplete="email"
+                        placeholder="new-email@example.com"
+                        required
+                      />
+                    ) : (
+                      <>
+                        <p className="text-xs text-zinc-300">Enter the 6-digit code sent to {emailForm.email}.</p>
+                        <AnimatedInput
+                          label="Email verification code"
+                          value={emailForm.code}
+                          onChange={(event) => setEmailForm((current) => ({ ...current, code: event.target.value.replace(/\D/g, '').slice(0, 6) }))}
+                          inputMode="numeric"
+                          autoComplete="one-time-code"
+                          maxLength={6}
+                          required
+                        />
+                      </>
+                    )}
+                    <TapButton type="submit" loading={emailBusy}>
+                      {emailStep === 'email' ? 'Send email code' : 'Verify and save email'}
                     </TapButton>
                   </form>
                 )}

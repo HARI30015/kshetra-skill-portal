@@ -41,6 +41,15 @@ export default function Login() {
     return () => clearTimeout(t);
   }, [cooldown]);
 
+  useEffect(() => {
+    const otpEmail = location.state?.passwordOtpEmail;
+    if (!otpEmail) return;
+    setEmail(otpEmail);
+    setMode('forgot-code');
+    setInfo(location.state?.notice || 'Enter the password-change code from your email.');
+    setError('');
+  }, [location.state]);
+
   const fail = (message) => {
     setError(message);
   };

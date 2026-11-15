@@ -1,0 +1,12 @@
+AI plan generator setup
+
+The Generate my plan endpoint now calls an OpenAI-compatible service from the backend only.
+Set these environment variables on the backend host (Render):
+
+OPENAI_API_KEY=<secret value>
+OPENAI_API_BASE=https://api.openai.com/v1   (optional)
+OPENAI_MODEL=gpt-4o-mini                    (optional)
+
+Never put these values in Vite frontend variables, source code, screenshots, or GitHub.
+The dashboard sends only the authenticated student request; the backend gathers the profile,
+LeetCode stats, CampusTrack score, and placement rows before asking the model for a plan.
