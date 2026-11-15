@@ -275,7 +275,7 @@ function AnimatedCounter({ value, duration = 0.9 }) {
 }
 
 // A javascript: href set through the DOM so React never strips or blocks it.
-function BookmarkletLink({ code }) {
+function BookmarkletLink({ code, onTap }) {
   const ref = useRef(null);
   useEffect(() => {
     if (ref.current) ref.current.setAttribute('href', code);
@@ -284,7 +284,13 @@ function BookmarkletLink({ code }) {
     <a
       ref={ref}
       href="#"
-      onClick={(e) => e.preventDefault()}
+      onClick={(e) => {
+        // Dragging still installs the real javascript: bookmarklet. A tap
+        // cannot install a bookmark on most phones, so make the same control
+        // useful there instead of cancelling the click and doing nothing.
+        e.preventDefault();
+        onTap?.();
+      }}
       className="mt-3 inline-flex items-center gap-1.5 rounded-xl bg-white px-4 py-2 text-sm font-bold text-black shadow-glow"
     >
       🔖 Sync to stdskillupps
@@ -735,12 +741,17 @@ export default function Dashboard() {
         toast('Score must be a number.');
         return;
       }
-      await updateProfile(
-        profile.id,
-        payloadWith({
-          campus_track_username: (form.campus_track_username || '').trim() || null,
-          campustrack_score: score,
-        })
+      await withRetry(
+        () =>
+          updateProfile(
+            profile.id,
+            payloadWith({
+              campus_track_username: (form.campus_track_username || '').trim() || null,
+              campustrack_score: score,
+            })
+          ),
+        () => true,
+        () => {}
       );
       setEditing(null);
       safeRefresh();
@@ -838,6 +849,25 @@ export default function Dashboard() {
         toast('Code selected — press Ctrl/Cmd + C to copy.');
       }
     }
+  };
+
+  const openCampusTrackSync = async () => {
+    // Open from the user gesture so mobile browsers do not treat this as a
+    // popup. The bookmarklet remains available in the dashboard to drag or
+    // copy after CampusTrack opens.
+    let opened = true;
+    try {
+      opened = !!window.open(CAMPUSTRACK_URL, '_blank', 'noopener,noreferrer');
+    } catch {
+      opened = false;
+    }
+    await copyBookmarklet();
+    toast(
+      opened
+        ? 'Bookmark code copied. Open your CampusTrack Profile and paste it as a bookmark URL, then tap that bookmark.'
+        : 'Bookmark code copied. Open CampusTrack, visit your Profile, and paste the code as a bookmark URL.',
+      6500,
+    );
   };
 
   /* ---------- LeetCode card body ---------- */
@@ -1204,7 +1234,7 @@ export default function Dashboard() {
                       <p className="text-xs uppercase tracking-wider text-zinc-400">LeetCode</p>
                       <p className="mt-1 font-semibold text-white">{username ? `@${username}` : 'Not linked yet'}</p>
                     </div>
-                    <TapButton variant="secondary" onClick={() => openEdit('lc')}>{username ? 'Edit' : 'Add'}</TapButton>
+                    <TapButton variant="secondary" onClick={() => (username ? openEdit('lc') : openLeetCodeAdd())}>{username ? 'Edit' : 'Add'}</TapButton>
                   </div>
                   <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/[0.05] p-4">
                     <div>
@@ -1252,7 +1282,7 @@ export default function Dashboard() {
                   <TapButton variant="secondary" onClick={() => (username ? openEdit('lc') : openLeetCodeAdd())}>
                     {username ? 'Change username' : 'Add username'}
                   </TapButton>
-                  <TapButton onClick={() => doSync()} loading={syncBusy} disabled={!username}>
+                  <TapButton onClick={() => (username ? doSync() : openLeetCodeAdd())} loading={syncBusy}>
                     {syncBusy ? 'Syncing…' : username ? 'Sync LeetCode stats' : 'Add username to sync'}
                   </TapButton>
                 </div>
@@ -1362,7 +1392,7 @@ export default function Dashboard() {
                   </p>
                   {bookmarklet ? (
                     <>
-                      <BookmarkletLink code={bookmarklet} />
+                      <BookmarkletLink code={bookmarklet} onTap={openCampusTrackSync} />
                       <textarea
                         ref={bmRef}
                         readOnly
