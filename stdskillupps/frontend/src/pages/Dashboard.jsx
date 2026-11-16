@@ -642,21 +642,13 @@ export default function Dashboard() {
     setTimeout(focusPanel, 120);
   };
 
-  // LeetCode Add: open the username panel on THIS site first (so the tap
-  // always visibly does something), then try the LeetCode login tab with a
-  // real user-gesture window.open. If a popup blocker stops the tab, the
-  // panel itself carries a real "Log in to LeetCode" link. While the panel
-  // is already open, tapping Add only brings it back into focus.
+  // LeetCode Add: open the username panel on THIS site only. It used to
+  // also open LeetCode's login page in a new tab, but on phones that tab
+  // took over the screen and the panel was gone when the student came
+  // back — so Save/Cancel never showed. The panel itself carries a real
+  // "Log in to LeetCode" link for anyone who needs it.
   const openLeetCodeAdd = () => {
-    const alreadyOpen = editing === 'lc';
     openEdit('lc');
-    if (!alreadyOpen) {
-      try {
-        window.open(LEETCODE_LOGIN_URL, '_blank', 'noopener,noreferrer');
-      } catch {
-        /* blocked: the panel shows the login link */
-      }
-    }
   };
 
   // Always send the full field set so a partial edit never wipes other fields.
