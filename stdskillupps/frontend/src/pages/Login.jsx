@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import PageWrapper from '../components/PageWrapper';
 import AnimatedInput from '../components/AnimatedInput';
 import AnimatedButton from '../components/AnimatedButton';
+import Loader from '../components/Loader';
 import { supabase } from '../supabaseClient';
 import { useAuth } from '../context/AuthContext';
 import { checkEmailExists } from '../api';
@@ -18,7 +19,7 @@ const HEADINGS = {
 export default function Login() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { refreshProfile } = useAuth();
+  const { refreshProfile, session, loading: authLoading } = useAuth();
   const [mode, setMode] = useState('login'); // login | forgot-email | forgot-code | forgot-new
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -49,6 +50,17 @@ export default function Login() {
     setInfo(location.state?.notice || 'Enter the password-change code from your email.');
     setError('');
   }, [location.state]);
+
+  // Already signed in? Skip the sign-in form and go to the dashboard
+  // instead of showing "Welcome back" again. Exception: the password-code
+  // flow (Change password by email code) deliberately opens this page for
+  // a signed-in user, so stay then.
+  useEffect(() => {
+    if (authLoading || !session) return;
+    if (location.state?.passwordOtpEmail) return;
+    const from = location.state?.from;
+    navigate(from && from !== '/login' ? from : '/dashboard', { replace: true });
+  }, [authLoading, session, location.state, navigate]);
 
   const fail = (message) => {
     setError(message);
@@ -222,6 +234,14 @@ export default function Login() {
       </button>
     </p>
   );
+
+  if (authLoading) {
+    return (
+      <div className="min-h-screen">
+        <Loader label="Checking your session…" />
+      </div>
+    );
+  }
 
   return (
     <PageWrapper>
