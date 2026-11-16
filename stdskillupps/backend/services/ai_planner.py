@@ -32,10 +32,10 @@ def generate_ai_plan(profile: dict, stats: dict | None, placements: list[dict]) 
 
     prompt = f"""Create a practical placement-preparation plan for one Indian BTech CSE student.
 Use only the supplied student data. Do not invent scores, achievements, company offers, or completed work.
-The plan must adapt to the student's year, target field, LeetCode difficulty split/languages, CampusTrack score,
+The plan must adapt to the student's year, target field, LeetCode difficulty split/languages,
 and the listed placement roles. It should help the student reach a realistic placement goal.
 
-Student profile: {_compact({'year': year, 'target_field': field, 'name': profile.get('full_name'), 'leetcode_username': profile.get('leetcode_username'), 'campustrack_score': profile.get('campustrack_score')})}
+Student profile: {_compact({'year': year, 'target_field': field, 'name': profile.get('full_name'), 'leetcode_username': profile.get('leetcode_username')})}
 LeetCode data: {_compact(stats)}
 Placement data: {_compact(placements)}
 

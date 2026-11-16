@@ -158,7 +158,7 @@ export default function Landing() {
             <div>
               <h2 className="text-base font-bold text-white">About stdskillupps</h2>
               <p className="mt-2 max-w-md text-sm leading-relaxed text-zinc-400">
-                stdskillupps is placement preparation for students. Link your LeetCode and CampusTrack profiles to track
+                stdskillupps is placement preparation for students. Link your LeetCode profile to track
                 progress in one place, follow year-wise guidance, and explore placement opportunities.
               </p>
             </div>

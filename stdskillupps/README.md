@@ -88,19 +88,12 @@ npm run dev
 ## Year-based recommendation logic
 
 - **Year 1** – fundamentals: core languages per target field, basics, relaxed weekly routine.
-- **Year 2** – compare LeetCode difficulty/language stats + CampusTrack score against
+- **Year 2** – compare LeetCode difficulty/language stats against
   placement demand; per-job language groups ("For PhonePe Backend Developer: Go, SQL…").
 - **Year 3** – accelerated training: weekly targets, medium/hard focus, mocks.
 - **Year 4** – intensive sprint: daily targets, interview revision, company-specific prep.
 
 Deterministic (no LLM), built from the placements table so it adapts as lecturers add data.
-
-## Campus-track integration
-
-CampusTrack is currently a **free-text field** (`profiles.campustrack_username`,
-`profiles.campustrack_score`) — the student enters/updates their username and score
-manually. A live CampusTrack API/scraper can replace this later by swapping the fetch
-in `services/` and the update path in `routers/profiles.py`.
 
 ## Field-name contract
 
@@ -111,8 +104,6 @@ places. The API speaks **both** directions:
 |-----------|--------------|----------|
 | `year` | `year_of_study` | year of study (1–4) |
 | `target_field` | `target_job_field` | target job field |
-| `campustrack_username` | `campus_track_username` | campus-track handle |
-| `campustrack_score` | `campus_track_score` | campus-track score |
 | `leetcode_total_solved` | `total_solved` | stats |
 | `leetcode_easy` | `easy_solved` | stats |
 | `leetcode_medium` | `medium_solved` | stats |
@@ -136,8 +127,6 @@ Additive columns beyond the original contract (driven by the frontend's needs):
 ## External platforms
 
 - **LeetCode** — https://leetcode.com/ (stored as a constant in `frontend/src/constants.js`). Stats are fetched from the public LeetCode GraphQL endpoint and **cached** in `student_stats`; the "Sync stats" button refetches on demand — the dashboard never refetches on page load.
-- **CampusTrack** — https://www.campustrack.in/ (same constants file). No public API exists, so the campus-track score is a **self-reported field** the student enters manually, shown with a "verify later" note for lecturers. The UI offers "open in new tab" buttons so students can sign in on those sites, then come back and enter their username.
-
 ## Performance
 
 - Frontend routes are code-split with `React.lazy` + `Suspense` — each page is its own chunk.

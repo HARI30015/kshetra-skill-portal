@@ -98,9 +98,7 @@ def sync_all_stats(
     db: Client = Depends(get_supabase),
 ):
     """Lecturer-only bulk sync: link EVERY profile that has a LeetCode
-    username to its live LeetCode stats in one call. CampusTrack has no
-    public API, so its score stays self-reported - only LeetCode is
-    synced here."""
+    username to its live LeetCode stats in one call."""
     resp = db.table("profiles").select("id, email, leetcode_username").execute()
     results = []
     for p in resp.data or []:

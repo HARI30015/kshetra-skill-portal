@@ -148,9 +148,8 @@ def _exact_schedule(year: int, field: str, primary_lang: str, total: int) -> lis
 def generate_plan(profile: dict, stats: dict | None, placements: list[dict]) -> dict:
     """Build a year-based study plan.
 
-    profile: row from profiles (year_of_study/year, target_job_field/target_field,
-    campustrack_score, ...). Both the frontend alias names and the canonical
-    DB column names are accepted.
+    profile: row from profiles (year_of_study/year, target_job_field/target_field).
+    Both the frontend alias names and the canonical DB column names are accepted.
     stats: row from student_stats or None
     placements: placement rows for the profile's target field
     """
@@ -164,7 +163,6 @@ def generate_plan(profile: dict, stats: dict | None, placements: list[dict]) -> 
     # Clamp the lower bound: year 0 / negative / garbage all mean "year 1"
     # (matches the previous `or 1` fallback for falsy values).
     year = max(1, _coerce_year(raw_year)) if raw_year is not None else 1
-    campustrack_score = profile.get("campustrack_score")
 
     freq = _language_frequency(placements)
     placement_langs = [lang for lang, _ in freq]  # union by demand frequency
@@ -239,16 +237,10 @@ def generate_plan(profile: dict, stats: dict | None, placements: list[dict]) -> 
         recommended_languages = (weak + [l for l in demand if l in known_set])[:6] or core_langs
         focus_areas = basics + ["Medium DSA", "Projects", "Internship prep"]
 
-        score_line = (
-            f"CampusTrack score: {campustrack_score}."
-            if campustrack_score is not None
-            else "CampusTrack score: not linked yet — link it for tighter guidance."
-        )
         plan_lines = [
             f"# Year 2 plan — {field} (build & compare)",
             "",
             f"Current LeetCode: **{total} solved** (easy {easy} / medium {medium} / hard {hard}).",
-            score_line,
             "",
             "## Core languages to work on (from placement demand)",
             "\n".join(

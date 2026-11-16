@@ -9,20 +9,18 @@ import DashboardTabs from '../components/DashboardTabs';
 import { supabase } from '../supabaseClient';
 import {
   MilestoneRing,
-  MilestoneBar,
   AchievementsCard,
   YearRoadmap,
   computeStreak,
 } from '../components/DashboardExtras';
 import { useAuth } from '../context/AuthContext';
-import { LEETCODE_URL, CAMPUSTRACK_URL } from '../constants';
+import { LEETCODE_URL } from '../constants';
 import {
   syncStats,
   getStats,
   generateRecommendation,
   getRecommendation,
   updateProfile,
-  getCtSyncKey,
   getMyLoginHistory,
 } from '../api';
 
@@ -74,20 +72,12 @@ const YEAR_GUIDE = {
   },
 };
 
-const CT_LOGIN_URL = 'https://vardhaman.campustrack.in/login';
-const CT_LINK_URL = 'https://share.google/VmWg06S7y9j9LB3Va';
-
 // INTERIM (for now): the LeetCode Add action directs to LeetCode's login
 // page first; the username panel still opens so the profile can be saved.
 const LEETCODE_LOGIN_URL = 'https://leetcode.com/accounts/login/';
 
 // Progress milestones (display only). LeetCode: solved-count targets.
 const LC_STEPS = [1, 10, 25, 50, 100, 150, 200, 300, 500, 750, 1000];
-// CampusTrack: the real maximum score is not known to the app. If you know it
-// (e.g. 1000), set CT_MAX to that number and the bar will show score / CT_MAX.
-// While it is null, the bar shows progress toward the next round milestone.
-const CT_MAX = null;
-const CT_STEPS = [50, 100, 250, 500, 1000, 2500, 5000, 10000];
 
 /* ------------------------------------------------------------------ */
 /* Helpers                                                             */
@@ -274,30 +264,6 @@ function AnimatedCounter({ value, duration = 0.9 }) {
   return <span>{display.toLocaleString()}</span>;
 }
 
-// A javascript: href set through the DOM so React never strips or blocks it.
-function BookmarkletLink({ code, onTap }) {
-  const ref = useRef(null);
-  useEffect(() => {
-    if (ref.current) ref.current.setAttribute('href', code);
-  }, [code]);
-  return (
-    <a
-      ref={ref}
-      href="#"
-      onClick={(e) => {
-        // Dragging still installs the real javascript: bookmarklet. A tap
-        // cannot install a bookmark on most phones, so make the same control
-        // useful there instead of cancelling the click and doing nothing.
-        e.preventDefault();
-        onTap?.();
-      }}
-      className="mt-3 inline-flex items-center gap-1.5 rounded-xl bg-white px-4 py-2 text-sm font-bold text-black shadow-glow"
-    >
-      🔖 Sync to stdskillupps
-    </a>
-  );
-}
-
 function EditPanel({ onSubmit, onCancel, saving, children }) {
   return (
     <motion.form
@@ -408,7 +374,6 @@ export default function Dashboard() {
   // Independent, progressive loads.
   const stats = useResource(pid, () => getStats(pid), !!pid);
   const plan = useResource(pid, () => getRecommendation(pid), !!pid);
-  const ct = useResource('ct-sync-key', () => getCtSyncKey(), true);
   // Sign-in history for the streak. If the endpoint is missing or fails, the
   // streak simply stays hidden (never faked).
   const history = useResource('login-history', () => getMyLoginHistory(), !!pid);
@@ -420,10 +385,9 @@ export default function Dashboard() {
   const [planBusy, setPlanBusy] = useState(false);
   const [planError, setPlanError] = useState('');
   const [scheduleOpen, setScheduleOpen] = useState(false);
-  const [editing, setEditing] = useState(null); // 'profile' | 'lc' | 'ct' | null
+  const [editing, setEditing] = useState(null); // 'profile' | 'lc' | null
   const [form, setForm] = useState({});
   const [saving, setSaving] = useState(false);
-  const [refreshingCt, setRefreshingCt] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
   const [avatarBusy, setAvatarBusy] = useState(false);
   const [passwordBusy, setPasswordBusy] = useState(false);
@@ -432,7 +396,6 @@ export default function Dashboard() {
   const [emailStep, setEmailStep] = useState('email');
   const [emailBusy, setEmailBusy] = useState(false);
   const avatarInputRef = useRef(null);
-  const bmRef = useRef(null);
   const autoSyncKey = useRef('');
   const autoPlanKey = useRef('');
   const statsRef = useRef(null);
@@ -511,20 +474,6 @@ export default function Dashboard() {
     doGenerate({ silent: true });
   }, [plan.status, pid, doGenerate]);
 
-  // When the student returns from CampusTrack (bookmarklet), pick up the new score.
-  useEffect(() => {
-    if (!pid) return undefined;
-    let last = Date.now();
-    const onVis = () => {
-      if (document.visibilityState === 'visible' && Date.now() - last > 20000) {
-        last = Date.now();
-        safeRefresh();
-      }
-    };
-    document.addEventListener('visibilitychange', onVis);
-    return () => document.removeEventListener('visibilitychange', onVis);
-  }, [pid, safeRefresh]);
-
   const handleLogout = async () => {
     if (loggingOut) return;
     setLoggingOut(true);
@@ -558,11 +507,8 @@ export default function Dashboard() {
   const languages = (field && FIELD_RESOURCES[field]) || FIELD_RESOURCES.SWE;
   const guide = YEAR_GUIDE[year] || YEAR_GUIDE[1];
   const firstName = profile.full_name?.split(' ')[0] || 'there';
-  const ctUsername = profile.campus_track_username || '';
-  const ctScore = profile.campustrack_score ?? profile.campus_track_score;
   const s = stats.data;
   const r = plan.data;
-  const bookmarklet = ct.data?.bookmarklet;
   const streakDays = history.status === 'ready' ? computeStreak(history.data) : 0;
   const diffBuckets = [
     { label: 'Easy', value: s?.easy_solved || 0, color: 'from-zinc-300 to-white' },
@@ -580,21 +526,19 @@ export default function Dashboard() {
   const daypart = hour < 12 ? 'morning' : hour < 17 ? 'afternoon' : 'evening';
   const weekLogins = history.status === 'ready' ? countLoginDaysLastWeek(history.data) : 0;
   const totalSolved = s?.total_solved || 0;
-  const ctScoreNum = Number(ctScore) || 0;
   const lcLinked = !!profile.leetcode_username;
-  const ctLinked = !!ctUsername;
   // Placement readiness from real signals only. Formula (kept visible here):
-  // 40% LeetCode solved toward 150 + 30% CampusTrack score toward 2000 +
-  // 30% profile completeness (name, year, target field, LeetCode, CampusTrack).
-  const filledFields = [profile.full_name, profile.year_of_study, profile.target_job_field, profile.leetcode_username, profile.campus_track_username].filter(
+  // 50% LeetCode solved toward 150 + 50% profile completeness
+  // (name, year, target field, LeetCode).
+  const filledFields = [profile.full_name, profile.year_of_study, profile.target_job_field, profile.leetcode_username].filter(
     (v) => v !== null && v !== undefined && v !== '',
   ).length;
-  const profileComplete = filledFields / 5;
-  const readiness = lcLinked || ctLinked
-    ? Math.round(100 * (0.4 * Math.min(totalSolved / 150, 1) + 0.3 * Math.min(ctScoreNum / 2000, 1) + 0.3 * profileComplete))
+  const profileComplete = filledFields / 4;
+  const readiness = lcLinked
+    ? Math.round(100 * (0.5 * Math.min(totalSolved / 150, 1) + 0.5 * profileComplete))
     : null;
   const readinessLabel = readiness === null
-    ? 'Link LeetCode or CampusTrack to see readiness'
+    ? 'Link LeetCode to see readiness'
     : readiness >= 70 ? 'Looking strong' : readiness >= 40 ? 'Building up' : 'Getting started';
   // Current plan week topic: the "**Week N: topic**" line for the week the
   // stored plan is in (weeks since the plan was created, capped at 12),
@@ -616,8 +560,6 @@ export default function Dashboard() {
       year_of_study: year,
       target_job_field: profile.target_job_field || '',
       leetcode_username: profile.leetcode_username || '',
-      campus_track_username: profile.campus_track_username || '',
-      campustrack_score: ctScore ?? '',
     });
     setEditing(kind);
     // Make the opened panel unmistakable: once React has rendered
@@ -657,8 +599,6 @@ export default function Dashboard() {
     year_of_study: year,
     target_job_field: profile.target_job_field || null,
     leetcode_username: profile.leetcode_username || null,
-    campus_track_username: profile.campus_track_username || null,
-    campustrack_score: ctScore == null || ctScore === '' ? null : Number(ctScore),
     ...o,
   });
 
@@ -733,38 +673,6 @@ export default function Dashboard() {
       setStatsData(null);
       setSyncError('');
       toast('LeetCode username removed');
-    }
-  };
-
-  const saveCampus = async (e) => {
-    e.preventDefault();
-    setSaving(true);
-    try {
-      const raw = String(form.campustrack_score ?? '').trim();
-      const score = raw === '' ? null : Number(raw);
-      if (score !== null && Number.isNaN(score)) {
-        toast('Score must be a number.');
-        return;
-      }
-      await withRetry(
-        () =>
-          updateProfile(
-            profile.id,
-            payloadWith({
-              campus_track_username: (form.campus_track_username || '').trim() || null,
-              campustrack_score: score,
-            })
-          ),
-        () => true,
-        () => {}
-      );
-      setEditing(null);
-      safeRefresh();
-      toast('CampusTrack details saved ✓');
-    } catch (err) {
-      toast(errMsg(err, 'Update failed.'), 4500);
-    } finally {
-      setSaving(false);
     }
   };
 
@@ -868,48 +776,6 @@ export default function Dashboard() {
     } finally {
       setEmailBusy(false);
     }
-  };
-
-  const refreshCtScore = async () => {
-    setRefreshingCt(true);
-    await safeRefresh();
-    setRefreshingCt(false);
-    toast('Checked for your latest score');
-  };
-
-  const copyBookmarklet = async () => {
-    if (!bookmarklet) return;
-    try {
-      await navigator.clipboard.writeText(bookmarklet);
-      toast('Bookmark code copied ✓');
-    } catch {
-      bmRef.current?.select();
-      try {
-        document.execCommand('copy');
-        toast('Bookmark code copied ✓');
-      } catch {
-        toast('Code selected — press Ctrl/Cmd + C to copy.');
-      }
-    }
-  };
-
-  const openCampusTrackSync = async () => {
-    // Open from the user gesture so mobile browsers do not treat this as a
-    // popup. The bookmarklet remains available in the dashboard to drag or
-    // copy after CampusTrack opens.
-    let opened = true;
-    try {
-      opened = !!window.open(CAMPUSTRACK_URL, '_blank', 'noopener,noreferrer');
-    } catch {
-      opened = false;
-    }
-    await copyBookmarklet();
-    toast(
-      opened
-        ? 'Bookmark code copied. Open your CampusTrack Profile and paste it as a bookmark URL, then tap that bookmark.'
-        : 'Bookmark code copied. Open CampusTrack, visit your Profile, and paste the code as a bookmark URL.',
-      6500,
-    );
   };
 
   /* ---------- LeetCode card body ---------- */
@@ -1106,8 +972,8 @@ export default function Dashboard() {
             </div>
           </div>
 
-          <div className="mt-4 grid gap-4 lg:grid-cols-5">
-            <div className="rounded-2xl border border-white/10 bg-white/[0.06] px-5 py-4 lg:col-span-3">
+          <div className="mt-4">
+            <div className="rounded-2xl border border-white/10 bg-white/[0.06] px-5 py-4">
               <p className="text-xs font-semibold uppercase tracking-wider text-zinc-400">Continue learning</p>
               <p className="mt-2 text-xl font-bold text-white">{currentTopic || (r ? 'Your plan is ready' : 'Your personal plan is being built…')}</p>
               <p className="mt-1 text-sm text-zinc-300">Pick up where you left off and keep your streak alive.</p>
@@ -1115,27 +981,6 @@ export default function Dashboard() {
                 <TapButton onClick={() => doGenerate()} loading={planBusy} className="mt-4">
                   {planBusy ? 'Generating…' : 'Generate my plan'}
                 </TapButton>
-              )}
-            </div>
-            <div className="rounded-2xl border border-white/10 bg-white/[0.06] px-5 py-4 lg:col-span-2">
-              <p className="text-xs font-semibold uppercase tracking-wider text-zinc-400">Upcoming</p>
-              <p className="mt-2 text-xl font-bold text-white">CampusTrack sync</p>
-              {ctLinked ? (
-                <>
-                  <p className="mt-1 text-sm text-zinc-300">Your latest CampusTrack activity is ready to review.</p>
-                  <p className="mt-2 text-xs text-zinc-400">Today · Placement prep</p>
-                </>
-              ) : (
-                <>
-                  <p className="mt-1 text-sm text-zinc-300">Link CampusTrack to sync your activity.</p>
-                  <TapButton
-                    variant="secondary"
-                    onClick={() => window.open(CT_LINK_URL, '_blank', 'noopener,noreferrer')}
-                    className="mt-4"
-                  >
-                    Link CampusTrack
-                  </TapButton>
-                </>
               )}
             </div>
           </div>
@@ -1284,13 +1129,6 @@ export default function Dashboard() {
                     </div>
                     <TapButton variant="secondary" onClick={() => (username ? openEdit('lc') : openLeetCodeAdd())}>{username ? 'Edit' : 'Add'}</TapButton>
                   </div>
-                  <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/[0.05] p-4">
-                    <div>
-                      <p className="text-xs uppercase tracking-wider text-zinc-400">CampusTrack</p>
-                      <p className="mt-1 font-semibold text-white">{ctUsername ? `@${ctUsername}` : 'Not linked yet'}</p>
-                    </div>
-                    <TapButton variant="secondary" onClick={() => openEdit('ct')}>{ctUsername ? 'Edit' : 'Add'}</TapButton>
-                  </div>
                 </div>
                 <p className="mt-4 text-xs leading-relaxed text-zinc-400">
                   Your profile picture is stored privately. Coding usernames remain editable from this profile panel.
@@ -1300,7 +1138,7 @@ export default function Dashboard() {
           </GlassCard>
         </section>
 
-        <section id="student-progress" className="mt-6 grid scroll-mt-32 gap-6 lg:grid-cols-2">
+        <section id="student-progress" className="mt-6 scroll-mt-32">
           {/* LeetCode */}
           <GlassCard delay={0.1}>
             <div className="grid gap-6 md:grid-cols-[minmax(0,1.2fr)_minmax(220px,0.8fr)]">
@@ -1372,106 +1210,6 @@ export default function Dashboard() {
               </aside>
             </div>
           </GlassCard>
-          {/* CampusTrack */}
-          <GlassCard delay={0.12}>
-            <div className="grid gap-6 md:grid-cols-[minmax(0,1.05fr)_minmax(250px,0.95fr)]">
-              <div>
-                <h2 className="text-lg font-bold text-white">CampusTrack progress</h2>
-                <div className="mt-4 rounded-2xl border border-white/10 bg-white/[0.045] px-4 py-3 text-sm">
-                  <span className="text-zinc-400">Username</span>
-                  <div className="mt-1">
-                    {ctUsername ? (
-                      <a
-                        href={CT_LOGIN_URL}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="font-semibold text-white underline decoration-sky-100/40 underline-offset-2"
-                      >
-                        @{ctUsername} ↗
-                      </a>
-                    ) : <span className="font-semibold text-zinc-300">Not linked yet</span>}
-                  </div>
-                </div>
-                {!ctUsername && (
-                  <a
-                    href={CAMPUSTRACK_URL}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="mt-3 inline-block text-xs font-semibold text-sky-100 underline underline-offset-2"
-                  >
-                    Open CampusTrack ↗
-                  </a>
-                )}
-                <div className="mt-4 rounded-2xl border border-white/10 bg-white/[0.05] px-4 py-5 text-center">
-                  <p className="text-3xl font-extrabold text-white">{ctScore ?? '—'}</p>
-                  <p className="mt-1 text-xs uppercase tracking-widest text-zinc-400">CampusTrack score</p>
-                  <MilestoneBar value={ctScore} steps={CT_STEPS} max={CT_MAX} />
-                </div>
-              </div>
-
-              <aside className="rounded-2xl border border-white/15 bg-white/[0.045] p-4">
-                <div className="flex items-center justify-between gap-3">
-                  <h3 className="text-sm font-semibold text-white">Actions</h3>
-                  <TapButton variant="secondary" onClick={() => openEdit('ct')}>
-                    {ctUsername ? 'Edit profile' : 'Add profile'}
-                  </TapButton>
-                </div>
-
-                {editing === 'ct' && (
-                  <EditPanel onSubmit={saveCampus} onCancel={() => setEditing(null)} saving={saving}>
-                    <AnimatedInput
-                      label="CampusTrack username"
-                      value={form.campus_track_username}
-                      onChange={setField('campus_track_username')}
-                    />
-                    <AnimatedInput
-                      label="CampusTrack score"
-                      value={form.campustrack_score}
-                      onChange={setField('campustrack_score')}
-                      type="number"
-                      placeholder="e.g. 85"
-                    />
-                  </EditPanel>
-                )}
-
-                <div className="mt-4 border-t border-white/10 pt-4">
-                  <p className="text-sm font-semibold text-white">Sync your CampusTrack score</p>
-                  <p className="mt-1 text-xs leading-relaxed text-zinc-400">
-                    CampusTrack has no public API, so the sync runs in your browser. Add the bookmark below, open CampusTrack, sign in, visit your Profile page, and click the bookmark.
-                  </p>
-                  {bookmarklet ? (
-                    <>
-                      <BookmarkletLink code={bookmarklet} onTap={openCampusTrackSync} />
-                      <textarea
-                        ref={bmRef}
-                        readOnly
-                        value={bookmarklet}
-                        onFocus={(e) => e.target.select()}
-                        className="mt-3 h-16 w-full rounded-lg border border-white/10 bg-black/30 p-2 text-[10px] text-zinc-300"
-                      />
-                      <div className="mt-2 flex flex-wrap gap-2">
-                        <TapButton variant="secondary" onClick={copyBookmarklet}>Copy bookmark code</TapButton>
-                        <TapButton variant="secondary" onClick={refreshCtScore} loading={refreshingCt}>
-                          {refreshingCt ? 'Refreshing…' : 'Refresh score'}
-                        </TapButton>
-                      </div>
-                      <p className="mt-2 text-[11px] text-zinc-500">
-                        If dragging fails, copy the code and paste it as the URL of a new browser bookmark.
-                      </p>
-                    </>
-                  ) : ct.status === 'loading' ? (
-                    <CardLoading compact label="Loading your personal sync bookmark…" waking={ct.waking} />
-                  ) : (
-                    <CardError
-                      compact
-                      message={ct.status === 'error' ? ct.error : 'Your sync bookmark is not available yet.'}
-                      onRetry={ct.reload}
-                    />
-                  )}
-                </div>
-          </aside>
-        </div>
-      </GlassCard>
           </section>
 
           <section id="student-plan" className="mt-6 scroll-mt-32">

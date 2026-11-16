@@ -123,7 +123,7 @@ def delete_my_incomplete_profile(
     if not rows:
         return {"deleted": False, "reason": "no profile"}
     row = rows[0]
-    user_fields = ("year", "target_field", "leetcode_username", "campustrack_username")
+    user_fields = ("year", "target_field", "leetcode_username")
     if row.get("onboarded") or any(row.get(k) for k in user_fields):
         return {"deleted": False, "reason": "profile has user data"}
     db.table("profiles").delete().eq("id", user.id).execute()
@@ -147,8 +147,8 @@ def update_profile(
     db: Client = Depends(get_supabase),
 ):
     """Update profile fields. Accepts both canonical column names
-    (year, target_field, campustrack_username) and frontend aliases
-    (year_of_study, target_job_field, campus_track_username, onboarded)."""
+    (year, target_field) and frontend aliases
+    (year_of_study, target_job_field, onboarded)."""
     self_or_lecturer(profile_id, profile)
     updates = normalize_profile_update(body)
     if not updates:
@@ -162,9 +162,7 @@ def update_profile(
                 raise HTTPException(status_code=400, detail="avatar_path must be inside your profile folder")
     # Real-or-fake check (owner's rule, 2026-10-22): a LeetCode
     # username is accepted only when LeetCode confirms the account
-    # really exists. CampusTrack has no public API to check against,
-    # so its username gets a format check here and stays
-    # lecturer-verified, as before.
+    # really exists.
     lc_name = updates.get("leetcode_username")
     if isinstance(lc_name, str) and lc_name.strip():
         if leetcode_user_exists(lc_name.strip()) is False:
@@ -172,39 +170,9 @@ def update_profile(
                 status_code=400,
                 detail=f"LeetCode user '{lc_name.strip()}' not found. Enter a real LeetCode username.",
             )
-    ct_name = updates.get("campustrack_username")
-    if isinstance(ct_name, str) and ct_name.strip():
-        cleaned = ct_name.strip()
-        if len(cleaned) > 60 or any(ch.isspace() for ch in cleaned):
-            raise HTTPException(
-                status_code=400,
-                detail="Enter a valid CampusTrack username (no spaces).",
-            )
     if "year" in updates and not (1 <= updates["year"] <= 4):
         raise HTTPException(status_code=400, detail="year must be between 1 and 4")
     resp = db.table("profiles").update(updates).eq("id", profile_id).execute()
     if not resp.data:
         raise HTTPException(status_code=404, detail="Profile not found")
     return profile_out(resp.data[0])
-
-
-@router.get("/me/sync-key")
-def my_campustrack_sync_key(profile=Depends(get_current_profile)):
-    """The signed-in student's personal CampusTrack sync key plus the
-    ready-to-drag bookmarklet carrying it. The key is derived (HMAC
-    of the profile id with a server secret), never stored."""
-    from routers.campustrack_sync import API_BASE, sync_key_for
-
-    key = sync_key_for(profile["id"])
-    if not key:
-        raise HTTPException(status_code=503, detail="CampusTrack sync is not configured")
-    bookmarklet = (
-        "javascript:(function(){var s=document.createElement('script');s.src='"
-        + API_BASE
-        + "/campustrack-sync.js?pid="
-        + str(profile["id"])
-        + "&k="
-        + key
-        + "';document.body.appendChild(s);})();"
-    )
-    return {"profile_id": profile["id"], "key": key, "bookmarklet": bookmarklet}

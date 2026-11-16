@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import PageWrapper from '../components/PageWrapper';
 import AnimatedInput from '../components/AnimatedInput';
 import AnimatedButton from '../components/AnimatedButton';
-import { LEETCODE_URL, CAMPUSTRACK_URL } from '../constants';
+import { LEETCODE_URL } from '../constants';
 import { updateProfile, syncStats, generateRecommendation } from '../api';
 import { useAuth } from '../context/AuthContext';
 
@@ -33,12 +33,10 @@ export default function Onboarding() {
   const [year, setYear] = useState(null);
   const [field, setField] = useState('');
   const [leetcode, setLeetcode] = useState('');
-  const [campusTrack, setCampusTrack] = useState('');
-  const [campusScore, setCampusScore] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const totalSteps = 4;
+  const totalSteps = 3;
 
   const go = (next) => {
     setDir(next > step ? 1 : -1);
@@ -97,8 +95,6 @@ export default function Onboarding() {
         year_of_study: year,
         target_job_field: field,
         leetcode_username: leetcode.trim() || null,
-        campus_track_username: campusTrack.trim() || null,
-        campustrack_score: campusScore.trim() === '' ? null : Number(campusScore),
         onboarded: true,
       });
       await refreshProfile();
@@ -211,43 +207,6 @@ export default function Onboarding() {
             🔗 Not signed in? Open leetcode.com to sign in first ↗
           </a>
           <p className="mt-2 text-xs text-zinc-400">
-            Sign in there, then come back and enter your username above.
-          </p>
-        </div>
-      ),
-    },
-    {
-      title: 'Link your campus track',
-      subtitle: 'Your campus training profile — last step!',
-      body: (
-        <div className="space-y-4">
-          <AnimatedInput
-            label="Campus-track username"
-            value={campusTrack}
-            onChange={(e) => setCampusTrack(e.target.value)}
-            placeholder="e.g. your campus portal handle"
-            name="campus_track_username"
-          />
-          <AnimatedInput
-            label="Campus-track score (self-reported)"
-            value={campusScore}
-            onChange={(e) => setCampusScore(e.target.value)}
-            placeholder="e.g. 85"
-            name="campustrack_score"
-            type="number"
-          />
-          <p className="text-xs text-zinc-400">
-            Enter your current score for now. After setup, your dashboard has a private browser bookmark to sync the real score from your CampusTrack profile.
-          </p>
-          <a
-            href={CAMPUSTRACK_URL}
-            target="_blank"
-            rel="noreferrer"
-            className="liquid-button inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold text-white"
-          >
-            🔗 Not signed in? Open campustrack.in to sign in first ↗
-          </a>
-          <p className="text-xs text-zinc-400">
             Sign in there, then come back and enter your username above.
           </p>
         </div>

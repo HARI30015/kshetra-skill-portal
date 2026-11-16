@@ -16,7 +16,6 @@ import {
   deletePlacement,
   syncAllStats,
 } from '../api';
-import { CAMPUSTRACK_URL } from '../constants';
 
 const EMPTY_PLACEMENT = {
   company: '',
@@ -146,7 +145,6 @@ export default function LecturerDashboard() {
       year_of_study: s.year_of_study || 1,
       target_job_field: s.target_job_field || '',
       leetcode_username: s.leetcode_username || '',
-      campus_track_username: s.campus_track_username || '',
       status: s.status || 'active',
     });
   };
@@ -160,7 +158,6 @@ export default function LecturerDashboard() {
         year_of_study: Number(editStudent.year_of_study),
         target_job_field: editStudent.target_job_field || null,
         leetcode_username: editStudent.leetcode_username.trim() || null,
-        campus_track_username: editStudent.campus_track_username.trim() || null,
         status: editStudent.status,
       });
       setEditStudent(null);
@@ -301,7 +298,7 @@ export default function LecturerDashboard() {
               <table className="w-full min-w-[980px] text-left text-sm">
                 <thead>
                   <tr className="border-y border-white/10 text-xs uppercase tracking-wider text-zinc-400">
-                    {['Name', 'Email', 'Year', 'Target field', 'LeetCode', 'CampusTrack', 'LeetCode solved', 'Status', ''].map((h) => (
+                    {['Name', 'Email', 'Year', 'Target field', 'LeetCode', 'LeetCode solved', 'Status', ''].map((h) => (
                       <th key={h} className="px-6 py-3 font-semibold">{h}</th>
                     ))}
                   </tr>
@@ -334,20 +331,6 @@ export default function LecturerDashboard() {
                               className="font-semibold text-zinc-200 underline decoration-white/40 underline-offset-2 hover:text-zinc-200"
                             >
                               @{s.leetcode_username} ↗
-                            </a>
-                          ) : (
-                            <span className="text-zinc-400">—</span>
-                          )}
-                        </td>
-                        <td className="px-6 py-3.5">
-                          {s.campus_track_username ? (
-                            <a
-                              href={CAMPUSTRACK_URL}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="font-semibold text-zinc-200 underline decoration-white/40 underline-offset-2 hover:text-zinc-200"
-                            >
-                              @{s.campus_track_username} ↗
                             </a>
                           ) : (
                             <span className="text-zinc-400">—</span>
@@ -476,7 +459,6 @@ export default function LecturerDashboard() {
                 </div>
                 <AnimatedInput label="Target job field" value={editStudent.target_job_field} onChange={(e) => setEditStudent({ ...editStudent, target_job_field: e.target.value })} />
                 <AnimatedInput label="LeetCode username" value={editStudent.leetcode_username} onChange={(e) => setEditStudent({ ...editStudent, leetcode_username: e.target.value })} />
-                <AnimatedInput label="Campus-track username" value={editStudent.campus_track_username} onChange={(e) => setEditStudent({ ...editStudent, campus_track_username: e.target.value })} />
                 <div className="flex gap-3 pt-2">
                   <AnimatedButton type="button" variant="secondary" onClick={() => setEditStudent(null)} className="flex-1">Cancel</AnimatedButton>
                   <AnimatedButton type="submit" loading={studentSaving} className="flex-1">

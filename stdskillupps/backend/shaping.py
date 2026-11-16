@@ -1,9 +1,9 @@
 """Response shaping + input aliasing.
 
 The database uses the canonical column names from supabase/schema.sql
-(year, target_field, campustrack_username, leetcode_total_solved, ...,
+(year, target_field, leetcode_total_solved, ...,
 updated_at, plan). The frontend reads a friendlier contract
-(year_of_study, target_job_field, campus_track_username, total_solved,
+(year_of_study, target_job_field, total_solved,
 easy_solved, medium_solved, hard_solved, synced_at, plan_text).
 
 These helpers translate both ways: every response carries BOTH the canonical
@@ -15,20 +15,16 @@ from __future__ import annotations
 PROFILE_IN_ALIASES: dict[str, str] = {
     "year_of_study": "year",
     "target_job_field": "target_field",
-    "campus_track_username": "campustrack_username",
-    "campus_track_score": "campustrack_score",
 }
 
 PROFILE_OUT_ALIASES: dict[str, str] = {
     "year": "year_of_study",
     "target_field": "target_job_field",
-    "campustrack_username": "campus_track_username",
-    "campustrack_score": "campus_track_score",
 }
 
 PROFILE_FIELDS = {
     "full_name", "email", "year", "target_field", "avatar_path",
-    "leetcode_username", "campustrack_username", "campustrack_score",
+    "leetcode_username",
     "onboarded",
 }
 

@@ -66,30 +66,6 @@ export function MilestoneRing({ value, steps }) {
   );
 }
 
-// CampusTrack: slim bar. If the real maximum score is known, pass `max`;
-// otherwise progress is shown toward the next round milestone.
-export function MilestoneBar({ value, steps, max }) {
-  const v = Number(value);
-  if (value === null || value === undefined || value === '' || Number.isNaN(v)) return null;
-  const known = typeof max === 'number' && max > 0;
-  const next = known ? max : nextMilestone(v, steps);
-  const denom = next ?? Math.max(v, 1);
-  const pct = Math.min(Math.max(v / denom, 0), 1) * 100;
-  return (
-    <div className="mt-3">
-      <div className="h-1.5 overflow-hidden rounded-full bg-white/10">
-        <div
-          className="h-full rounded-full bg-white"
-          style={{ width: `${pct}%`, transition: 'width 0.9s cubic-bezier(0.22, 1, 0.36, 1)' }}
-        />
-      </div>
-      <p className="mt-1.5 text-center text-[11px] text-zinc-400">
-        {known ? `${v} of ${max}` : next ? `Next milestone: ${next}` : 'All milestones reached'}
-      </p>
-    </div>
-  );
-}
-
 /* ---------------- streak ---------------- */
 
 const dayKey = (d) => `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;

@@ -9,4 +9,4 @@ OPENAI_MODEL=gpt-4o-mini                    (optional)
 
 Never put these values in Vite frontend variables, source code, screenshots, or GitHub.
 The dashboard sends only the authenticated student request; the backend gathers the profile,
-LeetCode stats, CampusTrack score, and placement rows before asking the model for a plan.
+LeetCode stats and placement rows before asking the model for a plan.
