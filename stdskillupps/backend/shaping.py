@@ -24,7 +24,7 @@ PROFILE_OUT_ALIASES: dict[str, str] = {
 
 PROFILE_FIELDS = {
     "full_name", "email", "year", "target_field", "avatar_path",
-    "leetcode_username",
+    "leetcode_username", "aim_company",
     "onboarded",
 }
 

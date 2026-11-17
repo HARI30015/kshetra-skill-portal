@@ -22,6 +22,8 @@ import {
   getRecommendation,
   updateProfile,
   getMyLoginHistory,
+  getTodayPlan,
+  completeTask,
 } from '../api';
 
 /* ------------------------------------------------------------------ */
@@ -474,6 +476,39 @@ export default function Dashboard() {
     doGenerate({ silent: true });
   }, [plan.status, pid, doGenerate]);
 
+  // ---- Today's Map: today's tasks from the adaptive planner ----
+  const [todayTasks, setTodayTasks] = useState([]);
+  const [planMeta, setPlanMeta] = useState(null);
+  const [todayLoaded, setTodayLoaded] = useState(false);
+
+  const loadToday = useCallback(async () => {
+    if (!pid) return;
+    try {
+      const d = await getTodayPlan();
+      setTodayTasks(d?.tasks || []);
+      setPlanMeta(d?.meta || null);
+    } catch {
+      // Today card stays hidden until the endpoint answers.
+    } finally {
+      setTodayLoaded(true);
+    }
+  }, [pid]);
+
+  // Reload when the plan changes too: a fresh Regenerate rebuilds
+  // today's task list on the server.
+  useEffect(() => {
+    loadToday();
+  }, [loadToday, plan.status]);
+
+  const handleCompleteTask = async (id) => {
+    try {
+      await completeTask(id);
+      setTodayTasks((p) => p.filter((t) => t.id !== id));
+    } catch (e) {
+      toast(errMsg(e, 'Could not mark the task done.'), 4500);
+    }
+  };
+
   const handleLogout = async () => {
     if (loggingOut) return;
     setLoggingOut(true);
@@ -541,12 +576,13 @@ export default function Dashboard() {
     ? 'Link LeetCode to see readiness'
     : readiness >= 70 ? 'Looking strong' : readiness >= 40 ? 'Building up' : 'Getting started';
   // Current plan week topic: the "**Week N: topic**" line for the week the
-  // stored plan is in (weeks since the plan was created, capped at 12),
-  // falling back to the first week in the plan text.
+  // stored plan is in (weeks since the plan was created, capped at the
+  // plan's own length — adaptive plans run to August of 4th year, far
+  // past 12 weeks), falling back to the first week in the plan text.
   const weekMatches = [...scheduleText.matchAll(/\*\*Week\s+(\d+):\s*([^*]+?)\*\*/g)];
   const planCreated = r?.created_at ? new Date(r.created_at) : null;
   const planWeek = planCreated && !Number.isNaN(planCreated.getTime())
-    ? Math.min(12, Math.max(1, Math.floor((Date.now() - planCreated.getTime()) / 604800000) + 1))
+    ? Math.min(weekMatches.length || 12, Math.max(1, Math.floor((Date.now() - planCreated.getTime()) / 604800000) + 1))
     : 1;
   const weekEntry = weekMatches.find((m) => Number(m[1]) === planWeek) || weekMatches[0];
   const currentTopic = weekEntry ? `Week ${weekEntry[1]} · ${weekEntry[2].trim()}` : null;
@@ -985,6 +1021,44 @@ export default function Dashboard() {
             </div>
           </div>
         </motion.section>
+
+        {todayLoaded && planMeta && (
+          <div className="mt-6">
+            <GlassCard delay={0.05}>
+              <div className="p-6">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-xl font-bold text-white">
+                    Today&apos;s Map → {planMeta?.aim || profile?.aim_company || 'Your Aim'}
+                  </h3>
+                  <span className="rounded-full border border-emerald-500/40 bg-emerald-500/20 px-3 py-1 text-xs text-emerald-300">
+                    {planMeta?.gap_label || 'Syncing'}
+                  </span>
+                </div>
+                {todayTasks.length > 0 ? (
+                  <ul className="mt-4 space-y-3">
+                    {todayTasks.map((t) => (
+                      <li key={t.id} className="flex items-center justify-between rounded-lg border border-white/10 bg-white/5 p-3">
+                        <div>
+                          <p className="font-semibold text-white">{t.task_description}</p>
+                          <p className="text-sm text-gray-400">Week {t.week} · {t.topic}</p>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => handleCompleteTask(t.id)}
+                          className="rounded-full border border-emerald-500/50 bg-emerald-500/20 px-4 py-2 text-emerald-300 hover:bg-emerald-500/30"
+                        >
+                          Done
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="mt-4 text-sm text-zinc-300">All today&apos;s tasks are done 🎉</p>
+                )}
+              </div>
+            </GlassCard>
+          </div>
+        )}
 
         <DashboardTabs
           label="Student dashboard sections"

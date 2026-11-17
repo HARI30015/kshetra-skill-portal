@@ -70,3 +70,10 @@ export const deletePlacement = (id) => api.delete(`/placements/${id}`).then((r) 
 
 // ---- Health ----
 export const getHealth = () => api.get('/health').then((r) => r.data);
+
+// ---- Today's plan (adaptive planner) ----
+export const getTodayPlan = () => api.get('/recommendations/me/today').then((r) => r.data);
+export const completeTask = (taskId) =>
+  api.post(`/recommendations/me/today/${taskId}/complete`).then((r) => r.data);
+export const updateAimCompany = (profileId, company) =>
+  updateProfile(profileId, { aim_company: company });

@@ -10,6 +10,7 @@ import { useAuth } from '../context/AuthContext';
 
 const YEARS = [1, 2, 3, 4];
 const FIELDS = ['SWE', 'Data Science', 'Frontend', 'Backend', 'DevOps', 'Mobile'];
+const AIM_COMPANIES = ['Amazon', 'Microsoft', 'Google', 'Adobe', 'TCS Digital', 'Infosys PP', 'TCS Ninja', 'Wipro', 'Accenture', 'Cognizant'];
 
 const stepVariants = {
   enter: (dir) => ({ opacity: 0, x: dir > 0 ? 60 : -60 }),
@@ -33,10 +34,11 @@ export default function Onboarding() {
   const [year, setYear] = useState(null);
   const [field, setField] = useState('');
   const [leetcode, setLeetcode] = useState('');
+  const [aimCompany, setAimCompany] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const totalSteps = 3;
+  const totalSteps = 4;
 
   const go = (next) => {
     setDir(next > step ? 1 : -1);
@@ -46,6 +48,7 @@ export default function Onboarding() {
   const canContinue = () => {
     if (step === 0) return year !== null;
     if (step === 1) return field !== '';
+    if (step === 3) return aimCompany !== '';
     return true; // usernames are optional
   };
 
@@ -95,6 +98,7 @@ export default function Onboarding() {
         year_of_study: year,
         target_job_field: field,
         leetcode_username: leetcode.trim() || null,
+        aim_company: aimCompany,
         onboarded: true,
       });
       await refreshProfile();
@@ -209,6 +213,41 @@ export default function Onboarding() {
           <p className="mt-2 text-xs text-zinc-400">
             Sign in there, then come back and enter your username above.
           </p>
+        </div>
+      ),
+    },
+    {
+      title: "What's your aim company?",
+      subtitle: "We'll build your schedule until 4th-year placements.",
+      body: (
+        <div className="grid grid-cols-2 gap-3">
+          {AIM_COMPANIES.map((c) => {
+            const active = aimCompany === c;
+            return (
+              <button
+                key={c}
+                type="button"
+                data-variant={active ? 'primary' : 'secondary'}
+                onClick={() => setAimCompany(c)}
+                className={`liquid-button relative rounded-2xl border px-4 py-3.5 text-center text-sm font-semibold transition-colors ${
+                  active
+                    ? 'border-transparent bg-white text-black shadow-glow'
+                    : 'border-white/20 bg-white/10 text-zinc-200 hover:bg-white/15'
+                }`}
+              >
+                {c}
+                {active && (
+                  <motion.span
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    className="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full border border-white bg-black text-xs text-white shadow"
+                  >
+                    ✓
+                  </motion.span>
+                )}
+              </button>
+            );
+          })}
         </div>
       ),
     },
