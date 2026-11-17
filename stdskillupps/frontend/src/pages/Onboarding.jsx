@@ -10,7 +10,12 @@ import { useAuth } from '../context/AuthContext';
 
 const YEARS = [1, 2, 3, 4];
 const FIELDS = ['SWE', 'Data Science', 'Frontend', 'Backend', 'DevOps', 'Mobile'];
-const AIM_COMPANIES = ['Amazon', 'Microsoft', 'Google', 'Adobe', 'TCS Digital', 'Infosys PP', 'TCS Ninja', 'Wipro', 'Accenture', 'Cognizant'];
+const AIM_COMPANY_GROUPS = [
+  { tier: "Dream", companies: ["Google", "Microsoft", "Amazon", "Adobe", "Atlassian", "Apple", "NVIDIA", "Rubrik", "Jane Street", "Goldman Sachs", "Uber", "Salesforce", "McKinsey"] },
+  { tier: "Top", companies: ["Oracle", "JP Morgan Chase", "Morgan Stanley", "Cisco", "Intel", "Qualcomm", "Samsung", "Flipkart", "Razorpay", "PhonePe", "Postman", "Swiggy", "Zomato", "Meesho", "CRED", "Groww", "Zerodha", "Zepto", "SAP Labs", "ServiceNow", "Walmart Global Tech", "Target India", "Wells Fargo", "Lowe's India"] },
+  { tier: "Core", companies: ["Zoho", "Freshworks", "Deloitte", "EY", "PwC", "KPMG"] },
+  { tier: "Mass", companies: ["TCS", "Infosys", "Wipro", "HCLTech", "Cognizant", "Accenture", "Capgemini"] },
+];
 
 const stepVariants = {
   enter: (dir) => ({ opacity: 0, x: dir > 0 ? 60 : -60 }),
@@ -220,8 +225,12 @@ export default function Onboarding() {
       title: "What's your aim company?",
       subtitle: "We'll build your schedule until 4th-year placements.",
       body: (
-        <div className="grid grid-cols-2 gap-3">
-          {AIM_COMPANIES.map((c) => {
+        <div className="space-y-5">
+          {AIM_COMPANY_GROUPS.map((group) => (
+            <div key={group.tier}>
+              <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-zinc-400">{group.tier}</p>
+              <div className="grid grid-cols-2 gap-3">
+                {group.companies.map((c) => {
             const active = aimCompany === c;
             return (
               <button
@@ -247,7 +256,10 @@ export default function Onboarding() {
                 )}
               </button>
             );
-          })}
+                })}
+              </div>
+            </div>
+          ))}
         </div>
       ),
     },

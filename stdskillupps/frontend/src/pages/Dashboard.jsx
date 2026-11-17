@@ -40,7 +40,12 @@ const FIELD_RESOURCES = {
 };
 
 // Aim companies for the adaptive planner (same list as onboarding Step 4).
-const AIM_COMPANIES = ['Amazon', 'Microsoft', 'Google', 'Adobe', 'TCS Digital', 'Infosys PP', 'TCS Ninja', 'Wipro', 'Accenture', 'Cognizant'];
+const AIM_COMPANY_GROUPS = [
+  { tier: "Dream", companies: ["Google", "Microsoft", "Amazon", "Adobe", "Atlassian", "Apple", "NVIDIA", "Rubrik", "Jane Street", "Goldman Sachs", "Uber", "Salesforce", "McKinsey"] },
+  { tier: "Top", companies: ["Oracle", "JP Morgan Chase", "Morgan Stanley", "Cisco", "Intel", "Qualcomm", "Samsung", "Flipkart", "Razorpay", "PhonePe", "Postman", "Swiggy", "Zomato", "Meesho", "CRED", "Groww", "Zerodha", "Zepto", "SAP Labs", "ServiceNow", "Walmart Global Tech", "Target India", "Wells Fargo", "Lowe's India"] },
+  { tier: "Core", companies: ["Zoho", "Freshworks", "Deloitte", "EY", "PwC", "KPMG"] },
+  { tier: "Mass", companies: ["TCS", "Infosys", "Wipro", "HCLTech", "Cognizant", "Accenture", "Capgemini"] },
+];
 
 const RESOURCE_LINKS = {
   'C++': 'https://en.cppreference.com/',
@@ -1162,8 +1167,12 @@ export default function Dashboard() {
                     <div className="block">
                       <span className="mb-1.5 block text-sm font-medium text-zinc-300">Aim company</span>
                       <span className="mb-2 block text-xs text-zinc-400">Your plan is built for this company.</span>
-                      <div className="grid grid-cols-2 gap-3">
-                        {AIM_COMPANIES.map((c) => {
+                      <div className="space-y-5">
+                        {AIM_COMPANY_GROUPS.map((group) => (
+                          <div key={group.tier}>
+                            <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-zinc-400">{group.tier}</p>
+                            <div className="grid grid-cols-2 gap-3">
+                              {group.companies.map((c) => {
                           const active = form.aim_company === c;
                           return (
                             <button
@@ -1189,7 +1198,10 @@ export default function Dashboard() {
                               )}
                             </button>
                           );
-                        })}
+                              })}
+                            </div>
+                          </div>
+                        ))}
                       </div>
                     </div>
                   </EditPanel>
