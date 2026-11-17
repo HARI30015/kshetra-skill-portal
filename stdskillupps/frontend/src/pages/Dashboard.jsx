@@ -39,6 +39,9 @@ const FIELD_RESOURCES = {
   Mobile: ['Kotlin', 'Swift', 'Dart'],
 };
 
+// Aim companies for the adaptive planner (same list as onboarding Step 4).
+const AIM_COMPANIES = ['Amazon', 'Microsoft', 'Google', 'Adobe', 'TCS Digital', 'Infosys PP', 'TCS Ninja', 'Wipro', 'Accenture', 'Cognizant'];
+
 const RESOURCE_LINKS = {
   'C++': 'https://en.cppreference.com/',
   Java: 'https://docs.oracle.com/en/java/',
@@ -596,6 +599,7 @@ export default function Dashboard() {
       year_of_study: year,
       target_job_field: profile.target_job_field || '',
       leetcode_username: profile.leetcode_username || '',
+      aim_company: profile.aim_company || '',
     });
     setEditing(kind);
     // Make the opened panel unmistakable: once React has rendered
@@ -635,6 +639,7 @@ export default function Dashboard() {
     year_of_study: year,
     target_job_field: profile.target_job_field || null,
     leetcode_username: profile.leetcode_username || null,
+    aim_company: profile.aim_company || null,
     ...o,
   });
 
@@ -644,6 +649,7 @@ export default function Dashboard() {
     try {
       const nextYear = Number(form.year_of_study) || 1;
       const nextField = (form.target_job_field || '').trim() || null;
+      const nextAim = form.aim_company || null;
       // Same retry as the LeetCode Save: a sleeping backend must not
       // fail the Edit profile Save on the first tap. withRetry
       // rethrows real 400s at once — only transient failures retry.
@@ -656,12 +662,13 @@ export default function Dashboard() {
               full_name: (form.full_name || '').trim() || profile.full_name || '',
               year_of_study: nextYear,
               target_job_field: nextField,
+              aim_company: nextAim,
             })
           ),
         () => true,
         () => {}
       );
-      const changed = nextYear !== year || nextField !== (profile.target_job_field || null);
+      const changed = nextYear !== year || nextField !== (profile.target_job_field || null) || nextAim !== (profile.aim_company || null);
       setEditing(null);
       toast(changed ? 'Profile updated ✓ — refreshing your plan…' : 'Profile updated ✓');
       safeRefresh();
@@ -1104,6 +1111,10 @@ export default function Dashboard() {
                     <span className="block text-xs uppercase tracking-wider text-zinc-400">Target field</span>
                     <span className="mt-1 block font-semibold text-white">{field || 'Not set'}</span>
                   </div>
+                  <div className="rounded-2xl border border-white/10 bg-white/[0.06] px-4 py-3 sm:col-span-2">
+                    <span className="block text-xs uppercase tracking-wider text-zinc-400">Aim company</span>
+                    <span className="mt-1 block font-semibold text-white">{profile.aim_company || 'Not set'}</span>
+                  </div>
                 </div>
 
                 <div className="mt-4 flex flex-wrap gap-3">
@@ -1147,6 +1158,39 @@ export default function Dashboard() {
                           {f}
                         </button>
                       ))}
+                    </div>
+                    <div className="block">
+                      <span className="mb-1.5 block text-sm font-medium text-zinc-300">Aim company</span>
+                      <span className="mb-2 block text-xs text-zinc-400">Your plan is built for this company.</span>
+                      <div className="grid grid-cols-2 gap-3">
+                        {AIM_COMPANIES.map((c) => {
+                          const active = form.aim_company === c;
+                          return (
+                            <button
+                              key={c}
+                              type="button"
+                              data-variant={active ? 'primary' : 'secondary'}
+                              onClick={() => setForm((x) => ({ ...x, aim_company: c }))}
+                              className={`liquid-button relative rounded-2xl border px-4 py-3 text-center text-sm font-semibold transition-colors ${
+                                active
+                                  ? 'border-transparent bg-white text-black shadow-glow'
+                                  : 'border-white/20 bg-white/10 text-zinc-200 hover:bg-white/15'
+                              }`}
+                            >
+                              {c}
+                              {active && (
+                                <motion.span
+                                  initial={{ scale: 0 }}
+                                  animate={{ scale: 1 }}
+                                  className="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full border border-white bg-black text-xs text-white shadow"
+                                >
+                                  ✓
+                                </motion.span>
+                              )}
+                            </button>
+                          );
+                        })}
+                      </div>
                     </div>
                   </EditPanel>
                 )}
