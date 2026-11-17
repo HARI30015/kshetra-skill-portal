@@ -14,7 +14,7 @@ import { galaxyUrl } from '../assets/galaxy';
 //  • STUDENT + LECTURER DASHBOARDS: an aurora gradient bubble scene (violet /
 //    sky / pink / mint glass bubbles, continuously drifting), honoring
 //    reduced-motion preferences.
-//  • LOGIN ("/login"): a colored aurora, drifting stars, and light trails.
+//  • LOGIN + SIGNUP ("/login", "/signup"): a colored aurora, drifting stars, and light trails.
 //  • OTHER PAGES: the original black-and-white galaxy (MonoBackground below).
 //
 // All scenes are fixed at z-0 and pointer-events: none, behind page content.
@@ -446,12 +446,13 @@ function LandingStarfield() {
 }
 
 // Landing uses a stars-only animated field; both dashboards use the aurora gradient
-// bubble scene; auth and other pages retain the monochrome galaxy.
+// bubble scene; login and signup use the colored motionscape; other pages retain
+// the monochrome galaxy.
 export default function Background3D() {
   const { pathname } = useLocation();
   if (pathname === '/') return <LandingStarfield />;
   if (pathname === '/dashboard' || pathname === '/lecturer') return <DashboardBackground />;
-  if (pathname === '/login') {
+  if (pathname === '/login' || pathname === '/signup') {
     let previewTheme = new URLSearchParams(window.location.search).get('bg');
     try {
       previewTheme ||= window.sessionStorage.getItem('std-bg-preview');
