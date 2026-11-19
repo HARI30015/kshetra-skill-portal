@@ -21,7 +21,7 @@ export default function App() {
   const location = useLocation();
 
   return (
-    <div className="noise-overlay relative min-h-screen">
+    <div className={`noise-overlay relative min-h-screen ${location.pathname !== '/' ? 'has-sidebar' : ''}`}>
       <Background3D />
       {location.pathname !== '/' && <Navbar />}
       <ErrorBoundary>

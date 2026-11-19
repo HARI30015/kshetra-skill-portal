@@ -91,10 +91,10 @@ export default function Navbar() {
         initial={{ y: -70, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-        className="fixed inset-x-0 top-0 z-40"
+        className="fixed inset-x-0 top-0 z-40 md:inset-y-0 md:left-0 md:right-auto md:w-64"
       >
-        <div className="mx-auto max-w-7xl px-4 pt-4">
-          <nav className="glass flex items-center justify-between px-4 py-3 sm:px-6">
+        <div className="mx-auto h-full max-w-7xl px-4 pt-4 md:p-4">
+          <nav className="glass flex items-center justify-between px-4 py-3 sm:px-6 md:h-full md:flex-col md:items-stretch md:justify-start md:px-4 md:py-5">
             <Link to="/" className="flex items-center gap-2">
               {/* Logo: a thin white rocket on a curved orbit with two tiny stars,
                   on a black tile. Inline SVG, white only. */}
@@ -118,7 +118,7 @@ export default function Navbar() {
               </span>
             </Link>
 
-            <div className="hidden items-center gap-1 md:flex">
+            <div className="hidden items-center gap-1 md:mt-10 md:flex md:flex-col md:items-stretch md:gap-2">
               {links.map((l) => (
                 <NavLink
                   key={l.to}
@@ -171,13 +171,15 @@ export default function Navbar() {
                   >
                     <Avatar name={profile?.full_name} email={profile?.email} avatarPath={profile?.avatar_path} size={34} />
                   </button>
-                  <button
+                  <motion.button
                     data-variant="secondary"
+                    whileTap={{ scale: 0.98 }}
+                    transition={{ duration: 0.08 }}
                     onClick={() => setConfirmOpen(true)}
                     className="liquid-button ml-1 rounded-lg px-4 py-2 text-sm font-semibold text-zinc-200 transition"
                   >
                     Logout
-                  </button>
+                  </motion.button>
                 </>
               )}
             </div>
@@ -318,20 +320,24 @@ export default function Navbar() {
                     You'll need to sign in again to track your progress.
                   </p>
                   <div className="mt-6 flex gap-3">
-                    <button
+                    <motion.button
                       data-variant="secondary"
+                      whileTap={{ scale: 0.98 }}
+                      transition={{ duration: 0.08 }}
                       onClick={() => setConfirmOpen(false)}
                       className="liquid-button flex-1 rounded-xl px-4 py-2.5 text-sm font-semibold text-white"
                     >
                       Stay
-                    </button>
-                    <button
+                    </motion.button>
+                    <motion.button
                       data-variant="primary"
+                      whileTap={{ scale: 0.98 }}
+                      transition={{ duration: 0.08 }}
                       onClick={handleLogout}
                       className="liquid-button flex-1 rounded-xl px-4 py-2.5 text-sm font-semibold text-black"
                     >
                       Log out
-                    </button>
+                    </motion.button>
                   </div>
                 </>
               )}

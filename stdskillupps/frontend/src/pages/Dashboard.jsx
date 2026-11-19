@@ -215,16 +215,18 @@ function TapButton({ children, onClick, loading, disabled, variant = 'primary', 
     ghost: 'text-zinc-200 hover:text-zinc-200',
   };
   return (
-    <button
+    <motion.button
       type={type}
       onClick={onClick}
       disabled={disabled || loading}
       data-variant={variant}
+      whileTap={{ scale: 0.98 }}
+      transition={{ duration: 0.08 }}
       className={`liquid-button inline-flex touch-manipulation select-none items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-60 ${styles[variant]} ${className}`}
     >
       {loading && <Spinner size={14} />}
       {children}
-    </button>
+    </motion.button>
   );
 }
 
@@ -985,7 +987,35 @@ export default function Dashboard() {
 
   return (
     <PageWrapper>
-      <main className="mx-auto max-w-6xl px-4 pb-24 pt-28">
+      <main className="mx-auto max-w-6xl px-4 pb-24 pt-28 lg:pr-[20rem]">
+        <aside className="fixed right-5 top-24 z-20 hidden w-64 space-y-4 lg:block">
+          <div className="glass-strong p-5">
+            <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-sky-100/70">Related for you</p>
+            <h2 className="mt-2 text-lg font-extrabold text-white">{field || 'SWE'} preparation</h2>
+            <p className="mt-2 text-xs leading-relaxed text-zinc-300">
+              Your sidebar companion for the next placement step.
+            </p>
+            <div className="mt-4 space-y-2">
+              <a href="#student-progress" className="block rounded-xl border border-white/10 bg-white/[0.06] p-3 text-sm text-zinc-200 transition hover:bg-white/10">
+                <span className="block text-xs text-zinc-400">Coding progress</span>
+                <span className="mt-1 block font-semibold text-white">{totalSolved} problems solved</span>
+              </a>
+              <a href="#student-plan" className="block rounded-xl border border-white/10 bg-white/[0.06] p-3 text-sm text-zinc-200 transition hover:bg-white/10">
+                <span className="block text-xs text-zinc-400">Next action</span>
+                <span className="mt-1 block font-semibold text-white">{r ? 'Review your plan' : 'Generate your plan'}</span>
+              </a>
+              <a href="/placements" className="block rounded-xl border border-white/10 bg-white/[0.06] p-3 text-sm text-zinc-200 transition hover:bg-white/10">
+                <span className="block text-xs text-zinc-400">Placement targets</span>
+                <span className="mt-1 block font-semibold text-white">Explore company paths ↗</span>
+              </a>
+            </div>
+          </div>
+          <div className="rounded-2xl border border-sky-100/15 bg-sky-100/[0.06] p-4">
+            <p className="text-xs font-semibold uppercase tracking-wider text-sky-100/70">Readiness</p>
+            <p className="mt-2 text-2xl font-extrabold text-white">{readiness === null ? '—' : `${readiness}%`}</p>
+            <p className="mt-1 text-xs text-zinc-300">{readinessLabel}</p>
+          </div>
+        </aside>
         {/* Home hero: greeting + real-data stats + continue learning + upcoming.
             Every number below comes from live data (login history, LeetCode
             stats, stored plan) — never mock numbers. */}
