@@ -50,12 +50,12 @@ export default function Landing() {
   return (
     <PageWrapper>
       <div className="flex flex-col items-center px-4">
-        <div data-hero className="flex min-h-[90vh] w-full flex-col items-center justify-center">
+        <div data-hero className="flex min-h-screen w-full flex-col items-center justify-center">
           <motion.main
             variants={container}
             initial="hidden"
             animate="show"
-            className="mx-auto max-w-5xl text-center"
+            className="w-full px-4 text-center"
           >
             <motion.div variants={fadeUp}>
               <RocketMark />
@@ -76,10 +76,10 @@ export default function Landing() {
               </span>
             </motion.h1>
 
-            <motion.p variants={fadeUp} className="mx-auto mt-6 max-w-2xl text-base text-zinc-300 sm:text-lg">
+            <motion.p variants={fadeUp} className="mt-6 w-full px-4 text-base text-zinc-300 sm:text-lg">
               Master DSA, track progress, and land your dream placement with guided prep, real-time analytics, and 2000+ company questions.
             </motion.p>
-            <motion.p variants={fadeUp} className="mx-auto mt-3 max-w-xl text-sm leading-relaxed text-zinc-400 sm:text-base">
+            <motion.p variants={fadeUp} className="mt-3 w-full px-4 text-sm leading-relaxed text-zinc-400 sm:text-base">
               stdskillupps keeps your coding progress, year-wise preparation plan, and real placement drives together in one place.
             </motion.p>
 
@@ -117,7 +117,7 @@ export default function Landing() {
                     exit={{ opacity: 0, scale: 0.8, rotateX: 12, z: -80 }}
                     transition={{ type: 'spring', stiffness: 140, damping: 20 }}
                     style={{ transformStyle: 'preserve-3d' }}
-                    className="flex w-full max-w-md flex-col items-center gap-4 rounded-3xl border border-white/25 bg-slate-950/55 p-8 shadow-[0_0_70px_rgba(148,163,184,0.16)] backdrop-blur-2xl"
+                    className="flex w-full flex-col items-center gap-4 rounded-3xl border border-white/25 bg-slate-950/55 p-8 shadow-[0_0_70px_rgba(148,163,184,0.16)] backdrop-blur-2xl"
                   >
                     <h2 className="text-2xl font-bold text-white">Choose how to continue</h2>
                     <button
@@ -151,13 +151,13 @@ export default function Landing() {
         </div>
 
         <footer
-          className="mt-12 w-full max-w-5xl border-t border-white/10 py-10 text-left"
+          className="mt-12 w-full border-t border-white/10 px-6 py-10 text-left"
           style={{ contentVisibility: 'auto', containIntrinsicSize: 'auto 300px' }}
         >
           <div className="grid gap-8 md:grid-cols-2">
             <div>
               <h2 className="text-base font-bold text-white">About stdskillupps</h2>
-              <p className="mt-2 max-w-md text-sm leading-relaxed text-zinc-400">
+              <p className="mt-2 w-full text-sm leading-relaxed text-zinc-400">
                 stdskillupps is placement preparation for students. Link your LeetCode profile to track
                 progress in one place, follow year-wise guidance, and explore placement opportunities.
               </p>

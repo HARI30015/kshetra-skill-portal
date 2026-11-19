@@ -269,7 +269,7 @@ export default function Onboarding() {
 
   return (
     <PageWrapper>
-      <main className="mx-auto flex min-h-screen w-full max-w-2xl flex-col justify-center px-4 pb-10 pt-28">
+      <main className="flex min-h-screen w-full flex-col justify-center px-4 pb-10 pt-28">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}

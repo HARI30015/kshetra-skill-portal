@@ -250,7 +250,7 @@ export default function Login() {
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.24, ease: 'easeOut' }}
-          className="w-full max-w-md"
+          className="w-full"
         >
           <motion.div
             className="glass-3d rounded-[2rem] p-6 sm:p-8"
