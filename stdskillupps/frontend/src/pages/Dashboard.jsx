@@ -312,7 +312,7 @@ function ProfileWait({ onRetry, onLogout, loggingOut }) {
   };
   return (
     <PageWrapper>
-      <main className="mx-auto max-w-6xl px-4 pb-16 pt-28">
+      <main className="w-full px-4 pb-16 pt-28">
         <h1 className="text-3xl font-extrabold text-white">
           Welcome back 👋 <span className="text-gradient">getting your dashboard ready…</span>
         </h1>
@@ -987,7 +987,7 @@ export default function Dashboard() {
 
   return (
     <PageWrapper>
-      <main className="mx-auto max-w-6xl px-4 pb-24 pt-28 lg:pr-[20rem]">
+      <main className="w-full px-4 pb-24 pt-28 lg:pr-[20rem]">
         <aside className="fixed right-5 top-24 z-20 hidden w-64 space-y-4 lg:block">
           <div className="glass-strong p-5">
             <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-sky-100/70">Related for you</p>

@@ -476,7 +476,7 @@ export default function Placements() {
 
   return (
     <PageWrapper>
-      <main className="mx-auto max-w-6xl px-4 pb-16 pt-28">
+      <main className="w-full px-4 pb-16 pt-28">
         <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-3xl font-extrabold text-white">
           Placement <span className="text-gradient">targets</span>
         </motion.h1>

@@ -243,7 +243,7 @@ export default function LecturerDashboard() {
 
   return (
     <PageWrapper>
-      <main className="mx-auto max-w-7xl px-4 pb-16 pt-28">
+      <main className="w-full px-4 pb-16 pt-28">
         <AnimatePresence>
           {notice && (
             <motion.div
