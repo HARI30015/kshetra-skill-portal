@@ -30,7 +30,7 @@ export default function FullscreenButton() {
       onClick={toggle}
       title={isFullscreen ? 'Exit full screen' : 'Full screen'}
       aria-label={isFullscreen ? 'Exit full screen' : 'Full screen'}
-      className="fixed bottom-4 right-4 z-50 flex h-11 w-11 items-center justify-center rounded-full border border-white/25 bg-slate-950/60 text-white shadow-lg backdrop-blur-xl transition hover:scale-105 hover:bg-slate-900/70"
+      className="fixed bottom-4 right-4 z-50 flex h-11 w-11 items-center justify-center rounded-full border border-white/25 bg-slate-950/60 text-white shadow-lg backdrop-blur-xl transition hover:scale-105 hover:bg-slate-900/70 md:bottom-auto md:top-4"
     >
       {isFullscreen ? (
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
