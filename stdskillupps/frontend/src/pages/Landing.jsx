@@ -117,7 +117,7 @@ export default function Landing() {
                     exit={{ opacity: 0, scale: 0.8, rotateX: 12, z: -80 }}
                     transition={{ type: 'spring', stiffness: 140, damping: 20 }}
                     style={{ transformStyle: 'preserve-3d' }}
-                    className="flex w-full flex-col items-center gap-4 rounded-3xl border border-white/25 bg-slate-950/55 p-8 shadow-[0_0_70px_rgba(148,163,184,0.16)] backdrop-blur-2xl"
+                    className="flex w-full max-w-md flex-col items-center gap-4 rounded-3xl border border-white/25 bg-slate-950/55 p-8 shadow-[0_0_70px_rgba(148,163,184,0.16)] backdrop-blur-2xl"
                   >
                     <h2 className="text-2xl font-bold text-white">Choose how to continue</h2>
                     <button

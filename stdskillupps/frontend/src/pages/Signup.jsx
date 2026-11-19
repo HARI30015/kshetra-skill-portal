@@ -223,7 +223,7 @@ export default function Signup() {
           initial={{ opacity: 0, y: 14, scale: 0.985 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           transition={{ duration: 0.22, ease: 'easeOut' }}
-          className="glass-3d w-full rounded-[2rem] p-6 sm:p-8"
+          className="glass-3d w-full max-w-md rounded-[2rem] p-6 sm:p-8"
         >
           <h1 className="text-2xl font-extrabold text-white">{title}</h1>
           <p className="mt-1 text-sm text-zinc-300">{subtitle}</p>
