@@ -4,6 +4,7 @@ import { AnimatePresence } from 'framer-motion';
 import Navbar from './components/Navbar';
 import ProtectedRoute from './components/ProtectedRoute';
 import Background3D from './components/Background3D';
+import FullscreenButton from './components/FullscreenButton';
 import Loader from './components/Loader';
 import ErrorBoundary from './components/ErrorBoundary';
 
@@ -68,6 +69,7 @@ export default function App() {
         </AnimatePresence>
       </Suspense>
       </ErrorBoundary>
+      <FullscreenButton />
     </div>
   );
 }
