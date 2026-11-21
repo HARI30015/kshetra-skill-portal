@@ -35,6 +35,7 @@ function Modal({ onClose, children, title }) {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm"
+      data-no-liquid
       onClick={onClose}
     >
       <motion.div
@@ -48,6 +49,7 @@ function Modal({ onClose, children, title }) {
         <div className="mb-5 flex items-center justify-between">
           <h3 className="text-xl font-bold text-white">{title}</h3>
           <button
+            data-no-liquid
             onClick={onClose}
             className="rounded-lg p-1.5 text-zinc-300 hover:bg-white/10"
             aria-label="Close"

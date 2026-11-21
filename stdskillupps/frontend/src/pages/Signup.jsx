@@ -268,6 +268,7 @@ export default function Signup() {
                       aria-pressed={year === yearOption}
                       onClick={() => setYear(yearOption)}
                       data-variant={year === yearOption ? 'primary' : 'secondary'}
+                      data-no-liquid
                       className={`liquid-button rounded-xl px-2 py-2.5 text-sm font-semibold ${
                         year === yearOption ? 'text-slate-950' : 'text-zinc-300'
                       }`}
@@ -305,6 +306,7 @@ export default function Signup() {
                 <button
                   type="button"
                   disabled={cooldown > 0 || loading || resending}
+                  data-no-liquid
                   onClick={handleResendCode}
                   className="rounded-full px-2 py-1 font-semibold text-sky-100 underline underline-offset-4 transition-colors hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
                 >

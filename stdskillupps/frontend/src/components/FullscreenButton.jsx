@@ -28,6 +28,7 @@ export default function FullscreenButton() {
     <button
       type="button"
       data-no-glass
+      data-no-liquid
       onClick={toggle}
       title={isFullscreen ? 'Exit full screen' : 'Full screen'}
       aria-label={isFullscreen ? 'Exit full screen' : 'Full screen'}

@@ -227,6 +227,7 @@ export default function Login() {
     <p className="text-center text-sm">
       <button
         type="button"
+        data-no-liquid
         onClick={backToLogin}
         className="font-semibold text-zinc-300 underline underline-offset-2 hover:text-white"
       >
@@ -316,6 +317,7 @@ export default function Login() {
                   <div className="mt-2 text-right">
                     <button
                       type="button"
+                      data-no-liquid
                       onClick={startForgot}
                       className="text-xs font-semibold text-zinc-300 underline underline-offset-2 hover:text-white"
                     >
@@ -382,6 +384,7 @@ export default function Login() {
                   <button
                     type="button"
                     disabled={cooldown > 0 || loading}
+                    data-no-liquid
                     onClick={() => sendCode()}
                     className="font-semibold text-zinc-200 underline underline-offset-2 hover:text-white disabled:cursor-not-allowed disabled:no-underline disabled:opacity-60"
                   >

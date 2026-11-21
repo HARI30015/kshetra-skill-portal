@@ -145,6 +145,7 @@ export default function Onboarding() {
                 key={y}
                 type="button"
                 data-variant={active ? 'primary' : 'secondary'}
+                data-no-liquid
                 onClick={() => setYear(y)}
                 className={`liquid-button relative rounded-2xl border px-4 py-6 text-center transition-colors ${
                   active
@@ -181,6 +182,7 @@ export default function Onboarding() {
                 key={f}
                 type="button"
                 data-variant={active ? 'primary' : 'secondary'}
+                data-no-liquid
                 onClick={() => setField(f)}
                 className={`liquid-button rounded-full border px-5 py-2.5 text-sm font-semibold transition-colors ${
                   active
@@ -237,6 +239,7 @@ export default function Onboarding() {
                 key={c}
                 type="button"
                 data-variant={active ? 'primary' : 'secondary'}
+                data-no-liquid
                 onClick={() => setAimCompany(c)}
                 className={`liquid-button relative rounded-2xl border px-4 py-3.5 text-center text-sm font-semibold transition-colors ${
                   active

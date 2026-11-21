@@ -5,6 +5,7 @@ import Navbar from './components/Navbar';
 import ProtectedRoute from './components/ProtectedRoute';
 import Background3D from './components/Background3D';
 import FullscreenButton from './components/FullscreenButton';
+import LiquidFilters from './components/LiquidFilters';
 import Loader from './components/Loader';
 import ErrorBoundary from './components/ErrorBoundary';
 
@@ -24,6 +25,7 @@ export default function App() {
   return (
     <div className={`noise-overlay relative min-h-screen ${location.pathname !== '/' ? 'has-sidebar' : ''}`}>
       <Background3D />
+      <LiquidFilters />
       {location.pathname !== '/' && <Navbar />}
       <ErrorBoundary>
       <Suspense fallback={<Loader label="Loading…" />}>

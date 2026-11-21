@@ -5,6 +5,7 @@ import App from './App';
 import { AuthProvider } from './context/AuthContext';
 import './index.css';
 import './premium.css';
+import './liquid-premium.css';
 
 
 ReactDOM.createRoot(document.getElementById('root')).render(

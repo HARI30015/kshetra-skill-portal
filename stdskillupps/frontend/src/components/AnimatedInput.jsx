@@ -88,6 +88,7 @@ export default function AnimatedInput({
               aria-label={showPassword ? 'Hide password' : 'Show password'}
               aria-pressed={showPassword}
               data-variant="ghost"
+              data-no-liquid
               onMouseDown={(event) => event.preventDefault()}
               onClick={() => setShowPassword((visible) => !visible)}
               className="password-visibility-toggle flex h-8 w-8 items-center justify-center rounded-full text-zinc-300 transition-colors hover:text-white"

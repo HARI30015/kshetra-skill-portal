@@ -211,7 +211,9 @@ button[data-variant='ghost'] {
    neutralise those two properties here. The global hover brightness, glow
    shadow and press shadow still apply. */
 button.liquid-button:not([data-no-motion]):hover:not(:disabled),
-button.liquid-button:not([data-no-motion]):active:not(:disabled) {
+button.liquid-button:not([data-no-motion]):active:not(:disabled),
+button.liquid-btn-premium:not([data-no-motion]):hover:not(:disabled),
+button.liquid-btn-premium:not([data-no-motion]):active:not(:disabled) {
   translate: 0 0;
   scale: 1;
 }

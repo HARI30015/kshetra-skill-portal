@@ -499,6 +499,7 @@ export default function Placements() {
               <button
                 key={item}
                 type="button"
+                data-no-liquid
                 onClick={() => setLevel(item)}
                 className={`liquid-button rounded-full border px-4 py-1.5 text-xs font-semibold ${level === item ? 'border-transparent bg-white text-black shadow-glow' : 'border-white/20 bg-white/10 text-zinc-300'}`}
               >

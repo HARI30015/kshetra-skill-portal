@@ -6,6 +6,7 @@ import GlassCard from '../components/GlassCard';
 import AnimatedInput from '../components/AnimatedInput';
 import Avatar from '../components/Avatar';
 import DashboardTabs from '../components/DashboardTabs';
+import LiquidButton from '../components/LiquidButton';
 import { supabase } from '../supabaseClient';
 import {
   MilestoneRing,
@@ -209,24 +210,21 @@ function Spinner({ size = 20 }) {
 }
 
 function TapButton({ children, onClick, loading, disabled, variant = 'primary', type = 'button', className = '' }) {
-  const styles = {
-    primary: 'bg-white text-black shadow-glow',
-    secondary: 'border border-white/20 bg-white/10 text-white hover:bg-white/15',
-    ghost: 'text-zinc-200 hover:text-zinc-200',
-  };
+  // Dashboard buttons render the premium LiquidButton (merged 2026-11-21).
+  // The old white-pill primary style is gone by design — monochrome glass
+  // with the variant as a hover glow, per the new button system.
   return (
-    <motion.button
+    <LiquidButton
       type={type}
       onClick={onClick}
-      disabled={disabled || loading}
-      data-variant={variant}
-      whileTap={{ scale: 0.98 }}
-      transition={{ duration: 0.08 }}
-      className={`liquid-button inline-flex touch-manipulation select-none items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-60 ${styles[variant]} ${className}`}
+      loading={loading}
+      disabled={disabled}
+      variant={variant}
+      size="sm"
+      className={className}
     >
-      {loading && <Spinner size={14} />}
       {children}
-    </motion.button>
+    </LiquidButton>
   );
 }
 
@@ -1086,6 +1084,7 @@ export default function Dashboard() {
                         </div>
                         <button
                           type="button"
+                          data-no-liquid
                           onClick={() => handleCompleteTask(t.id)}
                           className="rounded-full border border-emerald-500/50 bg-emerald-500/20 px-4 py-2 text-emerald-300 hover:bg-emerald-500/30"
                         >
@@ -1187,6 +1186,7 @@ export default function Dashboard() {
                           key={f}
                           type="button"
                           data-variant={form.target_job_field === f ? 'primary' : 'secondary'}
+                          data-no-liquid
                           onClick={() => setForm((x) => ({ ...x, target_job_field: f }))}
                           className={`liquid-button touch-manipulation rounded-full px-3 py-1 text-xs font-semibold ${form.target_job_field === f ? 'text-slate-950' : 'text-zinc-300'}`}
                         >
@@ -1209,6 +1209,7 @@ export default function Dashboard() {
                               key={c}
                               type="button"
                               data-variant={active ? 'primary' : 'secondary'}
+                              data-no-liquid
                               onClick={() => setForm((x) => ({ ...x, aim_company: c }))}
                               className={`liquid-button relative rounded-2xl border px-4 py-3 text-center text-sm font-semibold transition-colors ${
                                 active
