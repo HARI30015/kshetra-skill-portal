@@ -118,36 +118,107 @@ button:not([data-no-glass]) > [class~="absolute"] { z-index: 2; }
 button[data-variant='primary'] {
   color: #f8fbff;
   border-color: rgba(255,255,255,0.64);
-  background: radial-gradient(ellipse at 20% 0%, rgba(255,255,255,0.18), transparent 58%), linear-gradient(135deg, rgba(241,248,255,0.09), rgba(190,220,255,0.035) 55%, rgba(255,255,255,0.025));
-  --button-glow: rgba(147,197,253,0.46);
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.3), rgba(59, 130, 246, 0.3));
+  --button-glow: rgba(139, 92, 246, 0.5);
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.62), inset 0 -1px 0 rgba(14,25,42,0.24), 0 8px 28px rgba(96,165,250,0.14);
 }
 button[data-variant='secondary'] {
   color: #f8fafc;
-  background: linear-gradient(135deg, rgba(30,41,59,0.12), rgba(9,15,28,0.08) 58%, rgba(148,163,184,0.035));
-  --button-glow: rgba(192,132,252,0.32);
+  background: linear-gradient(135deg, rgba(56, 189, 248, 0.3), rgba(14, 165, 233, 0.3));
+  --button-glow: rgba(56, 189, 248, 0.4);
 }
 button[data-variant='danger'] {
   color: #fff1f2;
   border-color: rgba(251,113,133,0.42);
-  background: linear-gradient(135deg, rgba(127,29,29,0.10), rgba(24,6,14,0.12) 60%, rgba(190,24,93,0.04));
-  --button-glow: rgba(248,113,113,0.44);
+  background: linear-gradient(135deg, rgba(244, 63, 94, 0.3), rgba(225, 29, 72, 0.3));
+  --button-glow: rgba(244, 63, 94, 0.5);
 }
 button[data-variant='success'] {
   color: #eafff3;
   border-color: rgba(110,231,183,0.42);
-  background: linear-gradient(135deg, rgba(16,185,129,0.07), rgba(6,35,28,0.10) 62%, rgba(167,243,208,0.025));
-  --button-glow: rgba(52,211,153,0.36);
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.3), rgba(5, 150, 105, 0.3));
+  --button-glow: rgba(16, 185, 129, 0.5);
 }
 button[data-variant='gold'] {
   color: #fff8e7;
   border-color: rgba(253,230,138,0.46);
-  background: linear-gradient(135deg, rgba(245,158,11,0.07), rgba(50,30,8,0.10) 62%, rgba(255,237,180,0.025));
-  --button-glow: rgba(251,191,36,0.36);
+  background: linear-gradient(135deg, rgba(251, 191, 36, 0.3), rgba(245, 158, 11, 0.3));
+  --button-glow: rgba(251, 191, 36, 0.5);
 }
 button[data-variant='ghost'] {
   color: #e2e8f0;
-  background: linear-gradient(135deg, rgba(226,232,240,0.045), rgba(148,163,184,0.012));
+  border-color: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.05);
+  --button-glow: rgba(255, 255, 255, 0.25);
+}
+
+/* Pure liquid-glass button effects (merged 2026-11-21 from the "pure
+   liquid-glass" system): flowing liquid background, light sweep, inner
+   glow, and click ripple for AnimatedButton. The button finish itself
+   (border, fill, ::before sweep, ::after glass edge, keyboard pulse,
+   hover lift) still comes from button:not([data-no-glass]) above — the
+   pasted standalone .liquid-button base rule is intentionally not copied,
+   it would lose to that global rule on every shared property. */
+.liquid-bg {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.1) 0%,
+    rgba(255, 255, 255, 0.05) 50%,
+    rgba(255, 255, 255, 0.1) 100%
+  );
+  background-size: 200% 200%;
+  animation: liquidFlow 3s ease infinite;
+}
+@keyframes liquidFlow {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+/* The liquid background starts invisible in the JSX — reveal it on hover. */
+.liquid-button:hover .liquid-bg { opacity: 1; }
+/* Light sweep on hover (runs with the ::before sweep above). */
+.liquid-button:hover .light-sweep {
+  opacity: 1;
+  transform: translateX(200%);
+  transition: transform 0.7s ease-out, opacity 0.3s ease;
+}
+/* Inner glow pulse on hover. */
+.liquid-button:hover .inner-glow {
+  opacity: 1;
+  animation: innerPulse 2s ease-in-out infinite;
+}
+@keyframes innerPulse {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 0.6; }
+}
+/* Ripple (spans are created on click by AnimatedButton). */
+.ripple {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.5);
+  transform: scale(0);
+  animation: rippleEffect 0.6s ease-out;
+  pointer-events: none;
+}
+@keyframes rippleEffect {
+  to {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+/* Framer-motion owns the lift/press on these buttons (whileHover/whileTap),
+   so the global CSS translate/scale on hover/press would double it —
+   neutralise those two properties here. The global hover brightness, glow
+   shadow and press shadow still apply. */
+button.liquid-button:not([data-no-motion]):hover:not(:disabled),
+button.liquid-button:not([data-no-motion]):active:not(:disabled) {
+  translate: 0 0;
+  scale: 1;
+}
+/* Disabled buttons are greyed out on top of the JSX opacity. */
+.liquid-button:disabled { filter: grayscale(0.5); }
+@media (prefers-reduced-motion: reduce) {
+  .liquid-bg, .liquid-button:hover .inner-glow, .ripple { animation: none !important; }
 }
 
 /* Internal section tabs are separate from the untouched Navbar white-pill tabs. */
