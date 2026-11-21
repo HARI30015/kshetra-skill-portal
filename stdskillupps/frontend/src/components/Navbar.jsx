@@ -45,11 +45,18 @@ const prefetchProps = (to) => {
   return { onMouseEnter: run, onFocus: run, onTouchStart: run };
 };
 
+const NAV_ICONS = {
+  Dashboard: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true"><rect x="4" y="4" width="6" height="6" rx="1" /><rect x="14" y="4" width="6" height="6" rx="1" /><rect x="4" y="14" width="6" height="6" rx="1" /><rect x="14" y="14" width="6" height="6" rx="1" /></svg>,
+  Placements: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true"><path d="M4 8.5h16v10.25A1.25 1.25 0 0 1 18.75 20H5.25A1.25 1.25 0 0 1 4 18.75V8.5Z" /><path d="M8 8.5V6.75A1.75 1.75 0 0 1 9.75 5h4.5A1.75 1.75 0 0 1 16 6.75V8.5M4 12h16M10 12v1.5h4V12" /></svg>,
+  Students: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true"><circle cx="9" cy="8" r="3" /><path d="M3.5 19a5.5 5.5 0 0 1 11 0M15 5.5a3 3 0 0 1 0 5.8M16 14.2a5.5 5.5 0 0 1 4.5 4.8" /></svg>,
+};
+
 export default function Navbar() {
   const { isAuthenticated, role, logout, profile } = useAuth();
   const navigate = useNavigate();
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [sidebarExpanded, setSidebarExpanded] = useState(false);
   const [leaving, setLeaving] = useState(false);
 
   const links = [];
@@ -94,7 +101,7 @@ export default function Navbar() {
         className="fixed inset-x-0 top-0 z-40 md:inset-y-0 md:left-0 md:right-auto md:w-64"
       >
         <div className="mx-auto h-full max-w-7xl px-4 pt-4 md:p-4">
-          <nav className="glass flex items-center justify-between px-4 py-3 sm:px-6 md:h-full md:flex-col md:items-stretch md:justify-start md:px-4 md:py-5">
+          <nav className={`glass flex items-center justify-between px-4 py-3 sm:px-6 md:h-full md:flex-col md:items-stretch md:justify-start md:px-2 md:py-4 ${sidebarExpanded ? 'sidebar-expanded' : 'sidebar-collapsed'}`}>
             <Link to="/" className="flex items-center gap-2">
               {/* Logo: a thin white rocket on a curved orbit with two tiny stars,
                   on a black tile. Inline SVG, white only. */}
@@ -113,10 +120,22 @@ export default function Navbar() {
                   <path d="M 38 34.5 L 38.9 37.1 L 41.5 38 L 38.9 38.9 L 38 41.5 L 37.1 38.9 L 34.5 38 L 37.1 37.1 Z" fill="#fff" stroke="none" />
                 </svg>
               </motion.div>
-              <span className="text-lg font-extrabold tracking-tight text-white">
+              <span className="sidebar-label text-lg font-extrabold tracking-tight text-white">
                 std<span className="text-gradient">skillupps</span>
               </span>
             </Link>
+            <button
+              type="button"
+              data-no-glass
+              className="sidebar-toggle hidden h-9 w-9 shrink-0 items-center justify-center rounded-xl text-zinc-300 transition hover:text-white md:inline-flex"
+              onClick={() => setSidebarExpanded((open) => !open)}
+              aria-label={sidebarExpanded ? 'Collapse sidebar' : 'Expand sidebar'}
+              aria-expanded={sidebarExpanded}
+            >
+              <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+                <path d={sidebarExpanded ? 'M15 6 9 12l6 6' : 'm9 6 6 6-6 6'} strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </button>
 
             <div className="hidden items-center gap-1 md:mt-10 md:flex md:flex-col md:items-stretch md:gap-2">
               {links.map((l) => (
@@ -124,15 +143,17 @@ export default function Navbar() {
                   key={l.to}
                   to={l.to}
                   {...prefetchProps(l.to)}
+                  title={!sidebarExpanded ? l.label : undefined}
                   className={({ isActive }) =>
-                    `${linkShape} ${
+                    `sidebar-link ${linkShape} ${
                       isActive
                         ? lensActive
                         : 'rounded-lg text-zinc-300 hover:bg-white/10 hover:text-white'
                     }`
                   }
                 >
-                  {l.label}
+                  <span className="sidebar-icon h-5 w-5 shrink-0">{NAV_ICONS[l.label]}</span>
+                  <span className="sidebar-label">{l.label}</span>
                 </NavLink>
               ))}
               {!isAuthenticated ? (
@@ -140,24 +161,28 @@ export default function Navbar() {
                   <NavLink
                     to="/login"
                     {...prefetchProps('/login')}
+                    title={!sidebarExpanded ? 'Sign in' : undefined}
                     className={({ isActive }) =>
-                      `${linkShape} ${
+                      `sidebar-link ${linkShape} ${
                         isActive
                           ? lensActive
                           : 'rounded-lg text-zinc-300 hover:bg-white/10 hover:text-white'
                       }`
                     }
                   >
-                    Sign in
+                    <span className="sidebar-icon h-5 w-5 shrink-0">{NAV_ICONS.Dashboard}</span>
+                    <span className="sidebar-label">Sign in</span>
                   </NavLink>
                   <Link to="/signup" {...prefetchProps('/signup')}>
                     <motion.span
                       data-variant="primary"
                       whileTap={{ scale: 0.98 }}
                       transition={{ duration: 0.08 }}
-                      className="liquid-button ml-1 inline-block rounded-lg px-4 py-2 text-sm font-semibold text-black"
+                      title={!sidebarExpanded ? 'Get started' : undefined}
+                      className="liquid-button sidebar-cta ml-1 inline-flex items-center rounded-lg px-4 py-2 text-sm font-semibold text-black"
                     >
-                      Get started
+                      <span className="sidebar-icon h-5 w-5 shrink-0">{NAV_ICONS.Placements}</span>
+                      <span className="sidebar-label">Get started</span>
                     </motion.span>
                   </Link>
                 </>
@@ -176,9 +201,11 @@ export default function Navbar() {
                     whileTap={{ scale: 0.98 }}
                     transition={{ duration: 0.08 }}
                     onClick={() => setConfirmOpen(true)}
-                    className="liquid-button ml-1 rounded-lg px-4 py-2 text-sm font-semibold text-zinc-200 transition"
+                    title={!sidebarExpanded ? 'Logout' : undefined}
+                    className="liquid-button sidebar-logout ml-1 inline-flex items-center rounded-lg px-4 py-2 text-sm font-semibold text-zinc-200 transition"
                   >
-                    Logout
+                    <span className="sidebar-icon h-5 w-5 shrink-0">{NAV_ICONS.Students}</span>
+                    <span className="sidebar-label">Logout</span>
                   </motion.button>
                 </>
               )}

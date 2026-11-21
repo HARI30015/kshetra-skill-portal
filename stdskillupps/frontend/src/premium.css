@@ -217,10 +217,63 @@ button.liquid-btn-premium:not([data-no-motion]):active:not(:disabled) {
   translate: 0 0;
   scale: 1;
 }
+
+/* Every ordinary button floats into the cursor on hover. LiquidButton keeps
+   its Framer Motion spring, while native controls get the same gentle lift. */
+button:not([data-no-glass]):not(.liquid-btn-premium):not(:disabled):hover {
+  transform: translateY(-3px) scale(1.02);
+  filter: brightness(1.08);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.28), 0 12px 28px rgba(56,189,248,0.16), 0 0 18px var(--button-glow);
+}
+button:not([data-no-glass]):not(.liquid-btn-premium):not(:disabled):active {
+  transform: translateY(-1px) scale(0.985);
+}
+
+/* Desktop sidebar: a quiet icon rail that expands into the full navigation. */
+@media (min-width: 768px) {
+  nav.sidebar-collapsed,
+  nav.sidebar-expanded { position: relative; }
+  nav.sidebar-collapsed {
+    width: 4.5rem;
+    align-self: flex-start;
+  }
+  nav.sidebar-expanded {
+    width: 100%;
+  }
+  nav.sidebar-collapsed > a,
+  nav.sidebar-expanded > a {
+    justify-content: center;
+  }
+  nav.sidebar-collapsed .sidebar-label {
+    display: none;
+  }
+  nav.sidebar-collapsed .sidebar-link,
+  nav.sidebar-collapsed .sidebar-cta,
+  nav.sidebar-collapsed .sidebar-logout {
+    justify-content: center;
+    padding-left: 0.7rem;
+    padding-right: 0.7rem;
+  }
+  nav.sidebar-collapsed .sidebar-cta,
+  nav.sidebar-collapsed .sidebar-logout {
+    min-width: 2.7rem;
+  }
+  nav.sidebar-expanded .sidebar-link,
+  nav.sidebar-expanded .sidebar-cta,
+  nav.sidebar-expanded .sidebar-logout {
+    gap: 0.65rem;
+  }
+  .sidebar-icon { display: inline-flex; align-items: center; justify-content: center; }
+  .sidebar-icon > svg { width: 1.15rem; height: 1.15rem; }
+  .sidebar-toggle { position: absolute; right: 0.65rem; top: 0.75rem; }
+  nav.sidebar-collapsed .sidebar-toggle { right: 0.35rem; }
+}
 /* Disabled buttons are greyed out on top of the JSX opacity. */
 .liquid-button:disabled { filter: grayscale(0.5); }
 @media (prefers-reduced-motion: reduce) {
   .liquid-bg, .liquid-button:hover .inner-glow, .ripple { animation: none !important; }
+  button:not([data-no-glass]):not(:disabled):hover,
+  button:not([data-no-glass]):not(:disabled):active { transform: none !important; filter: none !important; }
 }
 
 /* Internal section tabs are separate from the untouched Navbar white-pill tabs. */

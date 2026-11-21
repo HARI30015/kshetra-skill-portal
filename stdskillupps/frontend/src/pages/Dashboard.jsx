@@ -981,7 +981,7 @@ export default function Dashboard() {
           </div>
         )}
         {scheduleText && (
-          <div className="mt-5 rounded-2xl border border-white/15 bg-white/5 p-5">
+          <div id="student-weekly-schedule" className="mt-5 scroll-mt-32 rounded-2xl border border-white/15 bg-white/5 p-5">
             <p className="mb-3 text-sm font-semibold text-zinc-300">📅 Your exact schedule</p>
             <div className={`relative space-y-3 ${scheduleLong && !scheduleOpen ? 'max-h-60 overflow-hidden' : ''}`}>
               {scheduleParas.map((p, i) => (
@@ -1212,6 +1212,7 @@ export default function Dashboard() {
             { id: 'student-profile', label: 'Profile & settings' },
             { id: 'student-progress', label: 'Coding progress' },
             { id: 'student-plan', label: 'My plan' },
+            { id: 'student-weekly-schedule', label: 'Weekly schedule' },
             { id: 'student-growth', label: 'Achievements' },
           ]}
         />
