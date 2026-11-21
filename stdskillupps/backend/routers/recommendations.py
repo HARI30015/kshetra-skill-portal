@@ -13,11 +13,14 @@ from supabase import Client
 from deps import get_current_profile, get_supabase, self_or_lecturer
 from services.recommender import (
     COMPANY_TIERS,
+    FOUNDATION_TOPICS,
     current_week_for,
     generate_adaptive_plan,
     get_daily_tasks_for_today,
     today_ist,
+    week_topic_for,
 )
+from services.problem_bank import TOPIC_LIST, today_problems, week_problems
 from shaping import recommendation_out
 
 router = APIRouter(prefix="/recommendations", tags=["recommendations"])
@@ -125,7 +128,12 @@ def get_today_tasks(
     db: Client = Depends(get_supabase),
 ):
     """Today's unfinished tasks + live plan meta (status/gap), so the
-    dashboard card never shows a stale 'Syncing' badge."""
+    dashboard card never shows a stale 'Syncing' badge. Also the
+    problems for today and this week, drawn from the verified problem
+    bank and divided per placement: the week's topic comes from the
+    student's own plan, and a focus topic for their aim company gets
+    harder problems and one extra a day.
+    """
     pid = profile["id"]
     stats = _load_stats(db, pid)
     activity = _load_activity(db, pid)
@@ -144,7 +152,40 @@ def get_today_tasks(
         )
     except Exception:
         tasks = []
-    return {"tasks": tasks, "meta": meta}
+    problems = {"week": None, "week_topic": None, "focus": False, "today": [], "week_problems": {}}
+    try:
+        rec = (
+            db.table("recommendations")
+            .select("plan,created_at")
+            .eq("profile_id", pid)
+            .order("created_at", desc=True)
+            .limit(1)
+            .execute()
+            .data
+            or []
+        )
+        if rec:
+            plan_text = rec[0].get("plan") or ""
+            current_week = current_week_for(rec[0].get("created_at"), meta.get("weeks_left") or 1)
+            week, topic = week_topic_for(plan_text, current_week)
+            # A catch-up week has no topic in the bank — revise the
+            # foundation topic instead of showing nothing.
+            if topic not in TOPIC_LIST:
+                topic = FOUNDATION_TOPICS[0]
+            aim = COMPANY_TIERS.get(meta.get("aim") or "TCS Ninja") or COMPANY_TIERS["TCS Ninja"]
+            focus = topic in aim.get("extras", [])
+            pace = meta.get("daily_pace") or 4
+            day_index = min(today_ist().weekday(), 5)  # 6-day week; Sunday repeats Saturday's set
+            problems = {
+                "week": week,
+                "week_topic": topic,
+                "focus": focus,
+                "today": today_problems(topic, week, day_index, pace, focus),
+                "week_problems": week_problems(topic, week, pace, focus),
+            }
+    except Exception:
+        pass
+    return {"tasks": tasks, "meta": meta, "problems": problems}
 
 
 @router.post("/me/today/{task_id}/complete")

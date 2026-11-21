@@ -947,18 +947,18 @@ def generate_adaptive_plan(profile: dict, stats: dict | None, recent_activity: l
         "status": status, "gap_label": gap_label, "gap_remaining": gap_remaining,
         "target": target_total, "current": current_total,
         "weeks_left": weeks_total, "tier": aim["tier"], "aim": aim_name,
-        "year": year,
+        "year": year, "daily_pace": pace,
         "recommended_languages": FIELD_CORE_LANGUAGES.get(field, FIELD_CORE_LANGUAGES["SWE"]),
         "focus_areas": list(aim.get("skills", [])[:3]),
     }
     return "\n".join(lines), meta
 
 
-def get_daily_tasks_for_today(plan_text: str, aim: dict, year: int, current_week: int) -> list[dict]:
-    """Today's tasks for the CURRENT week of the plan (not week 1).
+def week_topic_for(plan_text: str, current_week: int) -> tuple[int, str]:
+    """(week, topic) for current_week, parsed from the stored plan text.
 
-    Qwen's version broke after the first '**Week ' line, so it always
-    returned week 1. This one finds the line for current_week.
+    Finds the '**Week N: topic**' line for current_week; falls back to
+    week 1's line when the plan has no line for it yet.
     """
     topic = FOUNDATION_TOPICS[0]
     week = 1
@@ -970,10 +970,19 @@ def get_daily_tasks_for_today(plan_text: str, aim: dict, year: int, current_week
             except (ValueError, IndexError):
                 continue
             if w == current_week:
-                week, topic = w, t
-                break
+                return w, t
             if w == 1:
                 week, topic = 1, t  # fallback: first week in the text
+    return week, topic
+
+
+def get_daily_tasks_for_today(plan_text: str, aim: dict, year: int, current_week: int) -> list[dict]:
+    """Today's tasks for the CURRENT week of the plan (not week 1).
+
+    Qwen's version broke after the first '**Week ' line, so it always
+    returned week 1. This one finds the line for current_week.
+    """
+    week, topic = week_topic_for(plan_text, current_week)
     pace = _ADAPTIVE_YEAR_PACE.get(year, 4)
     tasks = [
         {"week": week, "topic": topic, "task_description": f"Solve {pace} {topic} problems on LeetCode"},

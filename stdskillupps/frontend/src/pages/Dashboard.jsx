@@ -32,6 +32,26 @@ import {
 /* Static data                                                         */
 /* ------------------------------------------------------------------ */
 
+// Where the plan's problems come from, and where to build AI projects.
+const PRACTICE_PLATFORMS = [
+  { name: 'LeetCode', url: 'https://leetcode.com/' },
+  { name: 'CodeChef', url: 'https://www.codechef.com/' },
+  { name: 'Codeforces', url: 'https://codeforces.com/' },
+  { name: 'HackerRank', url: 'https://www.hackerrank.com/' },
+  { name: 'HackerEarth', url: 'https://www.hackerearth.com/' },
+  { name: 'InterviewBit', url: 'https://www.interviewbit.com/' },
+  { name: 'GeeksforGeeks', url: 'https://www.geeksforgeeks.org/' },
+  { name: "Striver's A2Z", url: 'https://takeuforward.org/strivers-a2z-dsa-course/strivers-a2z-dsa-course-sheet-2/' },
+  { name: 'NeetCode', url: 'https://neetcode.io/roadmap' },
+];
+
+const AI_PROJECT_LINKS = [
+  { name: 'Hugging Face', url: 'https://huggingface.co/' },
+  { name: 'Google AI Studio', url: 'https://aistudio.google.com/' },
+  { name: 'LangChain', url: 'https://www.langchain.com/' },
+  { name: 'Kaggle', url: 'https://www.kaggle.com/' },
+];
+
 const FIELD_RESOURCES = {
   SWE: ['C++', 'Java', 'Python'],
   'Data Science': ['Python', 'SQL', 'R'],
@@ -481,6 +501,9 @@ export default function Dashboard() {
   const [todayTasks, setTodayTasks] = useState([]);
   const [planMeta, setPlanMeta] = useState(null);
   const [todayLoaded, setTodayLoaded] = useState(false);
+  const [todayProblems, setTodayProblems] = useState([]);
+  const [weekProblems, setWeekProblems] = useState({});
+  const [weekInfo, setWeekInfo] = useState(null);
 
   const loadToday = useCallback(async () => {
     if (!pid) return;
@@ -488,6 +511,13 @@ export default function Dashboard() {
       const d = await getTodayPlan();
       setTodayTasks(d?.tasks || []);
       setPlanMeta(d?.meta || null);
+      setTodayProblems(d?.problems?.today || []);
+      setWeekProblems(d?.problems?.week_problems || {});
+      setWeekInfo(
+        d?.problems?.week
+          ? { week: d.problems.week, topic: d.problems.week_topic, focus: d.problems.focus }
+          : null,
+      );
     } catch {
       // Today card stays hidden until the endpoint answers.
     } finally {
@@ -1089,10 +1119,92 @@ export default function Dashboard() {
                 ) : (
                   <p className="mt-4 text-sm text-zinc-300">All today&apos;s tasks are done 🎉</p>
                 )}
+                {todayProblems.length > 0 && (
+                  <div className="mt-5 border-t border-white/10 pt-4">
+                    <p className="text-sm font-semibold text-white">
+                      Today&apos;s problems · {weekInfo?.topic || ''}
+                    </p>
+                    <ul className="mt-3 space-y-2">
+                      {todayProblems.map((p) => (
+                        <li key={`${p.platform}-${p.title}`} className="flex items-center justify-between gap-3 rounded-lg border border-white/10 bg-white/5 px-3 py-2">
+                          <a href={p.url} target="_blank" rel="noreferrer" className="min-w-0 flex-1 truncate font-medium text-sky-100 hover:text-white hover:underline">
+                            {p.title}
+                          </a>
+                          <span className="shrink-0 rounded-full border border-white/20 px-2 py-0.5 text-xs text-zinc-300">{p.platform}</span>
+                          <span className="shrink-0 rounded-full border border-white/20 px-2 py-0.5 text-xs text-zinc-300">{p.difficulty}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
               </div>
             </GlassCard>
           </div>
         )}
+
+        {todayLoaded && weekInfo && Object.keys(weekProblems).length > 0 && (
+          <div className="mt-6">
+            <GlassCard delay={0.05}>
+              <div className="p-6">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <h3 className="text-xl font-bold text-white">
+                    This week&apos;s problems · Week {weekInfo.week} · {weekInfo.topic}
+                  </h3>
+                  {weekInfo.focus && (
+                    <span className="shrink-0 rounded-full border border-amber-500/40 bg-amber-500/20 px-3 py-1 text-xs text-amber-300">
+                      Focus week for {planMeta?.aim || 'your placement'}
+                    </span>
+                  )}
+                </div>
+                <div className="mt-4 space-y-4">
+                  {['1', '2', '3', '4', '5', '6'].map((day, i) => (
+                    <div key={day}>
+                      <p className="text-xs font-semibold uppercase tracking-wider text-zinc-400">
+                        {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][i]}
+                      </p>
+                      <ul className="mt-2 space-y-2">
+                        {(weekProblems[day] || []).map((p) => (
+                          <li key={`${p.platform}-${p.title}`} className="flex items-center justify-between gap-3 rounded-lg border border-white/10 bg-white/5 px-3 py-2">
+                            <a href={p.url} target="_blank" rel="noreferrer" className="min-w-0 flex-1 truncate font-medium text-sky-100 hover:text-white hover:underline">
+                              {p.title}
+                            </a>
+                            <span className="shrink-0 rounded-full border border-white/20 px-2 py-0.5 text-xs text-zinc-300">{p.platform}</span>
+                            <span className="shrink-0 rounded-full border border-white/20 px-2 py-0.5 text-xs text-zinc-300">{p.difficulty}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </GlassCard>
+          </div>
+        )}
+
+        <div className="mt-6">
+          <GlassCard delay={0.05}>
+            <div className="p-6">
+              <h3 className="text-xl font-bold text-white">Practice platforms</h3>
+              <p className="mt-1 text-sm text-zinc-300">Where your problems come from — open any platform to practise more.</p>
+              <div className="mt-4 flex flex-wrap gap-2">
+                {PRACTICE_PLATFORMS.map((p) => (
+                  <a key={p.name} href={p.url} target="_blank" rel="noreferrer" className="rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-white/20">
+                    {p.name} ↗
+                  </a>
+                ))}
+              </div>
+              <h4 className="mt-6 text-sm font-semibold text-white">Build with AI</h4>
+              <p className="mt-1 text-sm text-zinc-300">Free tools to build AI projects of your own.</p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {AI_PROJECT_LINKS.map((p) => (
+                  <a key={p.name} href={p.url} target="_blank" rel="noreferrer" className="rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-white/20">
+                    {p.name} ↗
+                  </a>
+                ))}
+              </div>
+            </div>
+          </GlassCard>
+        </div>
 
         <DashboardTabs
           label="Student dashboard sections"
