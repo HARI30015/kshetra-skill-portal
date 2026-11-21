@@ -7,6 +7,7 @@ import AnimatedButton from '../components/AnimatedButton';
 import { supabase } from '../supabaseClient';
 import { useAuth } from '../context/AuthContext';
 import { updateProfile } from '../api';
+import { AIM_COMPANY_GROUPS } from '../aimCompanies';
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 const RESEND_SECONDS = 30;
@@ -17,6 +18,7 @@ export default function Signup() {
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [year, setYear] = useState(null);
+  const [aimCompany, setAimCompany] = useState('');
   const [code, setCode] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -50,6 +52,10 @@ export default function Signup() {
     setInfo('');
     if (!year) {
       setError('Please select your year of study.');
+      return;
+    }
+    if (!aimCompany) {
+      setError('Please pick the placement you want in 4th year.');
       return;
     }
     setLoading(true);
@@ -131,7 +137,7 @@ export default function Signup() {
     let saved = false;
     for (let attempt = 0; attempt < 5 && !saved; attempt += 1) {
       try {
-        await updateProfile(created.id, { year_of_study: year, onboarded: true });
+        await updateProfile(created.id, { year_of_study: year, aim_company: aimCompany, onboarded: true });
         saved = true;
       } catch (err) {
         if (attempt === 4) throw err;
@@ -208,7 +214,7 @@ export default function Signup() {
   );
 
   const titles = {
-    details: ['Create your student account', 'Prepare with a plan that fits your year.'],
+    details: ['Create your student account', 'Pick your 4th-year placement — your plan is built for it.'],
     code: ['Verify your email', `Enter the 6-digit code sent to ${email.trim()}.`],
     password: ['Set your password', 'This is the password you will use to sign in.'],
   };
@@ -275,6 +281,47 @@ export default function Signup() {
                     >
                       Year {yearOption}
                     </button>
+                  ))}
+                </div>
+              </fieldset>
+              <fieldset>
+                <legend className="mb-2 block text-sm font-medium text-zinc-200">Placement you want in 4th year</legend>
+                <div className="space-y-4 rounded-2xl border border-white/20 bg-white/[0.06] p-3 backdrop-blur-xl">
+                  {AIM_COMPANY_GROUPS.map((group) => (
+                    <div key={group.tier}>
+                      <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wider text-zinc-400">{group.tier}</p>
+                      <div className="grid grid-cols-2 gap-2">
+                        {group.companies.map((company) => {
+                          const active = aimCompany === company;
+                          return (
+                            <button
+                              key={company}
+                              type="button"
+                              aria-pressed={active}
+                              onClick={() => setAimCompany(company)}
+                              data-variant={active ? 'primary' : 'secondary'}
+                              data-no-liquid
+                              className={`liquid-button relative rounded-xl border px-2 py-2.5 text-center text-[13px] font-semibold transition-colors ${
+                                active
+                                  ? 'border-transparent bg-white text-black shadow-glow'
+                                  : 'border-white/20 bg-white/10 text-zinc-200 hover:bg-white/15'
+                              }`}
+                            >
+                              {company}
+                              {active && (
+                                <motion.span
+                                  initial={{ scale: 0 }}
+                                  animate={{ scale: 1 }}
+                                  className="absolute -right-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full border border-white bg-black text-[10px] text-white shadow"
+                                >
+                                  ✓
+                                </motion.span>
+                              )}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
                   ))}
                 </div>
               </fieldset>

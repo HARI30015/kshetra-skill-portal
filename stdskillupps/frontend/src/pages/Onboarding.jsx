@@ -6,16 +6,11 @@ import AnimatedInput from '../components/AnimatedInput';
 import AnimatedButton from '../components/AnimatedButton';
 import { LEETCODE_URL } from '../constants';
 import { updateProfile, syncStats, generateRecommendation } from '../api';
+import { AIM_COMPANY_GROUPS } from '../aimCompanies';
 import { useAuth } from '../context/AuthContext';
 
 const YEARS = [1, 2, 3, 4];
 const FIELDS = ['SWE', 'Data Science', 'Frontend', 'Backend', 'DevOps', 'Mobile'];
-const AIM_COMPANY_GROUPS = [
-  { tier: "Dream", companies: ["Google", "Microsoft", "Amazon", "Adobe", "Atlassian", "Apple", "NVIDIA", "Rubrik", "Jane Street", "Goldman Sachs", "Uber", "Salesforce", "McKinsey"] },
-  { tier: "Top", companies: ["Oracle", "JP Morgan Chase", "Morgan Stanley", "Cisco", "Intel", "Qualcomm", "Samsung", "Flipkart", "Razorpay", "PhonePe", "Postman", "Swiggy", "Zomato", "Meesho", "CRED", "Groww", "Zerodha", "Zepto", "SAP Labs", "ServiceNow", "Walmart Global Tech", "Target India", "Wells Fargo", "Lowe's India"] },
-  { tier: "Core", companies: ["Zoho", "Freshworks", "Deloitte", "EY", "PwC", "KPMG"] },
-  { tier: "Mass", companies: ["TCS", "Infosys", "Wipro", "HCLTech", "Cognizant", "Accenture", "Capgemini"] },
-];
 
 const stepVariants = {
   enter: (dir) => ({ opacity: 0, x: dir > 0 ? 60 : -60 }),
